@@ -1,17 +1,14 @@
-import { Link } from "@tanstack/react-router";
-import { Fragment } from "react";
+import SideBar from "./SideBar";
+import MainArea from "./MainArea";
+import { ShowSideBarContextProvider } from "../context/ShowSideBar-Context";
 
 export default function PanelContainer() {
   return (
-    <Fragment>
-      <div className="bg-slate-200 min-h-screen">
-        <h1>به پنل زرصــاد خوش آمدید</h1>
-        <Link to="/auth/logout" replace={true}>
-          Logout
-        </Link>
-        <br />
-        <Link to="/about">About</Link>
+    <ShowSideBarContextProvider>
+      <div className="flex bg-slate-200 min-h-screen">
+        <MainArea />
+        <SideBar />
       </div>
-    </Fragment>
+    </ShowSideBarContextProvider>
   );
 }
