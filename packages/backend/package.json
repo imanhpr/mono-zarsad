@@ -1,0 +1,44 @@
+{
+  "name": "@zarsad/backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node --env-file=.env --watch --import tsx src/main.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@mikro-orm/cli": "^6.4.5",
+    "@mikro-orm/sqlite": "^6.4.5",
+    "@types/node": "^22.13.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@fastify/auth": "^5.0.2",
+    "@fastify/autoload": "^6.1.0",
+    "@fastify/awilix": "^7.0.0",
+    "@fastify/bearer-auth": "^10.1.0",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/csrf-protection": "^7.0.2",
+    "@fastify/helmet": "^13.0.1",
+    "@fastify/jwt": "^9.0.3",
+    "@fastify/multipart": "^9.0.3",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/type-provider-typebox": "^5.1.0",
+    "@mikro-orm/core": "^6.4.5",
+    "@mikro-orm/postgresql": "^6.4.5",
+    "@mikro-orm/reflection": "^6.4.5",
+    "@sinclair/typebox": "^0.34.16",
+    "@vinejs/vine": "^3.0.0",
+    "axios": "^1.7.9",
+    "cache-manager": "^6.4.0",
+    "fastify": "^5.2.1",
+    "fastify-plugin": "^5.0.1",
+    "i18next": "^24.2.2"
+  }
+}
