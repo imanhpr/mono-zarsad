@@ -1,11 +1,12 @@
-import { useContext } from "react";
-import { ShowSideBarContext } from "../context/contexts";
+import ShowSideBarButton from "./ShowSideBarButton";
 
 export default function MainArea() {
-  const { setShowSideBar } = useContext(ShowSideBarContext);
   return (
-    <div className="w-full">
-      <button onClick={() => setShowSideBar((v) => !v)}>click</button>
+    <div className="flex flex-col w-full">
+      <div className="md:hidden sticky flex justify-between items-center bg-slate-800 px-4 w-full">
+        <h1 className="mx-auto font-bold text-white text-3xl">ZarSad</h1>
+        <ShowSideBarButton />
+      </div>
     </div>
   );
 }
