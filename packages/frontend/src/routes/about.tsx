@@ -1,9 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import PanelContainer from "../components/Panel-Container";
 
-export const Route = createFileRoute('/about')({
+export const Route = createFileRoute("/about")({
   component: About,
-})
+});
 
 function About() {
-  return <div className="p-2">Hello from About!</div>
+  return (
+    <PanelContainer>
+      <h1>About</h1>
+    </PanelContainer>
+  );
 }

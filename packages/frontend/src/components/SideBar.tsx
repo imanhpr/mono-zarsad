@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
 import { ShowSideBarContext } from "../context/contexts";
+import { Link } from "@tanstack/react-router";
 
 export default function SideBar() {
   const { showSideBar, setShowSideBar } = useContext(ShowSideBarContext);
@@ -39,7 +40,10 @@ export default function SideBar() {
   return (
     <Fragment>
       <div className={clsNames}>
-        <div>"salallllmmmm</div>
+        <nav className="flex flex-col m-6 text-white text-2xl" dir="rtl">
+          <Link to="/">خانه</Link>
+          <Link to="/about">درباره ما</Link>
+        </nav>
       </div>
       {OverlayPortal}
     </Fragment>
