@@ -24,6 +24,7 @@ import userGuardHook from "./hooks/user-guard.hook.ts";
 import userPlugin from "./services/user/user.plugin.ts";
 import crudServiceFactoryPlugin from "./plugins/crud-service/index.ts";
 import Admin from "./models/Admin.entity.ts";
+import passwordServicePlugin from "./plugins/password/index.ts";
 export default function appFactory() {
   const app = Fastify({ logger: true })
     .setValidatorCompiler(TypeBoxValidatorCompiler)
@@ -54,7 +55,8 @@ export default function appFactory() {
       const plugin = fastify.crudFactory(Admin);
       fastify.register(plugin);
       done();
-    });
+    })
+    .register(passwordServicePlugin);
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));

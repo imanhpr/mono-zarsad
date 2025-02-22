@@ -5,7 +5,7 @@ export default class Admin {
   @PrimaryKey()
   id!: number;
 
-  @Property()
+  @Property({ unique: true })
   username!: string;
 
   @Property()
