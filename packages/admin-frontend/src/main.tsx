@@ -1,10 +1,11 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import "bootstrap/dist/css/bootstrap.min.css";
-
+import "bootstrap/dist/css/bootstrap.rtl.min.css";
+import "./index.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
+import { ThemeProvider } from "react-bootstrap";
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -22,7 +23,9 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <ThemeProvider dir="rtl">
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </StrictMode>
   );
 }

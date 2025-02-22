@@ -2,12 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  loader() {
+    return { username: "imanhpr" };
+  },
 });
 
 function Index() {
-  return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
-    </div>
-  );
+  const user = Route.useLoaderData();
+  return <h3 className="">خوش آمدی {user.username} جان.</h3>;
 }
