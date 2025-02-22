@@ -6,6 +6,7 @@ import "./index.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "react-bootstrap";
+import AuthContextProvider from "./context/Auth-Context";
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -24,7 +25,9 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <ThemeProvider dir="rtl">
-        <RouterProvider router={router} />
+        <AuthContextProvider>
+          <RouterProvider router={router} />
+        </AuthContextProvider>
       </ThemeProvider>
     </StrictMode>
   );
