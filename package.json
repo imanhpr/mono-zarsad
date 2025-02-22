@@ -11,6 +11,7 @@
   "description": "",
   "workspaces": [
     "packages/backend",
-    "packages/frontend"
+    "packages/frontend",
+    "packages/admin-frontend"
   ]
 }
