@@ -26,6 +26,7 @@ import crudServiceFactoryPlugin from "./plugins/crud-service/index.ts";
 import Admin from "./models/Admin.entity.ts";
 import passwordServicePlugin from "./plugins/password/index.ts";
 import adminPlugin from "./services/admin/admin.plugin.ts";
+import AdminRepo from "./repository/Admin.repo.ts";
 export default function appFactory() {
   const app = Fastify({ logger: true })
     .setValidatorCompiler(TypeBoxValidatorCompiler)
@@ -50,6 +51,7 @@ export default function appFactory() {
     .register(root)
     .register(UserRepo)
     .register(SessionRepo)
+    .register(AdminRepo)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })
