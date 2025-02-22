@@ -11,7 +11,7 @@ const promisifiedScrypt = util.promisify<
 >(crypto.scrypt);
 const promisifiedRandomByte = util.promisify(crypto.randomBytes);
 
-class PasswordService {
+export class PasswordService {
   serialize(passwordHash: Buffer, salt: Buffer) {
     return `${salt.toString("base64")}.${passwordHash.toString("base64")}`;
   }
