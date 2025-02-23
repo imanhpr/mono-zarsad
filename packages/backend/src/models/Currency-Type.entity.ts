@@ -5,7 +5,7 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import CurrencyPrice from "./Currency-Price.ts";
+import CurrencyPrice from "./Currency-Price.entity.ts";
 
 @Entity()
 export default class CurrencyType {

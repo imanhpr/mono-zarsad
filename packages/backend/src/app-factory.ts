@@ -17,16 +17,17 @@ import authPlugin from "./services/auth/auth.plugin.ts";
 import cacheManager from "./plugins/cache-manager/index.ts";
 import vineValidator from "./plugins/vine-validator/index.ts";
 import i18n from "./i18n/index.ts";
-import SessionRepo from "./repository/Session.repo.ts";
+import UserSessionRepo from "./repository/User-Session.repo.ts";
 import appConfig from "./configs/index.ts";
 import smsProvider from "./plugins/sms-provider/index.ts";
 import userGuardHook from "./hooks/user-guard.hook.ts";
 import userPlugin from "./services/user/user.plugin.ts";
 import crudServiceFactoryPlugin from "./plugins/crud-service/index.ts";
 import Admin from "./models/Admin.entity.ts";
-import passwordServicePlugin from "./plugins/password/index.ts";
 import adminPlugin from "./services/admin/admin.plugin.ts";
 import AdminRepo from "./repository/Admin.repo.ts";
+import AdminSessionRepo from "./repository/Admin-Session.repo.ts";
+
 export default function appFactory() {
   const app = Fastify({ logger: true })
     .setValidatorCompiler(TypeBoxValidatorCompiler)
@@ -50,8 +51,9 @@ export default function appFactory() {
     .register(smsProvider)
     .register(root)
     .register(UserRepo)
-    .register(SessionRepo)
     .register(AdminRepo)
+    .register(UserSessionRepo)
+    .register(AdminSessionRepo)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })

@@ -13,6 +13,7 @@
   "devDependencies": {
     "@mikro-orm/cli": "^6.4.5",
     "@mikro-orm/sqlite": "^6.4.5",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^22.13.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
@@ -40,6 +41,7 @@
     "cache-manager": "^6.4.0",
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.0.1",
-    "i18next": "^24.2.2"
+    "i18next": "^24.2.2",
+    "luxon": "^3.5.0"
   }
 }

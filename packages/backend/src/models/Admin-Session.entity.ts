@@ -1,6 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { randomUUID } from "node:crypto";
-import User from "./User.entity.ts";
 import Admin from "./Admin.entity.ts";
 
 @Entity()

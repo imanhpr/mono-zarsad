@@ -5,7 +5,7 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import Session from "./Session.entity.ts";
+import Session from "./User-Session.entity.ts";
 
 @Entity()
 export default class User {

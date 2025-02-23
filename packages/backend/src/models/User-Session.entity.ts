@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import User from "./User.entity.ts";
 
 @Entity()
-export default class Session {
+export default class UserSession {
   @PrimaryKey({ type: "uuid" })
   id: string = randomUUID();
 

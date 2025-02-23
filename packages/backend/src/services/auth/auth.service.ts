@@ -6,21 +6,22 @@ import { randInt } from "../../helpers/index.ts";
 import type User from "../../models/User.entity.ts";
 import { type UserRepo } from "../../repository/User.repo.ts";
 import { type Cache } from "cache-manager";
-import { type SessionRepo } from "../../repository/Session.repo.ts";
 import { type IOtpSender } from "../../plugins/sms-provider/types.ts";
 import { type JWT } from "@fastify/jwt";
+import type { SessionRepo } from "../../repository/Session.repo.ts";
+import type UserSession from "../../models/User-Session.entity.ts";
 
 class AuthService {
   #userRepo: UserRepo;
   #otpService: IOtpSender;
   #cache: Cache;
-  #sessionRepo: SessionRepo;
+  #sessionRepo: SessionRepo<typeof UserSession, typeof User>;
   #jwtSign: Pick<JWT, "sign">["sign"];
   constructor(
     userRepo: UserRepo,
     otpService: IOtpSender,
     cache: Cache,
-    sessionRepo: SessionRepo,
+    sessionRepo: SessionRepo<typeof UserSession, typeof User>,
     jwtSign: Pick<JWT, "sign">["sign"]
   ) {
     this.#userRepo = userRepo;
@@ -45,7 +46,7 @@ class AuthService {
       timingSafeEqual(Buffer.from(cacheCode.toString()), Buffer.from(code))
     ) {
       const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
-      const session = await this.#sessionRepo.createNew(user);
+      const session = await this.#sessionRepo.createNew(user.id);
       const token = await this.#createJwtToken(session.user);
       return Object.freeze({ session, token });
     }
@@ -62,7 +63,7 @@ class AuthService {
     if (now >= session.expireAt) throw new Error("Invalid TOken");
     if (!session) throw new Error("Session Not found");
 
-    const newSession = await this.#sessionRepo.createNew(session.user);
+    const newSession = await this.#sessionRepo.createNew(session.user.id);
     const token = await this.#createJwtToken(newSession.user);
 
     return { session: newSession, token };
@@ -99,18 +100,18 @@ export default fp(
     const hasUserRepo = fastify.hasDecorator("userRepo");
     const hasSmsService = fastify.hasDecorator("sms");
     const hasCacheManager = fastify.hasDecorator("cache");
-    const hasSessionRepo = fastify.hasDecorator("sessionRepo");
+    const hasUserSessionRepo = fastify.hasDecorator("userSessionRepo");
 
     if (!hasUserRepo) throw new Error("Please init userRepo");
     if (!hasSmsService) throw new Error("Please init smsService");
     if (!hasCacheManager) throw new Error("Please init `cache` manager");
-    if (!hasSessionRepo) throw new Error("Please init sessionRepo");
+    if (!hasUserSessionRepo) throw new Error("Please init userSessionRepo");
 
     const authService = new AuthService(
       fastify.userRepo,
       fastify.sms,
       fastify.cache,
-      fastify.sessionRepo,
+      fastify.userSessionRepo,
       fastify.jwt.sign
     );
     fastify.decorate("authService", authService);

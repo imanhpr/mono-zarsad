@@ -2,9 +2,10 @@ import process from "node:process";
 import appFactory from "../app-factory.ts";
 import { createInterface } from "readline/promises";
 import Admin from "../models/Admin.entity.ts";
+import password from "../plugins/password/index.ts";
 
 const readLine = createInterface(process.stdin, process.stdout);
-const app = appFactory();
+const app = appFactory().register(password);
 await app.ready();
 const em = app.orm.em.fork();
 
