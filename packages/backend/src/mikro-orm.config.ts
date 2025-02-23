@@ -1,10 +1,20 @@
-import { Options, SqliteDriver } from "@mikro-orm/sqlite";
+import { Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+
+const DB_HOST = process.env.MIKRO_ORM_DB_HOST!;
+const DB_PORT = process.env.MIKRO_ORM_DB_PORT!;
+const DB_NAME = process.env.MIKRO_ORM_DB_NAME!;
+const DB_PASSWORD = process.env.MIKRO_ORM_DB_PASSWORD!;
+const DB_USER = process.env.MIKRO_ORM_DB_USERNAME!;
 
 const config: Options = {
   // for simplicity, we use the SQLite database, as it's available pretty much everywhere
-  driver: SqliteDriver,
-  dbName: "sqlite.db",
+  driver: PostgreSqlDriver,
+  dbName: DB_NAME,
+  host: DB_HOST,
+  password: DB_PASSWORD,
+  user: DB_USER,
+  port: parseInt(DB_PORT),
   // folder-based discovery setup, using common filename suffix
   entities: ["dist/**/*.entity.js"],
   entitiesTs: ["src/**/*.entity.ts"],
