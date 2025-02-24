@@ -15,6 +15,9 @@ export default class CurrencyType {
   @Property()
   name!: string;
 
+  @Property()
+  name_farsi!: string;
+
   @OneToMany(() => CurrencyPrice, (price) => price.currency)
   prices = new Collection<CurrencyPrice>(this);
 }

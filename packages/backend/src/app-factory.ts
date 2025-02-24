@@ -2,7 +2,6 @@ import Fastify from "fastify";
 import fastifyJwt from "@fastify/jwt";
 import fastifySensible from "@fastify/sensible";
 import {
-  Type,
   TypeBoxTypeProvider,
   TypeBoxValidatorCompiler,
 } from "@fastify/type-provider-typebox";
@@ -22,11 +21,12 @@ import appConfig from "./configs/index.ts";
 import smsProvider from "./plugins/sms-provider/index.ts";
 import userGuardHook from "./hooks/user-guard.hook.ts";
 import userPlugin from "./services/user/user.plugin.ts";
-import crudServiceFactoryPlugin from "./plugins/crud-service/index.ts";
-import Admin from "./models/Admin.entity.ts";
 import adminPlugin from "./services/admin/admin.plugin.ts";
 import AdminRepo from "./repository/Admin.repo.ts";
 import AdminSessionRepo from "./repository/Admin-Session.repo.ts";
+import currencyPlugin from "./services/currency/currency.plugin.ts";
+import CurrencyPriceRepo from "./repository/Currency-Price.repo.ts";
+import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })
@@ -43,7 +43,6 @@ export default function appFactory() {
       origin: "http://localhost:5173",
       credentials: true,
     })
-    .register(crudServiceFactoryPlugin)
     .register(userGuardHook)
     .register(vineValidator)
     .register(cacheManager)
@@ -54,14 +53,12 @@ export default function appFactory() {
     .register(AdminRepo)
     .register(UserSessionRepo)
     .register(AdminSessionRepo)
+    .register(CurrencyPriceRepo)
+    .register(CurrencyTypeRepo)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })
-    .register(function (fastify, _, done) {
-      const plugin = fastify.crudFactory(Admin);
-      fastify.register(plugin);
-      done();
-    });
+    .register(currencyPlugin, { prefix: "currency" });
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));

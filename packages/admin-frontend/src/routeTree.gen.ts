@@ -11,29 +11,29 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
-import { Route as IndexImport } from './routes/index'
-import { Route as UserIndexImport } from './routes/user.index'
+import { Route as LayoutImport } from './routes/_layout'
+import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as LayoutUserImport } from './routes/_layout/user'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
+import { Route as LayoutCurrencyIndexImport } from './routes/_layout/currency/index'
 
 // Create/Update Routes
 
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
+const LayoutRoute = LayoutImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
+const LayoutIndexRoute = LayoutIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => LayoutRoute,
 } as any)
 
-const UserIndexRoute = UserIndexImport.update({
-  id: '/user/',
-  path: '/user/',
-  getParentRoute: () => rootRoute,
+const LayoutUserRoute = LayoutUserImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 const AuthLoginIndexRoute = AuthLoginIndexImport.update({
@@ -42,30 +42,43 @@ const AuthLoginIndexRoute = AuthLoginIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LayoutCurrencyIndexRoute = LayoutCurrencyIndexImport.update({
+  id: '/currency/',
+  path: '/currency/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
-    }
-    '/user/': {
-      id: '/user/'
+    '/_layout/user': {
+      id: '/_layout/user'
       path: '/user'
       fullPath: '/user'
-      preLoaderRoute: typeof UserIndexImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof LayoutUserImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/': {
+      id: '/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/currency/': {
+      id: '/_layout/currency/'
+      path: '/currency'
+      fullPath: '/currency'
+      preLoaderRoute: typeof LayoutCurrencyIndexImport
+      parentRoute: typeof LayoutImport
     }
     '/auth/login/': {
       id: '/auth/login/'
@@ -79,48 +92,67 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface LayoutRouteChildren {
+  LayoutUserRoute: typeof LayoutUserRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutCurrencyIndexRoute: typeof LayoutCurrencyIndexRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutUserRoute: LayoutUserRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+  LayoutCurrencyIndexRoute: LayoutCurrencyIndexRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/user': typeof UserIndexRoute
+  '': typeof LayoutRouteWithChildren
+  '/user': typeof LayoutUserRoute
+  '/': typeof LayoutIndexRoute
+  '/currency': typeof LayoutCurrencyIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/user': typeof UserIndexRoute
+  '/user': typeof LayoutUserRoute
+  '/': typeof LayoutIndexRoute
+  '/currency': typeof LayoutCurrencyIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/user/': typeof UserIndexRoute
+  '/_layout': typeof LayoutRouteWithChildren
+  '/_layout/user': typeof LayoutUserRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/currency/': typeof LayoutCurrencyIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/user' | '/auth/login'
+  fullPaths: '' | '/user' | '/' | '/currency' | '/auth/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/user' | '/auth/login'
-  id: '__root__' | '/' | '/about' | '/user/' | '/auth/login/'
+  to: '/user' | '/' | '/currency' | '/auth/login'
+  id:
+    | '__root__'
+    | '/_layout'
+    | '/_layout/user'
+    | '/_layout/'
+    | '/_layout/currency/'
+    | '/auth/login/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  UserIndexRoute: typeof UserIndexRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  UserIndexRoute: UserIndexRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
 }
 
@@ -134,20 +166,29 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/about",
-        "/user/",
+        "/_layout",
         "/auth/login/"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_layout": {
+      "filePath": "_layout.tsx",
+      "children": [
+        "/_layout/user",
+        "/_layout/",
+        "/_layout/currency/"
+      ]
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/_layout/user": {
+      "filePath": "_layout/user.tsx",
+      "parent": "/_layout"
     },
-    "/user/": {
-      "filePath": "user.index.tsx"
+    "/_layout/": {
+      "filePath": "_layout/index.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/currency/": {
+      "filePath": "_layout/currency/index.tsx",
+      "parent": "/_layout"
     },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
