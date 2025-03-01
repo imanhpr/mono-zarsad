@@ -50,4 +50,14 @@ export default class ZarAPI {
     );
     return response;
   }
+
+  async register(payload: {
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    nationalCode: string;
+  }) {
+    const response = await this.#axios.post("/auth/register", payload);
+    return response;
+  }
 }

@@ -11,6 +11,11 @@ import { type JWT } from "@fastify/jwt";
 import type { SessionRepo } from "../../repository/Session.repo.ts";
 import type UserSession from "../../models/User-Session.entity.ts";
 
+type CreateUser = Pick<
+  User,
+  "firstName" | "lastName" | "nationalCode" | "phoneNumber"
+>;
+
 class AuthService {
   #userRepo: UserRepo;
   #otpService: IOtpSender;
@@ -33,9 +38,7 @@ class AuthService {
 
   async login(phoneNumber: string) {
     const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
-    const code = await randInt(10000, 99999);
-    await this.#cache.set(phoneNumber, code, 1000 * 60 * 2);
-    const result = await this.#otpService.sendOTP(code, user.phoneNumber);
+    const result = await this.#sendOTP(user.phoneNumber);
     return { success: result };
   }
 
@@ -52,8 +55,10 @@ class AuthService {
     }
     throw new Error("Code Not Found");
   }
-  register(user: Omit<User, "id" | "session">): Promise<User> {
-    return this.#userRepo.createNormal(user);
+  async register(user: CreateUser) {
+    const result = await this.#sendOTP(user.phoneNumber);
+    await this.#userRepo.createNormal(user);
+    return { success: result };
   }
 
   async refreshToken(sid: string) {
@@ -78,6 +83,12 @@ class AuthService {
     return this.#sessionRepo.expireById(sid);
   }
 
+  async #sendOTP(phoneNumber: string) {
+    const code = await randInt(10000, 99999);
+    await this.#cache.set(phoneNumber, code, 1000 * 60 * 2);
+    const result = await this.#otpService.sendOTP(code, phoneNumber);
+    return result;
+  }
   #createJwtToken(user: User): Promise<{ token: string; expireAt: number }> {
     const { promise, reject, resolve } = Promise.withResolvers<{
       token: string;

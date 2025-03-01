@@ -1,6 +1,8 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import BaseAuthPage from "../../components/Base-Auth";
 import { useRef } from "react";
+import { useDispatch } from "react-redux";
+import { phoneNumberSliceActions } from "../../store/verify-phone-number.slice";
 
 export const Route = createFileRoute("/auth/register/")({
   component: RouteComponent,
@@ -12,13 +14,22 @@ export const Route = createFileRoute("/auth/register/")({
 });
 
 function RouteComponent() {
+  const dispatch = useDispatch();
   const navigator = useNavigate();
-  const formRef = useRef(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { zarAPI } = Route.useRouteContext();
   function submitHandler(e: React.FormEvent) {
     e.preventDefault();
-    navigator({
-      to: "/auth/$method/verify",
-      params: { method: "register" },
+    if (formRef.current == null) throw new Error("Shit form");
+    const formData = new FormData(formRef.current);
+    const payload = Object.fromEntries(formData.entries());
+    payload.phoneNumber = "+" + payload.phoneNumber;
+    dispatch(phoneNumberSliceActions.insert(payload.phoneNumber));
+    zarAPI.register(payload as any).then(() => {
+      navigator({
+        to: "/auth/$method/verify",
+        params: { method: "register" },
+      });
     });
   }
   return (
@@ -34,17 +45,23 @@ function RouteComponent() {
           </label>
           <input
             type="number"
+            name="phoneNumber"
             className="py-1 border border-yellow-400 rounded-md focus:outline-none text-xl text-center"
             placeholder="0902"
           />
         </div>
-        {["نام", "نام خانوادگی", "کد ملی"].map((name) => (
-          <div key={name} className="flex flex-col space-y-2">
+        {[
+          { label: "نام", name: "firstName" },
+          { label: "نام خانوادگی", name: "lastName" },
+          { label: "کد ملی", name: "nationalCode" },
+        ].map((e) => (
+          <div key={e.label} className="flex flex-col space-y-2">
             <label htmlFor="" className="text-right">
-              {name}
+              {e.label}
             </label>
             <input
               type="text"
+              name={e.name}
               className="py-1 border border-yellow-400 rounded-md focus:outline-none text-xl text-center"
             />
           </div>
