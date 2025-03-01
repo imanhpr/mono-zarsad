@@ -6,8 +6,8 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import Session from "./User-Session.entity.ts";
-import Profile from "./Profile.entity.ts";
+import type UserSession from "./User-Session.entity.ts";
+import type Profile from "./Profile.entity.ts";
 
 @Entity()
 export default class User {
@@ -26,9 +26,9 @@ export default class User {
   @Property()
   nationalCode!: string;
 
-  @OneToMany(() => Session, (session) => session.user)
-  sessions = new Collection<Session>(this);
+  @OneToMany("UserSession", (session: UserSession) => session.user)
+  sessions = new Collection<UserSession>(this);
 
-  @OneToOne(() => Profile, (prof) => prof.id)
+  @OneToOne("Profile", (prof: Profile) => prof.user, { owner: true })
   profile!: Profile;
 }

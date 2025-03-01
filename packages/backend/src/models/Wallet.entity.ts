@@ -5,16 +5,16 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import CurrencyType from "./Currency-Type.entity.ts";
+import type CurrencyType from "./Currency-Type.entity.ts";
 
 @Entity()
 export default class Wallet {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => CurrencyType)
+  @ManyToOne("CurrencyType")
   currencyType!: CurrencyType;
 
-  @Property()
+  @Property({ columnType: "decimal" })
   amount!: DecimalType;
 }

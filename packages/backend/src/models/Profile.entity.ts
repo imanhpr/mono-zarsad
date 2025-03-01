@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
+import User from "./User.entity.ts";
 
 @Entity()
 export default class Profile {
@@ -7,4 +8,7 @@ export default class Profile {
 
   @Property()
   debtPrem: boolean = false;
+
+  @OneToOne(() => User, (u) => u.profile, { orphanRemoval: true })
+  user!: User;
 }

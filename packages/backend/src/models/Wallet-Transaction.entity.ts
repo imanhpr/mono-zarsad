@@ -1,11 +1,11 @@
 import {
   DecimalType,
   Entity,
-  ManyToMany,
+  ManyToOne,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import CurrencyType from "./Currency-Type.entity.ts";
+import type CurrencyType from "./Currency-Type.entity.ts";
 
 @Entity()
 export default class WalletTransaction {
@@ -15,10 +15,10 @@ export default class WalletTransaction {
   @Property()
   type!: "INCREMENT" | "DECREMENT";
 
-  @Property()
+  @Property({ columnType: "decimal" })
   amount!: DecimalType;
 
-  @Property()
+  @Property({ columnType: "decimal" })
   walletAmount!: DecimalType;
 
   @Property()
@@ -27,6 +27,6 @@ export default class WalletTransaction {
   @Property()
   source!: string;
 
-  @ManyToMany(() => CurrencyType)
+  @ManyToOne("CurrencyType")
   currencyType!: CurrencyType;
 }
