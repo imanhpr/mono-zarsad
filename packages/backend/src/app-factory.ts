@@ -27,6 +27,10 @@ import AdminSessionRepo from "./repository/Admin-Session.repo.ts";
 import currencyPlugin from "./services/currency/currency.plugin.ts";
 import CurrencyPriceRepo from "./repository/Currency-Price.repo.ts";
 import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
+import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
+import WalletRepo from "./repository/Wallet.repo.ts";
+import { Decimal } from "decimal.js";
+import { IsolationLevel } from "@mikro-orm/core";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })
@@ -55,6 +59,8 @@ export default function appFactory() {
     .register(AdminSessionRepo)
     .register(CurrencyPriceRepo)
     .register(CurrencyTypeRepo)
+    .register(WalletTransactionRepo)
+    .register(WalletRepo)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })

@@ -1,6 +1,4 @@
 import fp from "fastify-plugin";
-import userGuardHook from "../hooks/user-guard.hook.ts";
-import arcAptchaPlugin from "../plugins/arc-aptcha.plugin.ts";
 
 export default fp(
   function rootServicePlugin(fastify, _, done) {

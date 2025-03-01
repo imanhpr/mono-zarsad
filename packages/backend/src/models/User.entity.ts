@@ -8,6 +8,7 @@ import {
 } from "@mikro-orm/core";
 import type UserSession from "./User-Session.entity.ts";
 import type Profile from "./Profile.entity.ts";
+import type Wallet from "./Wallet.entity.ts";
 
 @Entity()
 export default class User {
@@ -31,4 +32,7 @@ export default class User {
 
   @OneToOne("Profile", (prof: Profile) => prof.user, { owner: true })
   profile!: Profile;
+
+  @OneToMany("Wallet", (e: Wallet) => e.user)
+  wallets = new Collection<Wallet>(this);
 }
