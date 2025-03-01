@@ -2,6 +2,7 @@ import { EntityManager, EntityRepository } from "@mikro-orm/core";
 import fp from "fastify-plugin";
 
 import User from "../models/User.entity.ts";
+import Profile from "../models/Profile.entity.ts";
 
 export class UserRepo {
   #em: EntityManager;
@@ -11,8 +12,14 @@ export class UserRepo {
     this.#repo = this.#em.getRepository(User);
   }
 
-  async createNormal(userInput: Omit<User, "id">): Promise<User> {
-    const user = this.#em.create(User, userInput);
+  async createNormal(
+    userInput: Omit<User, "id" | "sessions" | "profile">
+  ): Promise<User> {
+    const profile = this.#em.create(Profile, {}, { partial: true });
+    const user = this.#em.create(User, {
+      ...userInput,
+      profile,
+    });
     await this.#em.persistAndFlush(user);
     return user;
   }
