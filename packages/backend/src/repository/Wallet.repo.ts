@@ -3,6 +3,8 @@ import fp from "fastify-plugin";
 import { EntityManager, LockMode } from "@mikro-orm/core";
 import Wallet from "../models/Wallet.entity.ts";
 import { Decimal } from "decimal.js";
+import type CurrencyType from "../models/Currency-Type.entity.ts";
+import type User from "../models/User.entity.ts";
 
 export class WalletRepo {
   #em: EntityManager;
@@ -21,6 +23,11 @@ export class WalletRepo {
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE }
     );
+  }
+
+  createNew(currencyType: CurrencyType, user: User) {
+    const wallet = this.#em.create(Wallet, { amount: "0", currencyType, user });
+    return wallet;
   }
 }
 

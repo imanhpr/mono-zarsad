@@ -7,9 +7,20 @@ import "./index.css";
 import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "react-bootstrap";
 import AuthContextProvider from "./context/Auth-Context";
+import { UserAPI } from "./api";
+import axios from "axios";
+import { Provider } from "react-redux";
+import store from "./store";
 
+const ax = axios.create({
+  baseURL: "http://localhost:3000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+const userAPI = new UserAPI(ax);
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, context: { userAPI } });
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -26,7 +37,9 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <ThemeProvider dir="rtl">
         <AuthContextProvider>
-          <RouterProvider router={router} />
+          <Provider store={store}>
+            <RouterProvider router={router} />
+          </Provider>
         </AuthContextProvider>
       </ThemeProvider>
     </StrictMode>

@@ -1,6 +1,7 @@
 import { EntityManager } from "@mikro-orm/core";
 import fp from "fastify-plugin";
 import CurrencyType from "../models/Currency-Type.entity.ts";
+import { CurrencyTypeEnum } from "../types/currency-types.ts";
 
 export class CurrencyTypeRepo {
   #em: EntityManager;
@@ -12,6 +13,13 @@ export class CurrencyTypeRepo {
   async findOneById(id: number) {
     const result = await this.#em.findOneOrFail(CurrencyType, { id });
     return result;
+  }
+
+  findOneByName(name: CurrencyTypeEnum) {
+    return this.#em.findOneOrFail(CurrencyType, { name });
+  }
+  findAll() {
+    return this.#em.findAll(CurrencyType);
   }
 }
 

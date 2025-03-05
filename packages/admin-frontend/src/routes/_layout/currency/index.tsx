@@ -85,7 +85,7 @@ function RouteComponent() {
             <Form onSubmit={formSubmitHandler}>
               <Row>
                 <Col>
-                  <Form.Group className="mb-3" controlId="formBasicEmail">
+                  <Form.Group className="mb-3">
                     <Form.Label>قیمت</Form.Label>
                     <Form.Control
                       className="text-center"
@@ -99,7 +99,7 @@ function RouteComponent() {
                 </Col>
 
                 <Col>
-                  <Form.Group className="mb-3" controlId="formBasicPassword">
+                  <Form.Group className="mb-3">
                     <Form.Label>ارز</Form.Label>
                     <Form.Control
                       onChange={(e) =>

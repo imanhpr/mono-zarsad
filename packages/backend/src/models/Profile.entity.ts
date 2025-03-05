@@ -9,6 +9,9 @@ export default class Profile {
   @Property()
   debtPrem: boolean = false;
 
-  @OneToOne(() => User, (u) => u.profile, { orphanRemoval: true })
+  @OneToOne(() => User, (u) => u.profile, {
+    orphanRemoval: true,
+    deleteRule: "cascade",
+  })
   user!: User;
 }

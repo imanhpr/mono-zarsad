@@ -1,4 +1,5 @@
 import {
+  Cascade,
   Collection,
   DecimalType,
   Entity,
@@ -22,9 +23,11 @@ export default class Wallet {
   @Property({ type: DecimalType })
   amount!: string;
 
-  @OneToMany("WalletTransaction", (e: WalletTransaction) => e.wallet)
+  @OneToMany("WalletTransaction", (e: WalletTransaction) => e.wallet, {
+    cascade: [Cascade.ALL],
+  })
   transactions = new Collection<WalletTransaction>(this);
 
-  @ManyToOne("User")
+  @ManyToOne("User", { deleteRule: "cascade" })
   user!: User;
 }

@@ -1,6 +1,5 @@
-import { Await, createFileRoute } from "@tanstack/react-router";
-import { Card, Col, Container, Row, Tab, Table } from "react-bootstrap";
-import { Line } from "react-chartjs-2";
+import { createFileRoute } from "@tanstack/react-router";
+import { Card, Col, Container, Row, Table } from "react-bootstrap";
 
 import { BsBag, BsEnvelope, BsFillPersonFill } from "react-icons/bs";
 import LineChart from "../../components/Line-Chart";
@@ -11,24 +10,18 @@ export const Route = createFileRoute("/_layout/")({
   component: Index,
   async loader() {
     const response = fetch("http://localhost:3000/currency?currency=1");
-    const response2 = fetch("http://localhost:3000/currency?currency=2");
-    const result = await Promise.all([response, response2]);
-    const json = await Promise.all([result[0].json(), result[1].json()]);
-    return [json[0].toReversed(), json[1].toReversed()];
+    const result = await Promise.all([response]);
+    const json = await Promise.all([result[0].json()]);
+    return [json[0].toReversed()];
   },
 });
 
 function Index() {
-  const [loaderData, loaderData2] = Route.useLoaderData();
+  const [loaderData] = Route.useLoaderData();
   console.log(loaderData);
   const data = loaderData.map((data) => data.price);
   const labels = loaderData.map((data) => data.createdAt);
   const lastUpdate = loaderData[loaderData.length - 1];
-
-  console.log("ldddd", loaderData2[0].price);
-  const data2 = loaderData2.map((data) => data.price);
-  const labels2 = loaderData2.map((data) => data.createdAt);
-  const lastUpdate2 = loaderData2[loaderData2.length - 1];
 
   return (
     <>
@@ -47,15 +40,7 @@ function Index() {
                 <h6 className="mb-0">طلا آب شده</h6>
               </Card.Header>
               <Card.Body>
-                <div>
-                  <LineChart
-                    data={data2}
-                    label="سکه"
-                    labels={labels2}
-                    borderColor="rgb(55, 115, 255)"
-                    backgroundColor="rgb(192, 230, 255)"
-                  />
-                </div>
+                <div></div>
                 <div className="d-flex flex-column text-center">
                   <Table>
                     <thead>
@@ -66,11 +51,7 @@ function Index() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>آخرین قیمت</td>
-                        <td>{intl.format(lastUpdate2.price)}</td>
-                        <td>{lastUpdate2.createdAt}</td>
-                      </tr>
+                      <tr></tr>
                     </tbody>
                   </Table>
                 </div>

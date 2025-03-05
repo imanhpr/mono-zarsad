@@ -42,6 +42,20 @@ function RouteComponent() {
                       </NavDropdown.ItemText>
                     </Link>
                   </NavDropdown>
+                  <NavDropdown
+                    dir="rtl"
+                    title="مدیریت کاربران"
+                    id="basic-nav-dropdown"
+                  >
+                    <Link className="nav-link" to="/user">
+                      <NavDropdown.ItemText>
+                        ایجاد کاربر جدید
+                      </NavDropdown.ItemText>
+                    </Link>
+                    <Link className="nav-link" to="/user/manage">
+                      <NavDropdown.ItemText>کاربران</NavDropdown.ItemText>
+                    </Link>
+                  </NavDropdown>
                 </Nav>
               </Navbar.Collapse>
             </Container>

@@ -1,5 +1,6 @@
 import { Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import { SeedManager } from "@mikro-orm/seeder";
 
 const DB_HOST = process.env.MIKRO_ORM_DB_HOST!;
 const DB_PORT = process.env.MIKRO_ORM_DB_PORT!;
@@ -8,6 +9,7 @@ const DB_PASSWORD = process.env.MIKRO_ORM_DB_PASSWORD!;
 const DB_USER = process.env.MIKRO_ORM_DB_USERNAME!;
 
 const config: Options = {
+  extensions: [SeedManager],
   // for simplicity, we use the SQLite database, as it's available pretty much everywhere
   driver: PostgreSqlDriver,
   dbName: DB_NAME,

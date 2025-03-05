@@ -1,0 +1,20 @@
+meta {
+  name: Create User
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/admin/user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName" : "ایمان",
+    "lastName" :"حسینی پور",
+    "phoneNumber" : "+989025144444",
+    "nationalCode" : "4321111111"
+  }
+}

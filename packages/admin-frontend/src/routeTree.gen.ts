@@ -13,9 +13,11 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutUserImport } from './routes/_layout/user'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
+import { Route as LayoutUserIndexImport } from './routes/_layout/user/index'
 import { Route as LayoutCurrencyIndexImport } from './routes/_layout/currency/index'
+import { Route as LayoutUserManageImport } from './routes/_layout/user/manage'
+import { Route as LayoutUserUserIdEditImport } from './routes/_layout/user/$userId.edit'
 
 // Create/Update Routes
 
@@ -30,21 +32,33 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutUserRoute = LayoutUserImport.update({
-  id: '/user',
-  path: '/user',
-  getParentRoute: () => LayoutRoute,
-} as any)
-
 const AuthLoginIndexRoute = AuthLoginIndexImport.update({
   id: '/auth/login/',
   path: '/auth/login/',
   getParentRoute: () => rootRoute,
 } as any)
 
+const LayoutUserIndexRoute = LayoutUserIndexImport.update({
+  id: '/user/',
+  path: '/user/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
 const LayoutCurrencyIndexRoute = LayoutCurrencyIndexImport.update({
   id: '/currency/',
   path: '/currency/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutUserManageRoute = LayoutUserManageImport.update({
+  id: '/user/manage',
+  path: '/user/manage',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutUserUserIdEditRoute = LayoutUserUserIdEditImport.update({
+  id: '/user/$userId/edit',
+  path: '/user/$userId/edit',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -59,18 +73,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/user': {
-      id: '/_layout/user'
-      path: '/user'
-      fullPath: '/user'
-      preLoaderRoute: typeof LayoutUserImport
-      parentRoute: typeof LayoutImport
-    }
     '/_layout/': {
       id: '/_layout/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/user/manage': {
+      id: '/_layout/user/manage'
+      path: '/user/manage'
+      fullPath: '/user/manage'
+      preLoaderRoute: typeof LayoutUserManageImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/currency/': {
@@ -80,6 +94,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCurrencyIndexImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/user/': {
+      id: '/_layout/user/'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof LayoutUserIndexImport
+      parentRoute: typeof LayoutImport
+    }
     '/auth/login/': {
       id: '/auth/login/'
       path: '/auth/login'
@@ -87,21 +108,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/user/$userId/edit': {
+      id: '/_layout/user/$userId/edit'
+      path: '/user/$userId/edit'
+      fullPath: '/user/$userId/edit'
+      preLoaderRoute: typeof LayoutUserUserIdEditImport
+      parentRoute: typeof LayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
 interface LayoutRouteChildren {
-  LayoutUserRoute: typeof LayoutUserRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutUserManageRoute: typeof LayoutUserManageRoute
   LayoutCurrencyIndexRoute: typeof LayoutCurrencyIndexRoute
+  LayoutUserIndexRoute: typeof LayoutUserIndexRoute
+  LayoutUserUserIdEditRoute: typeof LayoutUserUserIdEditRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutUserRoute: LayoutUserRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutUserManageRoute: LayoutUserManageRoute,
   LayoutCurrencyIndexRoute: LayoutCurrencyIndexRoute,
+  LayoutUserIndexRoute: LayoutUserIndexRoute,
+  LayoutUserUserIdEditRoute: LayoutUserUserIdEditRoute,
 }
 
 const LayoutRouteWithChildren =
@@ -109,40 +141,61 @@ const LayoutRouteWithChildren =
 
 export interface FileRoutesByFullPath {
   '': typeof LayoutRouteWithChildren
-  '/user': typeof LayoutUserRoute
   '/': typeof LayoutIndexRoute
+  '/user/manage': typeof LayoutUserManageRoute
   '/currency': typeof LayoutCurrencyIndexRoute
+  '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
 export interface FileRoutesByTo {
-  '/user': typeof LayoutUserRoute
   '/': typeof LayoutIndexRoute
+  '/user/manage': typeof LayoutUserManageRoute
   '/currency': typeof LayoutCurrencyIndexRoute
+  '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_layout': typeof LayoutRouteWithChildren
-  '/_layout/user': typeof LayoutUserRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/user/manage': typeof LayoutUserManageRoute
   '/_layout/currency/': typeof LayoutCurrencyIndexRoute
+  '/_layout/user/': typeof LayoutUserIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
+  '/_layout/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/user' | '/' | '/currency' | '/auth/login'
+  fullPaths:
+    | ''
+    | '/'
+    | '/user/manage'
+    | '/currency'
+    | '/user'
+    | '/auth/login'
+    | '/user/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/user' | '/' | '/currency' | '/auth/login'
+  to:
+    | '/'
+    | '/user/manage'
+    | '/currency'
+    | '/user'
+    | '/auth/login'
+    | '/user/$userId/edit'
   id:
     | '__root__'
     | '/_layout'
-    | '/_layout/user'
     | '/_layout/'
+    | '/_layout/user/manage'
     | '/_layout/currency/'
+    | '/_layout/user/'
     | '/auth/login/'
+    | '/_layout/user/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 
@@ -173,25 +226,35 @@ export const routeTree = rootRoute
     "/_layout": {
       "filePath": "_layout.tsx",
       "children": [
-        "/_layout/user",
         "/_layout/",
-        "/_layout/currency/"
+        "/_layout/user/manage",
+        "/_layout/currency/",
+        "/_layout/user/",
+        "/_layout/user/$userId/edit"
       ]
-    },
-    "/_layout/user": {
-      "filePath": "_layout/user.tsx",
-      "parent": "/_layout"
     },
     "/_layout/": {
       "filePath": "_layout/index.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/user/manage": {
+      "filePath": "_layout/user/manage.tsx",
       "parent": "/_layout"
     },
     "/_layout/currency/": {
       "filePath": "_layout/currency/index.tsx",
       "parent": "/_layout"
     },
+    "/_layout/user/": {
+      "filePath": "_layout/user/index.tsx",
+      "parent": "/_layout"
+    },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
+    },
+    "/_layout/user/$userId/edit": {
+      "filePath": "_layout/user/$userId.edit.tsx",
+      "parent": "/_layout"
     }
   }
 }

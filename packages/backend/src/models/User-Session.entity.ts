@@ -7,7 +7,7 @@ export default class UserSession {
   @PrimaryKey({ type: "uuid" })
   id: string = randomUUID();
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: "cascade" })
   user!: User;
 
   @Property()
