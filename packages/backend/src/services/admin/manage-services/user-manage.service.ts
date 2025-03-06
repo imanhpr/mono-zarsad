@@ -3,7 +3,8 @@ import { type UserRepo } from "../../../repository/User.repo.ts";
 import { type ICreateNewUser } from "../../../types/user.ts";
 import { type WalletRepo } from "../../../repository/Wallet.repo.ts";
 import { type CurrencyTypeRepo } from "../../../repository/Currency-Type.repo.ts";
-import { IsolationLevel, Transactional } from "@mikro-orm/core";
+import { Transactional } from "@mikro-orm/core";
+import { mapDateToJalali } from "../../../helpers/index.ts";
 
 class UserManageService {
   #repo: UserRepo;
@@ -36,12 +37,17 @@ class UserManageService {
     });
   }
 
-  getLatestUsers() {
-    return this.#repo.findLatestUserList();
+  async getLatestUsers() {
+    const result = await this.#repo.findLatestUserList();
+    return mapDateToJalali(result);
   }
 
   deleteUserById(id: number) {
     return this.#repo.deleteUserById(id);
+  }
+
+  editUserById(userId: number, payload: { user: object; profile: object }) {
+    return this.#repo.updateUserAndProfileById(userId, payload);
   }
 }
 

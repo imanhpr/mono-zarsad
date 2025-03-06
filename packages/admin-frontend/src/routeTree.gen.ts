@@ -15,6 +15,7 @@ import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutUserIndexImport } from './routes/_layout/user/index'
+import { Route as LayoutTransactionIndexImport } from './routes/_layout/transaction/index'
 import { Route as LayoutCurrencyIndexImport } from './routes/_layout/currency/index'
 import { Route as LayoutUserManageImport } from './routes/_layout/user/manage'
 import { Route as LayoutUserUserIdEditImport } from './routes/_layout/user/$userId.edit'
@@ -41,6 +42,12 @@ const AuthLoginIndexRoute = AuthLoginIndexImport.update({
 const LayoutUserIndexRoute = LayoutUserIndexImport.update({
   id: '/user/',
   path: '/user/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutTransactionIndexRoute = LayoutTransactionIndexImport.update({
+  id: '/transaction/',
+  path: '/transaction/',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -94,6 +101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCurrencyIndexImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/transaction/': {
+      id: '/_layout/transaction/'
+      path: '/transaction'
+      fullPath: '/transaction'
+      preLoaderRoute: typeof LayoutTransactionIndexImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/user/': {
       id: '/_layout/user/'
       path: '/user'
@@ -124,6 +138,7 @@ interface LayoutRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutUserManageRoute: typeof LayoutUserManageRoute
   LayoutCurrencyIndexRoute: typeof LayoutCurrencyIndexRoute
+  LayoutTransactionIndexRoute: typeof LayoutTransactionIndexRoute
   LayoutUserIndexRoute: typeof LayoutUserIndexRoute
   LayoutUserUserIdEditRoute: typeof LayoutUserUserIdEditRoute
 }
@@ -132,6 +147,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutUserManageRoute: LayoutUserManageRoute,
   LayoutCurrencyIndexRoute: LayoutCurrencyIndexRoute,
+  LayoutTransactionIndexRoute: LayoutTransactionIndexRoute,
   LayoutUserIndexRoute: LayoutUserIndexRoute,
   LayoutUserUserIdEditRoute: LayoutUserUserIdEditRoute,
 }
@@ -144,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/user/manage': typeof LayoutUserManageRoute
   '/currency': typeof LayoutCurrencyIndexRoute
+  '/transaction': typeof LayoutTransactionIndexRoute
   '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
@@ -153,6 +170,7 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/user/manage': typeof LayoutUserManageRoute
   '/currency': typeof LayoutCurrencyIndexRoute
+  '/transaction': typeof LayoutTransactionIndexRoute
   '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
@@ -164,6 +182,7 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/user/manage': typeof LayoutUserManageRoute
   '/_layout/currency/': typeof LayoutCurrencyIndexRoute
+  '/_layout/transaction/': typeof LayoutTransactionIndexRoute
   '/_layout/user/': typeof LayoutUserIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/_layout/user/$userId/edit': typeof LayoutUserUserIdEditRoute
@@ -176,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/user/manage'
     | '/currency'
+    | '/transaction'
     | '/user'
     | '/auth/login'
     | '/user/$userId/edit'
@@ -184,6 +204,7 @@ export interface FileRouteTypes {
     | '/'
     | '/user/manage'
     | '/currency'
+    | '/transaction'
     | '/user'
     | '/auth/login'
     | '/user/$userId/edit'
@@ -193,6 +214,7 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/_layout/user/manage'
     | '/_layout/currency/'
+    | '/_layout/transaction/'
     | '/_layout/user/'
     | '/auth/login/'
     | '/_layout/user/$userId/edit'
@@ -229,6 +251,7 @@ export const routeTree = rootRoute
         "/_layout/",
         "/_layout/user/manage",
         "/_layout/currency/",
+        "/_layout/transaction/",
         "/_layout/user/",
         "/_layout/user/$userId/edit"
       ]
@@ -243,6 +266,10 @@ export const routeTree = rootRoute
     },
     "/_layout/currency/": {
       "filePath": "_layout/currency/index.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/transaction/": {
+      "filePath": "_layout/transaction/index.tsx",
       "parent": "/_layout"
     },
     "/_layout/user/": {

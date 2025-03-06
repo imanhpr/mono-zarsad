@@ -56,6 +56,17 @@ function RouteComponent() {
                       <NavDropdown.ItemText>کاربران</NavDropdown.ItemText>
                     </Link>
                   </NavDropdown>
+                  <NavDropdown
+                    dir="rtl"
+                    title="مدیریت تراکنش ها"
+                    id="basic-nav-dropdown"
+                  >
+                    <NavDropdown.ItemText>
+                      <Link className="nav-link active" to="/transaction">
+                        ایجاد تراکنش جدید
+                      </Link>
+                    </NavDropdown.ItemText>
+                  </NavDropdown>
                 </Nav>
               </Navbar.Collapse>
             </Container>

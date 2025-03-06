@@ -29,8 +29,7 @@ import CurrencyPriceRepo from "./repository/Currency-Price.repo.ts";
 import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
 import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
 import WalletRepo from "./repository/Wallet.repo.ts";
-import { Decimal } from "decimal.js";
-import { IsolationLevel } from "@mikro-orm/core";
+import "./schema/index.ts";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })

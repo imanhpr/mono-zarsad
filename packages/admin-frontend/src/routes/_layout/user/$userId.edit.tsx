@@ -14,6 +14,8 @@ function RouteComponent() {
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: any) => state.updateUser.user);
   const [firstLoad, setFirstLoad] = useState(true);
+  const [userDebt, setUserDebt] = useState(user?.profile?.debtPrem);
+  const userAPI = Route.useRouteContext().userAPI;
 
   useEffect(() => {
     if (firstLoad) {
@@ -24,6 +26,21 @@ function RouteComponent() {
       dispatch(updateUserSliceActions.clearUser());
     };
   }, [firstLoad, dispatch]);
+
+  function onSubmitHandler(e: React.FormEvent) {
+    e.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
+    const data: Record<string, any> = Object.fromEntries(
+      new FormData(form).entries()
+    );
+    if (data.debtPrem) data.debtPrem = true;
+    else data.debtPrem = false;
+    console.log(data);
+    userAPI
+      .updateUserById(user.id, data)
+      .then((v) => console.log("result:", v));
+  }
 
   if (!user)
     return (
@@ -46,7 +63,7 @@ function RouteComponent() {
       <Container dir="rtl" className="mt-5">
         <Card>
           <Card.Body>
-            <Form ref={formRef}>
+            <Form onSubmit={onSubmitHandler} ref={formRef}>
               <Row>
                 <Col>
                   <Form.Group className="mb-3">
@@ -104,6 +121,29 @@ function RouteComponent() {
                       className="text-center"
                       type="text"
                       defaultValue={user.createdAt}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group className="">
+                    <Form.Label>دسترسی ها</Form.Label>
+                    <Form.Check
+                      name="debtPrem"
+                      onChange={() => setUserDebt((prev) => !prev)}
+                      type="checkbox"
+                      label={
+                        <>
+                          اعتبار منفی -{" "}
+                          <span
+                            className={
+                              userDebt ? "text-success" : "text-danger"
+                            }
+                          >
+                            {userDebt ? "فعال" : "غیرفعال"}
+                          </span>
+                        </>
+                      }
+                      defaultChecked={userDebt}
                     />
                   </Form.Group>
                 </Col>

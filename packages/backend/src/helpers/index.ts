@@ -1,3 +1,4 @@
+import { format } from "date-fns-jalali";
 import { randomInt } from "node:crypto";
 
 export async function randInt(min: number, max: number): Promise<number> {
@@ -8,4 +9,14 @@ export async function randInt(min: number, max: number): Promise<number> {
     resolve(value);
   });
   return promise;
+}
+
+export function mapDateToJalali<T extends { createdAt: Date }>(
+  input: T[]
+): T[] {
+  return input.map((data) => {
+    return Object.assign(data, {
+      createdAt: format(new Date(data.createdAt), "yyyy-MM-dd EEEE HH:mm:ss"),
+    });
+  });
 }

@@ -44,6 +44,27 @@ export class UserRepo {
     const user = this.#repo.getReference(id);
     await this.#em.removeAndFlush(user);
   }
+
+  async updateUserAndProfileById(
+    userId: number,
+    payload: {
+      profile: object;
+      user: object;
+    }
+  ) {
+    const user = await this.#em.findOneOrFail(
+      User,
+      { id: userId },
+      { populate: ["profile"] }
+    );
+    const profile = this.#em.getReference(Profile, user.profile.id);
+
+    const wUser = wrap(user).assign(payload.user);
+    const wProfile = wrap(profile).assign(payload.profile);
+
+    await this.#em.persistAndFlush([wUser, wProfile]);
+    return { result: "success", user: wUser };
+  }
 }
 
 export default fp(

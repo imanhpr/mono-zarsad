@@ -1,0 +1,22 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:3000/admin/user/3
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user" : {
+      "firstName" : "ایمان"
+    },
+    "profile" : {
+      "debtPrem": false
+    }
+  }
+}

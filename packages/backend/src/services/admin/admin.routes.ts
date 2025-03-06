@@ -6,20 +6,24 @@ import AdminSession from "../../models/Admin-Session.entity.ts";
 import createUserPostPlugin from "./routes/user/create-user-post.ts";
 import getLatestUsersPlugin from "./routes/user/latest-users-get.ts";
 import deleteUserPlugin from "./routes/user/delete-user.ts";
+import updateUserPutPlugin from "./routes/user/update-user-put.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
   _: Record<string, unknown>,
   done: (err?: Error) => void
 ) {
+  const config = { prefix: "user" };
+
   fastify
     .register(passwordServicePlugin)
     .register(userPasswordAuth, {
       entityRef: Admin,
       sessionRef: AdminSession,
     })
-    .register(createUserPostPlugin, { prefix: "user" })
-    .register(getLatestUsersPlugin, { prefix: "user" })
-    .register(deleteUserPlugin, { prefix: "user" });
+    .register(createUserPostPlugin, config)
+    .register(getLatestUsersPlugin, config)
+    .register(deleteUserPlugin, config)
+    .register(updateUserPutPlugin, config);
   done();
 }

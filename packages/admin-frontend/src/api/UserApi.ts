@@ -22,4 +22,21 @@ export default class UserAPI {
 
     return result.data;
   }
+
+  async updateUserById(userId: number, data: object) {
+    const p = {
+      user: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        nationalCode: data.nationalCode,
+        phoneNumber: data.phoneNumber,
+      },
+
+      profile: {
+        debtPrem: data.debtPrem,
+      },
+    };
+    const result = await this.#axios.put(`admin/user/${userId}`, p);
+    return result.data;
+  }
 }
