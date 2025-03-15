@@ -1,4 +1,5 @@
-import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
+import { EntityManager, EntityRepository, wrap } from "@mikro-orm/postgresql";
+import type { EntityManager as CoreEM } from "@mikro-orm/postgresql";
 import fp from "fastify-plugin";
 
 import User from "../models/User.entity.ts";
@@ -65,11 +66,32 @@ export class UserRepo {
     await this.#em.persistAndFlush([wUser, wProfile]);
     return { result: "success", user: wUser };
   }
+
+  async findUsersByFilter({
+    userId,
+    nationalCode,
+  }: {
+    userId?: number;
+    nationalCode?: string;
+  }) {
+    const qb = this.#em
+      .createQueryBuilder(User, "u")
+      .joinAndSelect("u.profile", "p");
+
+    if (userId) qb.where({ id: userId });
+
+    if (nationalCode) qb.andWhere({ nationalCode });
+
+    const [users, count] = await qb.getResultAndCount();
+    const kb = qb.getKnexQuery();
+    console.log(kb.toQuery());
+    return { users, count };
+  }
 }
 
 export default fp(
   function userRepoPlugin(fastify, _, done) {
-    const userRepo = new UserRepo(fastify.orm.em);
+    const userRepo = new UserRepo(fastify.orm.em as CoreEM);
 
     fastify.decorate("userRepo", userRepo);
     done();

@@ -25,3 +25,10 @@ export const UpdateUserPutRequestBodySchema = Type.Object({
 export type IUpdateUserPutRequestBodySchema = Static<
   typeof UpdateUserPutRequestBodySchema
 >;
+
+export const GetUserQueryParamSchema = Type.Object({
+  userId: Type.Optional(Type.Number()),
+  nationalCode: Type.Optional(Type.String()),
+});
+
+export type IGetUserQueryParamSchema = Static<typeof GetUserQueryParamSchema>;

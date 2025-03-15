@@ -39,4 +39,19 @@ export default class UserAPI {
     const result = await this.#axios.put(`admin/user/${userId}`, p);
     return result.data;
   }
+
+  async getUsersByFilter({
+    userId,
+    nationalCode,
+  }: {
+    userId?: number;
+    nationalCode?: string;
+  }) {
+    const params = new URLSearchParams();
+    if (userId) params.set("userId", userId.toString());
+    if (nationalCode) params.set("nationalCode", nationalCode);
+
+    const response = await this.#axios.get("admin/user/filter");
+    return response.data;
+  }
 }

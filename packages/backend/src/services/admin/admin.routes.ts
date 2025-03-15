@@ -7,6 +7,7 @@ import createUserPostPlugin from "./routes/user/create-user-post.ts";
 import getLatestUsersPlugin from "./routes/user/latest-users-get.ts";
 import deleteUserPlugin from "./routes/user/delete-user.ts";
 import updateUserPutPlugin from "./routes/user/update-user-put.ts";
+import getUserByFilterPlugin from "./routes/user/users-filter-get.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -24,6 +25,7 @@ export default function adminRoutesPlugin(
     .register(createUserPostPlugin, config)
     .register(getLatestUsersPlugin, config)
     .register(deleteUserPlugin, config)
-    .register(updateUserPutPlugin, config);
+    .register(updateUserPutPlugin, config)
+    .register(getUserByFilterPlugin, config);
   done();
 }

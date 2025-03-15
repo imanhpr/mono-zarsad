@@ -49,6 +49,10 @@ class UserManageService {
   editUserById(userId: number, payload: { user: object; profile: object }) {
     return this.#repo.updateUserAndProfileById(userId, payload);
   }
+
+  userListByFilter(input: { userId?: number; nationalCode?: string }) {
+    return this.#repo.findUsersByFilter(input);
+  }
 }
 
 export default fp(
