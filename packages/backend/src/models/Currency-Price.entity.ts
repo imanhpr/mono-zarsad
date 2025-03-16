@@ -1,5 +1,12 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Entity,
+  ManyToOne,
+  OneToOne,
+  PrimaryKey,
+  Property,
+} from "@mikro-orm/core";
 import CurrencyType from "./Currency-Type.entity.ts";
+import type Spread from "./Spread.entity.ts";
 
 @Entity()
 export default class CurrencyPrice {
@@ -14,4 +21,7 @@ export default class CurrencyPrice {
 
   @ManyToOne(() => CurrencyType)
   currency!: CurrencyType;
+
+  @OneToOne("Spread", (s: Spread) => s.currencyPrice, { owner: true })
+  spread!: Spread;
 }
