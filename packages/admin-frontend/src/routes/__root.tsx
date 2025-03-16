@@ -1,15 +1,16 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { type UserAPI } from "../api";
+import type { UserAPI, AuthApi } from "../api";
 
-export const Route = createRootRouteWithContext<{ userAPI: UserAPI }>()({
+export const Route = createRootRouteWithContext<{
+  userAPI: UserAPI;
+  authAPI: AuthApi;
+}>()({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  // const user = useContext(AuthCtx);
-  // const navigate = Route.useNavigate();
-  // if (user === null) navigate({ from: Route.fullPath, to: "/auth/login" });
+  console.log("Render");
   return (
     <>
       <Outlet />

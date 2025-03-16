@@ -30,6 +30,8 @@ import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
 import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
 import WalletRepo from "./repository/Wallet.repo.ts";
 import "./schema/index.ts";
+import type User from "./models/User.entity.ts";
+import type Admin from "./models/Admin.entity.ts";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })
@@ -73,4 +75,10 @@ export default function appFactory() {
     done();
   });
   return app;
+}
+
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    user: User | Omit<Admin, "password">; // user type is return type of `request.user` object
+  }
 }

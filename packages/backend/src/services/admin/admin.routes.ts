@@ -8,6 +8,8 @@ import getLatestUsersPlugin from "./routes/user/latest-users-get.ts";
 import deleteUserPlugin from "./routes/user/delete-user.ts";
 import updateUserPutPlugin from "./routes/user/update-user-put.ts";
 import getUserByFilterPlugin from "./routes/user/users-filter-get.ts";
+import adminMeGetPlugin from "./routes/auth/me-get.ts";
+import adminGurdHook from "../../hooks/admin-gurd-hook.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -17,6 +19,7 @@ export default function adminRoutesPlugin(
   const config = { prefix: "user" };
 
   fastify
+    .register(adminGurdHook)
     .register(passwordServicePlugin)
     .register(userPasswordAuth, {
       entityRef: Admin,
@@ -26,6 +29,7 @@ export default function adminRoutesPlugin(
     .register(getLatestUsersPlugin, config)
     .register(deleteUserPlugin, config)
     .register(updateUserPutPlugin, config)
-    .register(getUserByFilterPlugin, config);
+    .register(getUserByFilterPlugin, config)
+    .register(adminMeGetPlugin, { prefix: "auth" });
   done();
 }

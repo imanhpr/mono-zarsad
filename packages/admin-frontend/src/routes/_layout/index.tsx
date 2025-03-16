@@ -3,6 +3,7 @@ import { Card, Col, Container, Row, Table } from "react-bootstrap";
 
 import { BsBag, BsEnvelope, BsFillPersonFill } from "react-icons/bs";
 import LineChart from "../../components/Line-Chart";
+import { useSelector } from "react-redux";
 
 const intl = new Intl.NumberFormat("fa-IR");
 
@@ -17,6 +18,12 @@ export const Route = createFileRoute("/_layout/")({
 });
 
 function Index() {
+  const navigate = Route.useNavigate();
+  const user = useSelector<unknown | undefined>(
+    (state) => state?.userAuth?.currentUser
+  );
+  if (!user) navigate({ from: Route.fullPath, to: "/auth/login" });
+
   const [loaderData] = Route.useLoaderData();
   console.log(loaderData);
   const data = loaderData.map((data) => data.price);

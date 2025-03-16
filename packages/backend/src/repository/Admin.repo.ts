@@ -10,6 +10,10 @@ export class AdminRepo {
   async findOneByUserName(username: string): Promise<Admin> {
     return this.#repo.findOneOrFail({ username });
   }
+
+  findById(id: number) {
+    return this.#repo.findOneOrFail({ id }, { exclude: ["password"] });
+  }
 }
 
 export default fp(

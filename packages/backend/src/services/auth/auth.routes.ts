@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
-import type User from "../../models/User.entity.ts";
+import logOutGetPlugin from "./routes/logout/logout-get.plugin.ts";
+
 import {
   loginPostPlugin,
   refreshTokenGetPlugin,
@@ -25,13 +26,4 @@ export default function authRoutesPlugin(
     .register(logOutGetPlugin);
 
   done();
-}
-
-import "@fastify/jwt";
-import logOutGetPlugin from "./routes/logout/logout-get.plugin.ts";
-
-declare module "@fastify/jwt" {
-  interface FastifyJWT {
-    user: User; // user type is return type of `request.user` object
-  }
 }

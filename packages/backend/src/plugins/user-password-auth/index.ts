@@ -127,6 +127,8 @@ export default fp<{ entityRef: UserPassAuthAbleEntity; sessionRef: Session }>(
       }
     );
 
+    // TODO: Implement Refresh Token
+
     done();
   },
 

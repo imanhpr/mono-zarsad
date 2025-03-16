@@ -1,14 +1,12 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { useContext } from "react";
 import { Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
-import { AuthCtx } from "../context";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const user = useContext(AuthCtx);
+  const user = null;
   return (
     <>
       {!user && (
