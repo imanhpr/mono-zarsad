@@ -50,8 +50,9 @@ export default class UserAPI {
     const params = new URLSearchParams();
     if (userId) params.set("userId", userId.toString());
     if (nationalCode) params.set("nationalCode", nationalCode);
-
-    const response = await this.#axios.get("admin/user/filter");
+    const response = await this.#axios.get(
+      `admin/user/filter?${params.toString()}`
+    );
     return response.data;
   }
 }
