@@ -8,7 +8,9 @@ export class AuthApi {
   }
 
   async login(payload: IAdminSchemaPayload) {
-    const response = await this.#axios.post("/admin/auth/login", payload);
+    const response = await this.#axios.post("/admin/auth/login", payload, {
+      withCredentials: true,
+    });
 
     if (response.status === 200) {
       const { token } = await adminLoginAuthResponse.parseAsync(response.data);
@@ -18,7 +20,21 @@ export class AuthApi {
     throw new Error("Invalid Login");
   }
 
-  logout() {}
+  async logout() {
+    const response = await this.#axios.get("/admin/auth/logout", {
+      withCredentials: true,
+    });
+
+    console.log("logout response : ", response.data, response.status);
+  }
+
+  async refreshToken() {
+    const response = await this.#axios.get("/admin/auth/refresh", {
+      withCredentials: true,
+    });
+    console.log("token :", response.data.token);
+    return response.data.token;
+  }
 
   async me(accessToken: string) {
     const response = await this.#axios.get("/admin/auth/me", {

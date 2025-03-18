@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as AuthLogoutIndexImport } from './routes/auth/logout.index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutUserIndexImport } from './routes/_layout/user/index'
 import { Route as LayoutTransactionIndexImport } from './routes/_layout/transaction/index'
@@ -31,6 +32,12 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+
+const AuthLogoutIndexRoute = AuthLogoutIndexImport.update({
+  id: '/auth/logout/',
+  path: '/auth/logout/',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AuthLoginIndexRoute = AuthLoginIndexImport.update({
@@ -122,6 +129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginIndexImport
       parentRoute: typeof rootRoute
     }
+    '/auth/logout/': {
+      id: '/auth/logout/'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/_layout/user/$userId/edit': {
       id: '/_layout/user/$userId/edit'
       path: '/user/$userId/edit'
@@ -163,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/transaction': typeof LayoutTransactionIndexRoute
   '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/auth/logout': typeof AuthLogoutIndexRoute
   '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
@@ -173,6 +188,7 @@ export interface FileRoutesByTo {
   '/transaction': typeof LayoutTransactionIndexRoute
   '/user': typeof LayoutUserIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/auth/logout': typeof AuthLogoutIndexRoute
   '/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
@@ -185,6 +201,7 @@ export interface FileRoutesById {
   '/_layout/transaction/': typeof LayoutTransactionIndexRoute
   '/_layout/user/': typeof LayoutUserIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
+  '/auth/logout/': typeof AuthLogoutIndexRoute
   '/_layout/user/$userId/edit': typeof LayoutUserUserIdEditRoute
 }
 
@@ -198,6 +215,7 @@ export interface FileRouteTypes {
     | '/transaction'
     | '/user'
     | '/auth/login'
+    | '/auth/logout'
     | '/user/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -207,6 +225,7 @@ export interface FileRouteTypes {
     | '/transaction'
     | '/user'
     | '/auth/login'
+    | '/auth/logout'
     | '/user/$userId/edit'
   id:
     | '__root__'
@@ -217,6 +236,7 @@ export interface FileRouteTypes {
     | '/_layout/transaction/'
     | '/_layout/user/'
     | '/auth/login/'
+    | '/auth/logout/'
     | '/_layout/user/$userId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -224,11 +244,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
+  AuthLogoutIndexRoute: typeof AuthLogoutIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
+  AuthLogoutIndexRoute: AuthLogoutIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -242,7 +264,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_layout",
-        "/auth/login/"
+        "/auth/login/",
+        "/auth/logout/"
       ]
     },
     "/_layout": {
@@ -278,6 +301,9 @@ export const routeTree = rootRoute
     },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
+    },
+    "/auth/logout/": {
+      "filePath": "auth/logout.index.tsx"
     },
     "/_layout/user/$userId/edit": {
       "filePath": "_layout/user/$userId.edit.tsx",

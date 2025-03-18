@@ -32,6 +32,22 @@ function Index() {
 
   return (
     <>
+      <div style={{ position: "relative" }}>
+        <div
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+          style={{ position: "absolute" }}
+        >
+          <strong>Holy guacamole!</strong> You should check in on some of those
+          fields below.
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
       <Container dir="rtl" className="mt-5">
         <Row>
           <Col>

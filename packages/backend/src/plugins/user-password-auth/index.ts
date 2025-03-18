@@ -1,4 +1,4 @@
-import { RequestGenericInterface } from "fastify";
+import fastify, { RequestGenericInterface } from "fastify";
 import fp from "fastify-plugin";
 import {
   IUserPasswordAuthRequestBodySchema,
@@ -72,6 +72,16 @@ class UserPasswordAuthService {
     }
     return this.#sessionRepo.expireById(sid);
   }
+
+  async refreshToken(sid: string) {
+    const currentSession = await this.#sessionRepo.findOne(sid);
+
+    const newSession = await this.#sessionRepo.createNew(
+      currentSession.user.id
+    );
+    const token = this.#jwtSign({ id: newSession.user.id });
+    return { token, newSession };
+  }
 }
 
 export default fp<{ entityRef: UserPassAuthAbleEntity; sessionRef: Session }>(
@@ -127,8 +137,21 @@ export default fp<{ entityRef: UserPassAuthAbleEntity; sessionRef: Session }>(
       }
     );
 
-    // TODO: Implement Refresh Token
-
+    fastify.get(
+      "/auth/refresh",
+      async function AdminRefreshTokenHandler(req, rep) {
+        // TODO: Type safety
+        const sid = req.cookies["session-id"];
+        if (sid == null)
+          return rep
+            .code(400)
+            .send({ message: "please set session-id header" });
+        const { newSession, token } = await service.refreshToken(sid);
+        rep
+          .setCookie("session-id", newSession.id, { path: "/admin/auth" })
+          .send({ token });
+      }
+    );
     done();
   },
 

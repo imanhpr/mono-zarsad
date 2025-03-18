@@ -65,6 +65,12 @@ function RouteComponent() {
                       </Link>
                     </NavDropdown.ItemText>
                   </NavDropdown>
+
+                  <Nav.Item>
+                    <Link className="nav-link" to="/auth/logout">
+                      خروج
+                    </Link>
+                  </Nav.Item>
                 </Nav>
               </Navbar.Collapse>
             </Container>
