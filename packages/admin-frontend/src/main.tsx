@@ -6,11 +6,10 @@ import "./index.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "react-bootstrap";
-import { UserAPI } from "./api";
+import { AuthApi, TransactionAPI, UserAPI } from "./api";
 import axios from "axios";
 import { Provider } from "react-redux";
 import store from "./store";
-import { AuthApi } from "./api/AuthApi";
 
 const ax = axios.create({
   baseURL: "http://localhost:3000",
@@ -20,8 +19,12 @@ const ax = axios.create({
 });
 const userAPI = new UserAPI(ax);
 const authAPI = new AuthApi(ax);
+const transactionAPI = new TransactionAPI(ax);
 // Create a new router instance
-const router = createRouter({ routeTree, context: { userAPI, authAPI } });
+const router = createRouter({
+  routeTree,
+  context: { userAPI, authAPI, transactionAPI },
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

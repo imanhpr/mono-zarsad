@@ -17,11 +17,13 @@ export class WalletRepo {
     this.#em.persist(wallet);
   }
 
-  selectWalletforUpdate(id: number) {
+  selectWalletForUpdate(id: number) {
     return this.#em.findOneOrFail(
       Wallet,
       { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE }
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+      }
     );
   }
 

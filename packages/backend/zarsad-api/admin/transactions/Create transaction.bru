@@ -1,0 +1,18 @@
+meta {
+  name: Create transaction
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/admin/transaction
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "walletId" : 2,
+    "amount" : "400000000"
+  }
+}

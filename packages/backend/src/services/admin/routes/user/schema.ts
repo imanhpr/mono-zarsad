@@ -29,6 +29,7 @@ export type IUpdateUserPutRequestBodySchema = Static<
 export const GetUserQueryParamSchema = Type.Object({
   userId: Type.Optional(Type.Number()),
   nationalCode: Type.Optional(Type.String()),
+  wallet: Type.Optional(Type.Boolean({ default: false })),
 });
 
 export type IGetUserQueryParamSchema = Static<typeof GetUserQueryParamSchema>;

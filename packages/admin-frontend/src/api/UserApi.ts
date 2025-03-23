@@ -43,13 +43,17 @@ export default class UserAPI {
   async getUsersByFilter({
     userId,
     nationalCode,
+    wallet,
   }: {
     userId?: number;
     nationalCode?: string;
+    wallet?: boolean;
   }) {
     const params = new URLSearchParams();
     if (userId) params.set("userId", userId.toString());
     if (nationalCode) params.set("nationalCode", nationalCode);
+    if (wallet) params.set("wallet", wallet.toString());
+
     const response = await this.#axios.get(
       `admin/user/filter?${params.toString()}`
     );

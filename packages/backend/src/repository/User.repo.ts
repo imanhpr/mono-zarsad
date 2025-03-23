@@ -70,13 +70,18 @@ export class UserRepo {
   async findUsersByFilter({
     userId,
     nationalCode,
+    wallet,
   }: {
     userId?: number;
     nationalCode?: string;
+    wallet?: boolean;
   }) {
     const qb = this.#em
       .createQueryBuilder(User, "u")
       .joinAndSelect("u.profile", "p");
+
+    if (wallet)
+      qb.joinAndSelect("u.wallets", "w").joinAndSelect("w.currencyType", "ct");
 
     if (userId) qb.where({ id: userId });
 

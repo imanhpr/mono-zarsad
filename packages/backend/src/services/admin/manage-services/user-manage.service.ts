@@ -50,8 +50,12 @@ class UserManageService {
     return this.#repo.updateUserAndProfileById(userId, payload);
   }
 
-  userListByFilter(input: { userId?: number; nationalCode?: string }) {
-    return this.#repo.findUsersByFilter(input);
+  async userListByFilter(input: { userId?: number; nationalCode?: string }) {
+    const result = await this.#repo.findUsersByFilter(input);
+    return {
+      users: mapDateToJalali(result.users),
+      count: result.count,
+    };
   }
 }
 

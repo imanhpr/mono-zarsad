@@ -32,6 +32,7 @@ import WalletRepo from "./repository/Wallet.repo.ts";
 import "./schema/index.ts";
 import type User from "./models/User.entity.ts";
 import type Admin from "./models/Admin.entity.ts";
+import ProfileRepo from "./repository/Profile.repo.ts";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })
@@ -54,6 +55,7 @@ export default function appFactory() {
     .register(mikroOrmPlugin)
     .register(smsProvider)
     .register(root)
+    // Repo
     .register(UserRepo)
     .register(AdminRepo)
     .register(UserSessionRepo)
@@ -62,6 +64,8 @@ export default function appFactory() {
     .register(CurrencyTypeRepo)
     .register(WalletTransactionRepo)
     .register(WalletRepo)
+    .register(ProfileRepo)
+    // Business Logics
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })

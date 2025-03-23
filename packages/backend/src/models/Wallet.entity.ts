@@ -20,7 +20,7 @@ export default class Wallet {
   @ManyToOne("CurrencyType")
   currencyType!: CurrencyType;
 
-  @Property({ type: DecimalType })
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
   amount!: string;
 
   @OneToMany("WalletTransaction", (e: WalletTransaction) => e.wallet, {

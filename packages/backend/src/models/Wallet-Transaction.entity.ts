@@ -16,10 +16,10 @@ export default class WalletTransaction {
   @Property()
   type!: "INCREMENT" | "DECREMENT";
 
-  @Property({ type: DecimalType })
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
   amount!: string;
 
-  @Property({ type: DecimalType })
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
   walletAmount!: string;
 
   @Property()
