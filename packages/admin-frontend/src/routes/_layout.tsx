@@ -64,6 +64,15 @@ function RouteComponent() {
                         ایجاد تراکنش جدید
                       </Link>
                     </NavDropdown.ItemText>
+
+                    <NavDropdown.ItemText>
+                      <Link
+                        className="nav-link active"
+                        to="/transaction/history"
+                      >
+                        گزارش حساب کاربری
+                      </Link>
+                    </NavDropdown.ItemText>
                   </NavDropdown>
 
                   <Nav.Item>

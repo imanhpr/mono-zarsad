@@ -28,6 +28,18 @@ export class WalletTransactionRepo {
 
     this.#em.persist(walletTransaction);
   }
+
+  async findWalletTransactionByUserId(userId: number) {
+    const [transactions, count] = await this.#em.findAndCount(
+      WalletTransaction,
+      {
+        wallet: { user: { id: userId } },
+      },
+      { populate: ["wallet", "currencyType"] }
+    );
+
+    return Object.freeze({ count, transactions });
+  }
 }
 
 export default fp(

@@ -2,7 +2,7 @@ import { Button, Container, Table } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { updateUserSliceActions } from "../store/update-user.slice";
 import { useNavigate } from "@tanstack/react-router";
-import { BsFillPenFill } from "react-icons/bs";
+import { BsFillPenFill, BsFileTextFill } from "react-icons/bs";
 
 export default function UserTable({
   users,
@@ -53,6 +53,20 @@ export default function UserTable({
                       variant="secondary"
                     >
                       ویرایش <BsFillPenFill />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        dispatch(
+                          updateUserSliceActions.updateUserRequest(user)
+                        );
+                        navigate({
+                          to: `/transaction/history/${user.id}`,
+                        });
+                      }}
+                      variant="warning"
+                    >
+                      گزارش حساب
+                      <BsFileTextFill />
                     </Button>
                   </td>
                 </tr>

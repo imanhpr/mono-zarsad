@@ -24,4 +24,8 @@ export default class TransactionAPI {
     });
     return response.data;
   }
+  async getWalletTransactionsByUserId(userid: number) {
+    const response = await this.#axios.get(`admin/transaction/${userid}`);
+    return response.data;
+  }
 }

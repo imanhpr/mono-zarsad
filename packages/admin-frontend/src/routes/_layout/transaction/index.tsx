@@ -13,6 +13,7 @@ import { debounce, isNil } from "es-toolkit";
 import Select from "react-select";
 import { numberToWords } from "@persian-tools/persian-tools";
 import { isNumericString } from "../../../helper";
+import UserWalletTable from "../../../components/UserWalletTable";
 
 export const Route = createFileRoute("/_layout/transaction/")({
   component: RouteComponent,
@@ -162,26 +163,7 @@ function RouteComponent() {
                     </div>
                   </Col>
                   <Col>
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>شناسه ولت</th>
-                          <th>ولت</th>
-                          <th>مقدار</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {user.wallets.map((wallet) => {
-                          return (
-                            <tr key={wallet.id}>
-                              <td>{wallet.id}</td>
-                              <td>{wallet.currencyType.name_farsi}</td>
-                              <td>{wallet.amount}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
+                    <UserWalletTable user={user} />
                   </Col>
                 </Row>
                 <hr />

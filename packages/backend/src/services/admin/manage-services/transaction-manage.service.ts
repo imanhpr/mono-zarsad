@@ -3,9 +3,9 @@ import { IsolationLevel, Transactional, wrap } from "@mikro-orm/core";
 import { WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
 import { WalletRepo } from "../../../repository/Wallet.repo.ts";
 import { Decimal } from "decimal.js";
-import { EntityManager } from "@mikro-orm/postgresql";
-import type Wallet from "../../../models/Wallet.entity.ts";
+
 import { type ProfileRepo } from "../../../repository/Profile.repo.ts";
+import { mapDateToJalali } from "../../../helpers/index.ts";
 
 export class TransactionManageService {
   #walletTransactionRepo: WalletTransactionRepo;
@@ -64,6 +64,13 @@ export class TransactionManageService {
     } as const);
 
     return result;
+  }
+
+  async userTransactionHistory(userId: number) {
+    const result =
+      await this.#walletTransactionRepo.findWalletTransactionByUserId(userId);
+    const mapResult = mapDateToJalali(result.transactions);
+    return Object.freeze({ count: result.count, transactions: mapResult });
   }
 
   async #checkUserDebtPrem(userId: number, amount: Decimal) {

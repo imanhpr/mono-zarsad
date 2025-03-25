@@ -16,7 +16,6 @@ export const Route = createRootRouteWithContext<{
 function RouteComponent() {
   const dispatch = useDispatch();
   const authAPI = Route.useRouteContext({ select: (t) => t.authAPI });
-  const navigate = Route.useNavigate();
   useEffect(() => {
     authAPI
       .refreshToken()
@@ -26,8 +25,7 @@ function RouteComponent() {
       })
       .then((me) => {
         dispatch(userAuthActions.setUser(me));
-      })
-      .then(() => navigate({ to: "/" }));
+      });
   }, []);
   return (
     <>
