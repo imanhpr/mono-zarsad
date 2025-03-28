@@ -11,8 +11,9 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
-import { Route as IndexImport } from './routes/index'
+import { Route as LayoutImport } from './routes/_layout'
+import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as LayoutAboutImport } from './routes/_layout/about'
 import { Route as AuthRegisterIndexImport } from './routes/auth/register.index'
 import { Route as AuthLogoutIndexImport } from './routes/auth/logout.index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
@@ -20,16 +21,21 @@ import { Route as AuthMethodVerifyImport } from './routes/auth/$method.verify'
 
 // Create/Update Routes
 
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
+const LayoutRoute = LayoutImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
+const LayoutIndexRoute = LayoutIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAboutRoute = LayoutAboutImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 const AuthRegisterIndexRoute = AuthRegisterIndexImport.update({
@@ -60,19 +66,26 @@ const AuthMethodVerifyRoute = AuthMethodVerifyImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
+    '/_layout/about': {
+      id: '/_layout/about'
       path: '/about'
       fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof LayoutAboutImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/': {
+      id: '/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
     }
     '/auth/$method/verify': {
       id: '/auth/$method/verify'
@@ -107,9 +120,23 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface LayoutRouteChildren {
+  LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutAboutRoute: LayoutAboutRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '': typeof LayoutRouteWithChildren
+  '/about': typeof LayoutAboutRoute
+  '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/logout': typeof AuthLogoutIndexRoute
@@ -117,8 +144,8 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/about': typeof LayoutAboutRoute
+  '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/logout': typeof AuthLogoutIndexRoute
@@ -127,8 +154,9 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/_layout': typeof LayoutRouteWithChildren
+  '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/logout/': typeof AuthLogoutIndexRoute
@@ -138,24 +166,26 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
+    | ''
     | '/about'
+    | '/'
     | '/auth/$method/verify'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/about'
+    | '/'
     | '/auth/$method/verify'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
   id:
     | '__root__'
-    | '/'
-    | '/about'
+    | '/_layout'
+    | '/_layout/about'
+    | '/_layout/'
     | '/auth/$method/verify'
     | '/auth/login/'
     | '/auth/logout/'
@@ -164,8 +194,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   AuthMethodVerifyRoute: typeof AuthMethodVerifyRoute
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
   AuthLogoutIndexRoute: typeof AuthLogoutIndexRoute
@@ -173,8 +202,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   AuthMethodVerifyRoute: AuthMethodVerifyRoute,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
   AuthLogoutIndexRoute: AuthLogoutIndexRoute,
@@ -191,19 +219,27 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
-        "/about",
+        "/_layout",
         "/auth/$method/verify",
         "/auth/login/",
         "/auth/logout/",
         "/auth/register/"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/_layout": {
+      "filePath": "_layout.tsx",
+      "children": [
+        "/_layout/about",
+        "/_layout/"
+      ]
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/_layout/about": {
+      "filePath": "_layout/about.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/": {
+      "filePath": "_layout/index.tsx",
+      "parent": "/_layout"
     },
     "/auth/$method/verify": {
       "filePath": "auth/$method.verify.tsx"

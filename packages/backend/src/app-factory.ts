@@ -46,7 +46,7 @@ export default function appFactory() {
     .register(fastifyCookie, { secret: "verySecretKey" })
     .register(fastifyAuth)
     .register(fastifyCors, {
-      origin: "http://localhost:5173",
+      origin: ["http://localhost:5173", "http://localhost:5174"],
       credentials: true,
     })
     .register(userGuardHook)

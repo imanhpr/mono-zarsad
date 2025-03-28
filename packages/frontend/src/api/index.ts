@@ -60,4 +60,9 @@ export default class ZarAPI {
     const response = await this.#axios.post("/auth/register", payload);
     return response;
   }
+
+  async userInfo() {
+    const response = await this.#axios.get("/user/info");
+    return response.data;
+  }
 }

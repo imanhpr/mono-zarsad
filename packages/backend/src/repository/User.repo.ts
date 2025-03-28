@@ -88,9 +88,13 @@ export class UserRepo {
     if (nationalCode) qb.andWhere({ nationalCode });
 
     const [users, count] = await qb.getResultAndCount();
-    const kb = qb.getKnexQuery();
-    console.log(kb.toQuery());
     return { users, count };
+  }
+
+  getUserInfoForPanelById(id: number) {
+    return this.#em.findOneOrFail(User, id, {
+      populate: ["wallets", "wallets.currencyType"],
+    });
   }
 }
 
