@@ -1,4 +1,4 @@
-import { createFileRoute, useStableCallback } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Chart as ChartJS,
   Tooltip,
@@ -14,6 +14,8 @@ import clsx from "clsx";
 import { Fragment, useReducer, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Decimal } from "decimal.js";
+import num2persian from "num2persian";
+import { LuArrowDownUp } from "react-icons/lu";
 
 ChartJS.register(
   CategoryScale,
@@ -105,6 +107,7 @@ function Index() {
         label: "طلا",
         data: dataSet,
         fill: true,
+
         backgroundColor: "rgba(253, 224, 71 , 0.4)",
         borderColor: "rgb(253, 224, 71)",
         tension: 0.3,
@@ -180,7 +183,7 @@ function Index() {
               قیمت ها در نمودار به تومان میباشند
             </p>
           </div>
-          <div className="flex flex-col justify-start items-center gap-y-12 w-1/2">
+          <div className="flex flex-col justify-start items-center w-1/2">
             <OrderForm goldPrice={lastPrice.y} />
           </div>
         </div>
@@ -213,9 +216,10 @@ function OrderForm({ goldPrice }: { goldPrice: string }) {
 
   const inputCls =
     "text-2xl bg-gray-100 focus:bg-white p-2 border border-gray-400 rounded-lg focus:outline-none w-full text-center fa-numeric";
+
   return (
     <Fragment>
-      <div className="flex md:flex-row flex-col justify-around md:gap-x-4 w-3/4">
+      <div className="flex md:flex-row flex-col justify-around mb-10 w-3/4">
         <button onClick={() => setOrderType("buy")} className={sellClassNames}>
           خرید
         </button>
@@ -227,26 +231,86 @@ function OrderForm({ goldPrice }: { goldPrice: string }) {
         <label className="text-xl">تومانء</label>
         <input
           dir="ltr"
-          onFocus={() => setPair("toman")}
+          onChange={(e) => {
+            if (e.target.value === "")
+              return setPayload({
+                goldAmount: "0",
+                tomanAmount: "0",
+              });
+            const calcGoldAmount = new Decimal(e.target.value)
+              .div(new Decimal(goldPrice).div(GOLD_CONST))
+              .toFixed(3, 3)
+              .toString();
+            setPayload({
+              goldAmount: calcGoldAmount,
+              tomanAmount: e.target.value,
+            });
+          }}
+          onFocus={() => {
+            setPair("toman");
+          }}
+          value={payload.tomanAmount !== "0" ? payload.tomanAmount : ""}
           type="text"
           name="toman"
           className={inputCls}
         />
+
+        {payload.tomanAmount !== "0" && (
+          <span>{num2persian(payload.tomanAmount)} تومانء</span>
+        )}
+      </div>
+      <div className="bg-amber-400 my-2 p-2 rounded-full">
+        <LuArrowDownUp size={32} />
       </div>
       <div className="w-3/4">
         <label className="text-xl">طلا</label>
         <input
           dir="ltr"
+          onChange={(e) => {
+            if (e.target.value === "")
+              return setPayload({
+                goldAmount: "0",
+                tomanAmount: "0",
+              });
+            const calcTomanAmount = new Decimal(e.target.value)
+              .mul(new Decimal(goldPrice).div(GOLD_CONST))
+              .ceil()
+              .toString();
+            setPayload({
+              goldAmount: e.target.value,
+              tomanAmount: calcTomanAmount,
+            });
+          }}
           onFocus={() => setPair("gold")}
+          value={payload.goldAmount !== "0" ? payload.goldAmount : ""}
           type="text"
           name="gold"
           className={inputCls}
         />
+        {!new Decimal(payload.goldAmount).eq(0) && (
+          <span>{goldAmountText(payload.goldAmount)}</span>
+        )}
       </div>
     </Fragment>
   );
 }
 
+function goldAmountText(amount: string) {
+  const d = new Decimal(amount).toFixed(3, 3).toString();
+  const [gram, soot] = d.split(".");
+  const sentence: string[] = [];
+
+  if (gram && gram !== "0") {
+    const text = `${num2persian(gram)} گرم`;
+    sentence.push(text);
+  }
+
+  if (soot) {
+    const sootText = num2persian(soot) + " " + "سوت";
+    sentence.push(sootText);
+  }
+  return sentence.join(" و ");
+}
 function GradientCard(props: {
   title: string;
   amount: string;
