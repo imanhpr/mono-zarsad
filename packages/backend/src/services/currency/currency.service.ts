@@ -37,8 +37,10 @@ export class CurrencyService {
     return this.#mapDateToJalali(result);
   }
 
-  async findCurrencyPriceByCurrencyTypeId(id: number) {
+  async findCurrencyPriceByCurrencyTypeId(id: number, isJalali = true) {
+    console.log(isJalali);
     const result = await this.#priceRepo.findManyByCurrencyId([id]);
+    if (!isJalali) return result;
     return this.#mapDateToJalali(result);
   }
 

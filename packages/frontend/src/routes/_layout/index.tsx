@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useContext } from "react";
+import { createFileRoute, useStableCallback } from "@tanstack/react-router";
 import {
   Chart as ChartJS,
   Tooltip,
@@ -11,7 +10,10 @@ import {
   Title,
   Filler,
 } from "chart.js";
+import clsx from "clsx";
+import { Fragment, useReducer, useState } from "react";
 import { Line } from "react-chartjs-2";
+import { Decimal } from "decimal.js";
 
 ChartJS.register(
   CategoryScale,
@@ -25,17 +27,59 @@ ChartJS.register(
 );
 ChartJS.defaults.font = { family: "IRANYekanX", size: 18, weight: "normal" };
 
+const numberIntl = new Intl.NumberFormat("fa-IR");
+const timeIntl = new Intl.DateTimeFormat("fa-IR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+});
+const dateIntlForChart = new Intl.DateTimeFormat("fa-IR", {
+  day: "numeric",
+  month: "numeric",
+  year: "2-digit",
+});
+
+const dateIntlForToolTipTitle = new Intl.DateTimeFormat("fa-IR", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
+const GOLD_CONST = "4.331802";
 export const Route = createFileRoute("/_layout/")({
   component: Index,
   loader(ctx) {
     const api = ctx.context.zarAPI;
-    return api.userInfo();
+    // TODO: Get Gold By Name or get list of ids first
+
+    return Promise.all([
+      api.userInfo(),
+      api.getCurrencyPriceByCurrencyTypeId(1),
+    ]);
   },
 });
 
+function walletReducer<
+  T extends { tomanWalletAmount: string; goldWalletAmount: string },
+>(state: T, action: { action: string; amount: string }): T {
+  const stateClone = structuredClone(state);
+
+  switch (action.action) {
+    case "SET_TOMAN":
+      stateClone.tomanWalletAmount = action.amount;
+      return stateClone;
+
+    case "SET_GOLD":
+      stateClone.goldWalletAmount = action.amount;
+      return stateClone;
+  }
+  return state;
+}
+
 function Index() {
-  const intl = new Intl.NumberFormat("fa-IR");
-  const user = Route.useLoaderData();
+  const [user, priceList] = Route.useLoaderData();
   const goldWallet = user.wallets.find(
     (wallet) => wallet.currencyType.name === "GOLD_18"
   );
@@ -43,15 +87,23 @@ function Index() {
     (wallet) => wallet.currencyType.name === "TOMAN"
   );
 
+  const [walletState, walletDispatch] = useReducer(walletReducer, {
+    tomanWalletAmount: tomanWallet.amount as string,
+    goldWalletAmount: goldWallet.amount as string,
+  });
+
+  const dataSet: any[] = priceList.slice(0, 8).map((item) => {
+    const date = new Date(item.createdAt);
+    const dateString = dateIntlForChart.format(date);
+    return { y: item.price, x: dateString, createdAt: date };
+  });
+  const lastPrice = dataSet[dataSet.length - 1];
+
   const data = {
-    labels: ["01/01", "01/02", "01/03", "01/04", "601/05", "01/06"],
     datasets: [
       {
         label: "طلا",
-        data: [
-          8_114_200, 7_994_900, 7_938_800, 8_109_400, 7_697_800, 7_379_400,
-          6_871_300,
-        ].reverse(),
+        data: dataSet,
         fill: true,
         backgroundColor: "rgba(253, 224, 71 , 0.4)",
         borderColor: "rgb(253, 224, 71)",
@@ -59,36 +111,47 @@ function Index() {
       },
     ],
   };
+
   return (
     <div className="flex flex-col">
       <div>
         <h2 className="font-bold text-3xl">خوش آمدی {user?.firstName} جان</h2>
       </div>
       {/* Card */}
-      <div className="flex md:flex-row flex-col gap-x-0 gap-y-12 md:gap-x-12 md:gap-y-0 mt-12">
-        <div className="bg-gradient-to-tr from-lime-500 to-green-600 shadow-2xl p-4 rounded text-white">
-          <div className="flex flex-col items-start gap-4 min-w-64 min-h-32">
-            <p className="font-bold text-xl">کیف پول ریال</p>
-            <p className="font-black text-4xl">
-              <span dir="ltr">{intl.format(tomanWallet.amount)}</span>{" "}
-              <sub className="font-normal text-lg">تومان</sub>
-            </p>
+      <div className="flex md:flex-row flex-col w-full">
+        <div className="w-1/2">
+          <div className="flex md:flex-row flex-col gap-x-0 gap-y-12 md:gap-x-12 md:gap-y-0 mt-12">
+            <GradientCard
+              title="کیف پول ﷼"
+              amount={tomanWallet.amount}
+              sub="تومانء"
+              gradient="bg-gradient-to-tr from-lime-500 to-green-600"
+            />
+
+            <GradientCard
+              title="کیف پول طلا"
+              amount={goldWallet.amount}
+              sub="گرم"
+              gradient="bg-gradient-to-tr from-yellow-400 to-amber-500"
+            />
           </div>
         </div>
-
-        <div className="bg-gradient-to-tr from-yellow-400 to-amber-500 shadow-xl p-4 rounded text-white">
-          <div className="flex flex-col items-start gap-4 min-w-64 min-h-32">
-            <p className="font-bold text-xl">کیف پول طلا</p>
-            <p className="font-black text-4xl">
-              <span dir="ltr">{intl.format(goldWallet.amount)}</span>{" "}
-              <sub className="font-normal text-lg">گرم</sub>
-            </p>
+        <div className="w-1/2">
+          <div className="flex md:flex-row flex-col md:justify-end gap-x-0 gap-y-12 md:gap-x-12 md:gap-y-0 mt-12">
+            <GradientCard
+              title="آخرین قیمت"
+              amount={lastPrice.y}
+              sub="تومانء"
+              gradient="bg-gradient-to-tr from-slate-500 to-slate-800"
+              footer={`آخرین بروزرسانی : ${timeIntl.format(lastPrice.createdAt)}`}
+            />
           </div>
         </div>
       </div>
+
       <div className="flex flex-col bg-white shadow-lg mt-12 p-4 rounded min-w-full min-h-64">
         <div>
-          <h1 className="font-extrabold text-2xl">خرید و فروش طلا</h1>
+          <h1 className="font-extrabold text-2xl">خرید و فروش سریع</h1>
         </div>
         <div className="flex md:flex-row flex-col md:gap-x-8">
           <div className="flex flex-col w-1/2">
@@ -98,6 +161,18 @@ function Index() {
                 locale: "fa-IR",
                 plugins: {
                   legend: { display: false },
+                  tooltip: {
+                    displayColors: false,
+                    callbacks: {
+                      title: (items) => {
+                        const item = items[0];
+                        return dateIntlForToolTipTitle.format(
+                          item.raw.createdAt
+                        );
+                      },
+                      label: (item) => `${item.formattedValue} تومانء`,
+                    },
+                  },
                 },
               }}
             />
@@ -106,30 +181,93 @@ function Index() {
             </p>
           </div>
           <div className="flex flex-col justify-start items-center gap-y-12 w-1/2">
-            <div className="flex md:flex-row flex-col justify-around md:gap-x-4 w-3/4">
-              <button className="bg-amber-400 py-2 rounded md:w-24 lg:w-64 hover:cursor-pointer">
-                خرید
-              </button>
-              <button className="bg-amber-100 py-2 rounded md:w-24 lg:w-64 hover:cursor-pointer">
-                فروش
-              </button>
-            </div>
-            <div className="w-3/4">
-              <input
-                type="text"
-                name="toman"
-                className="p-2 border border-gray-400 rounded-lg focus:outline-none w-full text-center"
-              />
-            </div>
-            <div className="w-3/4">
-              <input
-                type="text"
-                name="toman"
-                className="p-2 border border-gray-400 rounded-lg focus:outline-none w-full text-center"
-              />
-            </div>
+            <OrderForm goldPrice={lastPrice.y} />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderForm({ goldPrice }: { goldPrice: string }) {
+  const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
+  const [pair, setPair] = useState<"gold" | "toman">("gold");
+  const [payload, setPayload] = useState({ goldAmount: "0", tomanAmount: "0" });
+
+  const sellActiveOrderCls = {
+    "bg-amber-400": orderType === "buy",
+    "bg-amber-100": orderType !== "buy",
+  };
+  const buyActiveOrderCls = {
+    "bg-amber-400": orderType === "sell",
+    "bg-amber-100": orderType !== "sell",
+  };
+  const sellClassNames = clsx(
+    "py-2 rounded md:w-24 lg:w-64 hover:cursor-pointer",
+    sellActiveOrderCls
+  );
+  const buyClassNames = clsx(
+    "py-2 rounded md:w-24 lg:w-64 hover:cursor-pointer",
+    buyActiveOrderCls
+  );
+
+  const inputCls =
+    "text-2xl bg-gray-100 focus:bg-white p-2 border border-gray-400 rounded-lg focus:outline-none w-full text-center fa-numeric";
+  return (
+    <Fragment>
+      <div className="flex md:flex-row flex-col justify-around md:gap-x-4 w-3/4">
+        <button onClick={() => setOrderType("buy")} className={sellClassNames}>
+          خرید
+        </button>
+        <button onClick={() => setOrderType("sell")} className={buyClassNames}>
+          فروش
+        </button>
+      </div>
+      <div className="w-3/4">
+        <label className="text-xl">تومانء</label>
+        <input
+          dir="ltr"
+          onFocus={() => setPair("toman")}
+          type="text"
+          name="toman"
+          className={inputCls}
+        />
+      </div>
+      <div className="w-3/4">
+        <label className="text-xl">طلا</label>
+        <input
+          dir="ltr"
+          onFocus={() => setPair("gold")}
+          type="text"
+          name="gold"
+          className={inputCls}
+        />
+      </div>
+    </Fragment>
+  );
+}
+
+function GradientCard(props: {
+  title: string;
+  amount: string;
+  sub: string;
+  gradient: string;
+  footer?: string;
+}) {
+  const cls = clsx("shadow-2xl p-4 rounded text-white", props.gradient);
+  return (
+    <div className={cls}>
+      <div className="flex flex-col items-start gap-4 min-w-64 min-h-32">
+        <p className="font-bold text-xl">{props.title}</p>
+        <p className="font-black text-4xl">
+          <span dir="ltr">
+            {numberIntl.format(props.amount as unknown as number)}
+          </span>{" "}
+          <sub className="font-normal text-lg">{props.sub}</sub>
+        </p>
+        {props.footer && (
+          <p className="text-gray-200 text-sm">{props.footer}</p>
+        )}
       </div>
     </div>
   );

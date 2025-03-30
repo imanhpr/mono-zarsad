@@ -24,14 +24,14 @@ export default function SideBar() {
 
   const OverlayPortal = createPortal(Overlay, document.body);
   const clsNames = clsx(
+    "bg-slate-800",
     "right-0",
     "md:static",
     "fixed",
     "inset-y-0",
-    "bg-zinc-600",
     "w-1/2",
     "md:w-96",
-    "transition-transform ",
+    "transition-transform",
     "md:translate-x-0",
     { "translate-x-full": showSideBar },
     "md:block",

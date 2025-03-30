@@ -65,4 +65,11 @@ export default class ZarAPI {
     const response = await this.#axios.get("/user/info");
     return response.data;
   }
+
+  async getCurrencyPriceByCurrencyTypeId(id: number) {
+    const response = await this.#axios.get(
+      `/currency?currency=${id}&isJalali=false`
+    );
+    return response.data;
+  }
 }

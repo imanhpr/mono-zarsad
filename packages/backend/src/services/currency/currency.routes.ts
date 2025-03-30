@@ -6,6 +6,7 @@ interface NewCurrencyPriceRequestBody {
 }
 interface GetCurrencyPriceListQuery {
   currency?: string | string[];
+  isJalali?: string | string[];
 }
 export default function currencyRoutesPlugin(
   fastify: FastifyInstance,
@@ -19,10 +20,11 @@ export default function currencyRoutesPlugin(
   fastify.get<{ Querystring: GetCurrencyPriceListQuery }>(
     "/",
     function getCurrencyList(req) {
-      const { currency } = req.query;
-      console.log({ currency });
+      const { currency, isJalali } = req.query;
+      console.log({ isJalali, currency });
       return service.findCurrencyPriceByCurrencyTypeId(
-        parseInt(currency as string)
+        parseInt(currency as string),
+        isJalali === "true" ? true : false
       );
     }
   );
