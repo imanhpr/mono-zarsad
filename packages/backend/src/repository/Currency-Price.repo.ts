@@ -43,6 +43,17 @@ export class CurrencyPriceRepo {
       { populate: ["currency"], orderBy: { id: "DESC" } }
     );
   }
+
+  findLatestCurrencyPriceByCurrencyTypeId(currencyTypeId: number) {
+    return this.#em.findOneOrFail(
+      CurrencyPrice,
+      {
+        currency: { id: currencyTypeId },
+        id: 236,
+      },
+      { populate: ["spread"] }
+    );
+  }
 }
 
 export default fp(

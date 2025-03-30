@@ -129,6 +129,9 @@ function Index() {
               amount={tomanWallet.amount}
               sub="تومانء"
               gradient="bg-gradient-to-tr from-lime-500 to-green-600"
+              footer={
+                tomanWallet.amount < 0 ? "شما بدهکار می باشید" : undefined
+              }
             />
 
             <GradientCard
@@ -282,7 +285,7 @@ function OrderForm({ goldPrice }: { goldPrice: string }) {
             });
           }}
           onFocus={() => setPair("gold")}
-          value={payload.goldAmount !== "0" ? payload.goldAmount : ""}
+          value={payload.goldAmount}
           type="text"
           name="gold"
           className={inputCls}

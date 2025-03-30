@@ -33,6 +33,7 @@ import "./schema/index.ts";
 import type User from "./models/User.entity.ts";
 import type Admin from "./models/Admin.entity.ts";
 import ProfileRepo from "./repository/Profile.repo.ts";
+import transactionModulePlugin from "./services/transaction/index.ts";
 
 export default function appFactory() {
   const app = Fastify({ logger: true })
@@ -69,7 +70,8 @@ export default function appFactory() {
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })
-    .register(currencyPlugin, { prefix: "currency" });
+    .register(currencyPlugin, { prefix: "currency" })
+    .register(transactionModulePlugin);
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));

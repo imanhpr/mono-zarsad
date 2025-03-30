@@ -31,6 +31,16 @@ export class WalletRepo {
     const wallet = this.#em.create(Wallet, { amount: "0", currencyType, user });
     return wallet;
   }
+
+  selectWalletPairForExchange(sourceWalletId: number, targetWalletId: number) {
+    return this.#em.find(
+      Wallet,
+      { id: { $in: [sourceWalletId, targetWalletId] } },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+      }
+    );
+  }
 }
 
 export default fp(
