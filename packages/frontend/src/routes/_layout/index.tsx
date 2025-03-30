@@ -9,6 +9,7 @@ import {
   LineElement,
   Title,
   Filler,
+  ChartData,
 } from "chart.js";
 import clsx from "clsx";
 import { Fragment, useReducer, useState } from "react";
@@ -16,6 +17,7 @@ import { Line } from "react-chartjs-2";
 import { Decimal } from "decimal.js";
 import num2persian from "num2persian";
 import { LuArrowDownUp } from "react-icons/lu";
+import { Point } from "chart.js/auto";
 
 ChartJS.register(
   CategoryScale,
@@ -99,17 +101,22 @@ function Index() {
     const dateString = dateIntlForChart.format(date);
     return { y: item.price, x: dateString, createdAt: date };
   });
-  const lastPrice = dataSet[dataSet.length - 1];
+  const lastPrice = dataSet[0];
 
-  const data = {
+  const data: ChartData<"line", (number | Point | null)[], unknown> = {
     datasets: [
       {
         label: "طلا",
-        data: dataSet,
+        data: dataSet.toReversed(),
         fill: true,
 
         backgroundColor: "rgba(253, 224, 71 , 0.4)",
         borderColor: "rgb(253, 224, 71)",
+        pointStyle: "circle",
+        pointBorderColor: "black",
+        pointBackgroundColor: "rgb(253, 224, 71)",
+        pointHitRadius: 256,
+        pointRadius: 8,
         tension: 0.3,
       },
     ],

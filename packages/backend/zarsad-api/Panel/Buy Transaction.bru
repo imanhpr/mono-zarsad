@@ -6,6 +6,17 @@ meta {
 
 post {
   url: http://localhost:3000/transaction
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "wallets": {
+      "sourceId" : 2,
+      "targetId" : 1
+    },
+    "tomanAmount" : "800000",
+    "goldAmount" : "0.202"
+  }
 }

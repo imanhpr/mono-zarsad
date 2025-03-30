@@ -40,7 +40,7 @@ export class CurrencyPriceRepo {
       {
         currency: { id: { $in: currencyId } },
       },
-      { populate: ["currency"], orderBy: { id: "DESC" } }
+      { populate: ["currency"], orderBy: { createdAt: "DESC" } }
     );
   }
 
@@ -49,9 +49,8 @@ export class CurrencyPriceRepo {
       CurrencyPrice,
       {
         currency: { id: currencyTypeId },
-        id: 236,
       },
-      { populate: ["spread"] }
+      { populate: ["spread"], orderBy: { createdAt: "DESC" } }
     );
   }
 }

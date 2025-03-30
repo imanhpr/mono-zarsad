@@ -70,6 +70,7 @@ export default class ZarAPI {
     const response = await this.#axios.get(
       `/currency?currency=${id}&isJalali=false`
     );
+    console.log("response.data", response.data);
     return response.data;
   }
 }

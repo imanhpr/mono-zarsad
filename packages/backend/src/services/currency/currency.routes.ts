@@ -21,7 +21,6 @@ export default function currencyRoutesPlugin(
     "/",
     function getCurrencyList(req) {
       const { currency, isJalali } = req.query;
-      console.log({ isJalali, currency });
       return service.findCurrencyPriceByCurrencyTypeId(
         parseInt(currency as string),
         isJalali === "true" ? true : false
