@@ -12,11 +12,11 @@ import {
   ChartData,
 } from "chart.js";
 import clsx from "clsx";
-import { Fragment, useReducer, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Decimal } from "decimal.js";
 import num2persian from "num2persian";
-import { LuArrowDownUp } from "react-icons/lu";
+import { LuArrowDown } from "react-icons/lu";
 import { Point } from "chart.js/auto";
 
 ChartJS.register(
@@ -65,23 +65,6 @@ export const Route = createFileRoute("/_layout/")({
   },
 });
 
-function walletReducer<
-  T extends { tomanWalletAmount: string; goldWalletAmount: string },
->(state: T, action: { action: string; amount: string }): T {
-  const stateClone = structuredClone(state);
-
-  switch (action.action) {
-    case "SET_TOMAN":
-      stateClone.tomanWalletAmount = action.amount;
-      return stateClone;
-
-    case "SET_GOLD":
-      stateClone.goldWalletAmount = action.amount;
-      return stateClone;
-  }
-  return state;
-}
-
 function Index() {
   const [user, priceList] = Route.useLoaderData();
   const goldWallet = user.wallets.find(
@@ -90,11 +73,6 @@ function Index() {
   const tomanWallet = user.wallets.find(
     (wallet) => wallet.currencyType.name === "TOMAN"
   );
-
-  const [walletState, walletDispatch] = useReducer(walletReducer, {
-    tomanWalletAmount: tomanWallet.amount as string,
-    goldWalletAmount: goldWallet.amount as string,
-  });
 
   const dataSet: any[] = priceList.slice(0, 8).map((item) => {
     const date = new Date(item.createdAt);
@@ -194,7 +172,11 @@ function Index() {
             </p>
           </div>
           <div className="flex flex-col justify-start items-center w-1/2">
-            <OrderForm goldPrice={lastPrice.y} />
+            <OrderForm
+              goldPrice={lastPrice.y}
+              buyFromWallet={tomanWallet}
+              sellToWallet={goldWallet}
+            />
           </div>
         </div>
       </div>
@@ -202,10 +184,31 @@ function Index() {
   );
 }
 
-function OrderForm({ goldPrice }: { goldPrice: string }) {
+function OrderForm({
+  goldPrice,
+  sellToWallet,
+  buyFromWallet,
+}: {
+  goldPrice: string;
+  sellToWallet: any;
+  buyFromWallet: any;
+}) {
+  const zarApi = Route.useRouteContext({ select: (t) => t.zarAPI });
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
-  const [pair, setPair] = useState<"gold" | "toman">("gold");
   const [payload, setPayload] = useState({ goldAmount: "0", tomanAmount: "0" });
+  const walletPayload = walletpayload(orderType, buyFromWallet, sellToWallet);
+
+  const requestPayload = Object.freeze({
+    wallets: walletPayload,
+    orderType,
+    ...payload,
+  });
+
+  const onSumbitHandler = useCallback(
+    async function onSumbitHandler(reqPayload) {
+      await zarApi.buyRequest(reqPayload);
+    }
+  );
 
   const sellActiveOrderCls = {
     "bg-amber-400": orderType === "buy",
@@ -237,70 +240,83 @@ function OrderForm({ goldPrice }: { goldPrice: string }) {
           فروش
         </button>
       </div>
-      <div className="w-3/4">
-        <label className="text-xl">تومانء</label>
-        <input
-          dir="ltr"
-          onChange={(e) => {
-            if (e.target.value === "")
-              return setPayload({
-                goldAmount: "0",
-                tomanAmount: "0",
+      <div
+        className={clsx("flex flex-col items-center w-full", {
+          "flex-col-reverse": orderType === "sell",
+        })}
+      >
+        <div className="w-3/4">
+          <label className="text-xl">تومانء</label>
+          <input
+            dir="ltr"
+            onChange={(e) => {
+              if (e.target.value === "")
+                return setPayload({
+                  goldAmount: "0",
+                  tomanAmount: "0",
+                });
+              const calcGoldAmount = new Decimal(e.target.value)
+                .div(new Decimal(goldPrice).div(GOLD_CONST))
+                .toFixed(3, 3)
+                .toString();
+              console.log(
+                new Decimal(e.target.value)
+                  .div(new Decimal(goldPrice).div(GOLD_CONST))
+                  .toString()
+              );
+              setPayload({
+                goldAmount: calcGoldAmount,
+                tomanAmount: e.target.value,
               });
-            const calcGoldAmount = new Decimal(e.target.value)
-              .div(new Decimal(goldPrice).div(GOLD_CONST))
-              .toFixed(3, 3)
-              .toString();
-            setPayload({
-              goldAmount: calcGoldAmount,
-              tomanAmount: e.target.value,
-            });
-          }}
-          onFocus={() => {
-            setPair("toman");
-          }}
-          value={payload.tomanAmount !== "0" ? payload.tomanAmount : ""}
-          type="text"
-          name="toman"
-          className={inputCls}
-        />
+            }}
+            value={payload.tomanAmount !== "0" ? payload.tomanAmount : ""}
+            type="text"
+            name="toman"
+            className={inputCls}
+          />
 
-        {payload.tomanAmount !== "0" && (
-          <span>{num2persian(payload.tomanAmount)} تومانء</span>
-        )}
-      </div>
-      <div className="bg-amber-400 my-2 p-2 rounded-full">
-        <LuArrowDownUp size={32} />
-      </div>
-      <div className="w-3/4">
-        <label className="text-xl">طلا</label>
-        <input
-          dir="ltr"
-          onChange={(e) => {
-            if (e.target.value === "")
-              return setPayload({
-                goldAmount: "0",
-                tomanAmount: "0",
+          {payload.tomanAmount !== "0" && (
+            <span>{num2persian(payload.tomanAmount)} تومانء</span>
+          )}
+        </div>
+        <div className="bg-amber-400 my-2 p-2 rounded-full">
+          <LuArrowDown size={32} />
+        </div>
+        <div className="w-3/4">
+          <label className="text-xl">طلا</label>
+          <input
+            dir="ltr"
+            onChange={(e) => {
+              if (e.target.value === "")
+                return setPayload({
+                  goldAmount: "0",
+                  tomanAmount: "0",
+                });
+              const calcTomanAmount = new Decimal(e.target.value)
+                .mul(new Decimal(goldPrice).div(GOLD_CONST))
+                .ceil()
+                .toString();
+              setPayload({
+                goldAmount: e.target.value,
+                tomanAmount: calcTomanAmount,
               });
-            const calcTomanAmount = new Decimal(e.target.value)
-              .mul(new Decimal(goldPrice).div(GOLD_CONST))
-              .ceil()
-              .toString();
-            setPayload({
-              goldAmount: e.target.value,
-              tomanAmount: calcTomanAmount,
-            });
-          }}
-          onFocus={() => setPair("gold")}
-          value={payload.goldAmount}
-          type="text"
-          name="gold"
-          className={inputCls}
-        />
-        {!new Decimal(payload.goldAmount).eq(0) && (
-          <span>{goldAmountText(payload.goldAmount)}</span>
-        )}
+            }}
+            value={payload.goldAmount}
+            type="text"
+            name="gold"
+            className={inputCls}
+          />
+          {!new Decimal(payload.goldAmount).eq(0) && (
+            <span>{goldAmountText(payload.goldAmount)}</span>
+          )}
+        </div>
       </div>
+      <button
+        onClick={() => onSumbitHandler(requestPayload)}
+        className="bg-blue-100 mt-8 py-1 rounded w-48 hover:cursor-pointer"
+      >
+        ثبت
+      </button>
     </Fragment>
   );
 }
@@ -310,12 +326,12 @@ function goldAmountText(amount: string) {
   const [gram, soot] = d.split(".");
   const sentence: string[] = [];
 
-  if (gram && gram !== "0") {
+  if (gram && Number.parseFloat(gram) !== 0) {
     const text = `${num2persian(gram)} گرم`;
     sentence.push(text);
   }
 
-  if (soot) {
+  if (soot && Number.parseFloat(soot) !== 0) {
     const sootText = num2persian(soot) + " " + "سوت";
     sentence.push(sootText);
   }
@@ -345,4 +361,18 @@ function GradientCard(props: {
       </div>
     </div>
   );
+}
+
+function walletpayload(
+  state: "buy" | "sell",
+  buyWallet: any,
+  sellWallet: any
+): Readonly<{ sourceId: number; targetId: number }> {
+  if (state === "buy")
+    return Object.freeze({
+      sourceId: buyWallet.id,
+      targetId: sellWallet.id,
+    });
+
+  return Object.freeze({ sourceId: sellWallet.id, targetId: buyWallet.id });
 }

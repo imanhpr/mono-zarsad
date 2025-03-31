@@ -12,7 +12,6 @@ export class WalletRepo {
     this.#em = entityManager;
   }
   updateWalletAmount(wallet: Wallet, amount: Decimal) {
-    console.log("updateWalletAmount : ", this.#em._id);
     wallet.amount = amount.toString();
     this.#em.persist(wallet);
   }

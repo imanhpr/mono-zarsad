@@ -73,4 +73,9 @@ export default class ZarAPI {
     console.log("response.data", response.data);
     return response.data;
   }
+
+  async buyRequest(payload: any) {
+    const response = await this.#axios.post("/transaction", payload);
+    return response.data;
+  }
 }
