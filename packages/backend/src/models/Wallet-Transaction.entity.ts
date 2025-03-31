@@ -1,12 +1,15 @@
 import {
+  Collection,
   DecimalType,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
 import type CurrencyType from "./Currency-Type.entity.ts";
 import type Wallet from "./Wallet.entity.ts";
+import type WalletExchangePairTransaction from "./WalletExchangePairTransaction.entity.ts";
 
 @Entity()
 export default class WalletTransaction {
@@ -33,4 +36,7 @@ export default class WalletTransaction {
 
   @ManyToOne("Wallet")
   wallet!: Wallet;
+
+  @ManyToOne("WalletExchangePairTransaction", { nullable: true })
+  walletExchangePair?: WalletExchangePairTransaction;
 }

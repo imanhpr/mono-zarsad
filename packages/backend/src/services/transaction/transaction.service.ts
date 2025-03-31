@@ -1,9 +1,11 @@
 import fp from "fastify-plugin";
 import { Transactional } from "@mikro-orm/core";
-import { WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
-import { WalletRepo } from "../../repository/Wallet.repo.ts";
 import { Decimal } from "decimal.js";
-import { CurrencyPriceRepo } from "../../repository/Currency-Price.repo.ts";
+
+import { type WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
+import { type WalletRepo } from "../../repository/Wallet.repo.ts";
+import { type CurrencyPriceRepo } from "../../repository/Currency-Price.repo.ts";
+import { type WalletExchangePairTransactionRepo } from "../../repository/WalletExchangePairTransaction.repo.ts";
 import type Wallet from "../../models/Wallet.entity.ts";
 
 const GOLD_CONST = new Decimal("4.331802");
@@ -12,15 +14,18 @@ export class TransactionService {
   #transactionRepo: WalletTransactionRepo;
   #walletRepo: WalletRepo;
   #currencyPriceRepo: CurrencyPriceRepo;
+  #walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo;
 
   constructor(
     transactionRepo: WalletTransactionRepo,
     walletRepo: WalletRepo,
-    currencyPriceRepo: CurrencyPriceRepo
+    currencyPriceRepo: CurrencyPriceRepo,
+    walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo
   ) {
     this.#transactionRepo = transactionRepo;
     this.#walletRepo = walletRepo;
     this.#currencyPriceRepo = currencyPriceRepo;
+    this.#walletExchangePairTransactionRepo = walletExchangePairTransactionRepo;
   }
 
   async #getAndLockPairOfWallets(rawWallets: {
@@ -155,7 +160,7 @@ export class TransactionService {
     );
 
     // TODO: Wallet Exchange Audit and Wallet Exchange table
-    this.#transactionRepo.create({
+    const incrementTransaction = this.#transactionRepo.create({
       type: "INCREMENT",
       source: "EXCHANGE",
       amount:
@@ -164,7 +169,7 @@ export class TransactionService {
       walletAmount: newTargetWalletAmount,
     });
 
-    this.#transactionRepo.create({
+    const decrementTransaction = this.#transactionRepo.create({
       type: "DECREMENT",
       source: "EXCHANGE",
       amount:
@@ -175,7 +180,17 @@ export class TransactionService {
       walletAmount: newSourceWalletAmount,
     });
 
+    const exchangePairTransaction =
+      this.#walletExchangePairTransactionRepo.create(
+        incrementTransaction,
+        decrementTransaction
+      );
+
+    decrementTransaction.walletExchangePair = exchangePairTransaction;
+    incrementTransaction.walletExchangePair = exchangePairTransaction;
+
     return Object.freeze({
+      id: exchangePairTransaction.id,
       wallets: {
         sourceWallet: {
           id: sourceWallet.id,
@@ -183,7 +198,6 @@ export class TransactionService {
         },
         targetWallet: {
           id: targetWallet.id,
-
           amount: targetWallet.amount,
         },
       },
@@ -216,7 +230,8 @@ export default fp(function transactionServicePlugin(fastify, _, done) {
   const transactionService = new TransactionService(
     fastify.walletTransactionRepo,
     fastify.walletRepo,
-    fastify.currencyPriceRepo
+    fastify.currencyPriceRepo,
+    fastify.walletExchangePairTransactionRepo
   );
 
   fastify.decorate("transactionService", transactionService);

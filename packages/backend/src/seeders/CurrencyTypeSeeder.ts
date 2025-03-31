@@ -9,7 +9,11 @@ export class CurrencyTypeSeeder extends Seeder {
       name: CurrencyTypeEnum.GOLD_18,
       name_farsi: "طلا",
     });
+    const toman = em.create(CurrencyType, {
+      name: CurrencyTypeEnum.TOMAN,
+      name_farsi: "تومان",
+    });
 
-    em.persist(gold);
+    em.persist([toman, gold]);
   }
 }

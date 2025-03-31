@@ -34,9 +34,14 @@ import type User from "./models/User.entity.ts";
 import type Admin from "./models/Admin.entity.ts";
 import ProfileRepo from "./repository/Profile.repo.ts";
 import transactionModulePlugin from "./services/transaction/index.ts";
+import WalletExchangePairTransactionRepo from "./repository/WalletExchangePairTransaction.repo.ts";
 
 export default function appFactory() {
-  const app = Fastify({ logger: true })
+  const app = Fastify({
+    logger: {
+      transport: { target: "pino-pretty" },
+    },
+  })
     .setValidatorCompiler(TypeBoxValidatorCompiler)
     .withTypeProvider<TypeBoxTypeProvider>()
 
@@ -66,6 +71,7 @@ export default function appFactory() {
     .register(WalletTransactionRepo)
     .register(WalletRepo)
     .register(ProfileRepo)
+    .register(WalletExchangePairTransactionRepo)
     // Business Logics
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })

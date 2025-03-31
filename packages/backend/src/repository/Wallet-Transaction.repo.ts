@@ -27,6 +27,7 @@ export class WalletTransactionRepo {
     });
 
     this.#em.persist(walletTransaction);
+    return walletTransaction;
   }
 
   async findWalletTransactionByUserId(userId: number) {
