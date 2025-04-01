@@ -145,7 +145,7 @@ export class TransactionService {
       this.#calcNewWalletAmountsBaseOfOrderType(
         payload.orderType,
         finalCalcTomanAmount,
-        finalCalcGoldGram,
+        finalCalcGoldGram.toDecimalPlaces(3, 3),
         sourceWalletAmount,
         targetWalletAmount
       );
