@@ -89,6 +89,12 @@ export class WalletExchangeService {
     return Object.freeze({ newSourceWalletAmount, newTargetWalletAmount });
   }
 
+  find5ExchangeTransactionByUserId(userId: number) {
+    return this.#walletExchangePairTransactionRepo.find5LatestUserExchangeTransactionByUserId(
+      userId
+    );
+  }
+
   @Transactional()
   async createNewWalletPairCurrencyExchange(payload: {
     orderType: "sell" | "buy";

@@ -19,6 +19,12 @@ export class TransactionService {
       payload
     );
   }
+
+  async reportLast5Exchange(userId: number) {
+    return this.#shardWalletExchangeService.find5ExchangeTransactionByUserId(
+      userId
+    );
+  }
 }
 
 export default fp(function transactionServicePlugin(fastify, _, done) {

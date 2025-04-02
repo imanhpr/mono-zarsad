@@ -62,6 +62,21 @@ export class WalletExchangePairTransactionRepo {
       lockMode: LockMode.PESSIMISTIC_WRITE,
     });
   }
+
+  find5LatestUserExchangeTransactionByUserId(userId: number) {
+    return this.#em.find(
+      WalletExchangePairTransaction,
+      {
+        fromWallet: { user: userId },
+        toWallet: { user: userId },
+      },
+      {
+        limit: 5,
+        orderBy: { createdAt: "DESC" },
+        populate: ["fromCurrency", "toCurrency"],
+      }
+    );
+  }
 }
 
 export default fp(function walletExchangePairTransactionRepo(fastify, _, done) {

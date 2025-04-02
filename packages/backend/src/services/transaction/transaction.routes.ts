@@ -12,5 +12,13 @@ export default function transactionModuleRoutes(
     const transactionResult = await service.createNewExchange(req.body as any);
     return transactionResult;
   });
+
+  fastify.get(
+    "/report/latest-exchange",
+    { preHandler: fastify.jwtBearerAuth },
+    function latestExchangeUserReport(req) {
+      return service.reportLast5Exchange(req.user.id);
+    }
+  );
   done();
 }

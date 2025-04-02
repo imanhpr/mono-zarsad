@@ -78,4 +78,11 @@ export default class ZarAPI {
     const response = await this.#axios.post("/transaction", payload);
     return response.data;
   }
+
+  async get5LatestExchange() {
+    const response = await this.#axios.get(
+      "/transaction/report/latest-exchange"
+    );
+    return response.data;
+  }
 }

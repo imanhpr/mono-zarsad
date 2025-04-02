@@ -18,7 +18,7 @@ export default function SideBar() {
   const Overlay = (
     <div
       onClick={closeHandler}
-      className={`md:hidden absolute inset-0 bg-black opacity-60 ${showSideBar ? "hidden" : "block"} z-10`}
+      className={`md:hidden absolute inset-0 bg-black opacity-60 fixed ${showSideBar ? "hidden" : "block"} z-10`}
     ></div>
   );
 
