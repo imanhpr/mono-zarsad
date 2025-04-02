@@ -35,6 +35,7 @@ import type Admin from "./models/Admin.entity.ts";
 import ProfileRepo from "./repository/Profile.repo.ts";
 import transactionModulePlugin from "./services/transaction/index.ts";
 import WalletExchangePairTransactionRepo from "./repository/WalletExchangePairTransaction.repo.ts";
+import sharedServicePlugin from "./services/shared/index.ts";
 
 export default function appFactory() {
   const app = Fastify({
@@ -73,6 +74,7 @@ export default function appFactory() {
     .register(ProfileRepo)
     .register(WalletExchangePairTransactionRepo)
     // Business Logics
+    .register(sharedServicePlugin)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })

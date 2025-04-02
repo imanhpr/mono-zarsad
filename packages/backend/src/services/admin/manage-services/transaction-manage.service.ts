@@ -6,20 +6,24 @@ import { Decimal } from "decimal.js";
 
 import { type ProfileRepo } from "../../../repository/Profile.repo.ts";
 import { mapDateToJalali } from "../../../helpers/index.ts";
+import { WalletExchangeService } from "../../shared/WalletExchange.service.ts";
 
 export class TransactionManageService {
   #walletTransactionRepo: WalletTransactionRepo;
   #walletRepo: WalletRepo;
   #profileRepo: ProfileRepo;
+  #shardWalletExchangeService: WalletExchangeService;
 
   constructor(
     walletTransactionRepo: WalletTransactionRepo,
     walletRepo: WalletRepo,
-    profileRepo: ProfileRepo
+    profileRepo: ProfileRepo,
+    sharedWalletExchangeService: WalletExchangeService
   ) {
     this.#walletTransactionRepo = walletTransactionRepo;
     this.#walletRepo = walletRepo;
     this.#profileRepo = profileRepo;
+    this.#shardWalletExchangeService = sharedWalletExchangeService;
   }
 
   @Transactional({ isolationLevel: IsolationLevel.SERIALIZABLE })
@@ -66,6 +70,10 @@ export class TransactionManageService {
     return result;
   }
 
+  finalizeWalletExchange(exchangeId: string) {
+    return this.#shardWalletExchangeService.finalizeWalletExchange(exchangeId);
+  }
+
   async userTransactionHistory(userId: number) {
     const result =
       await this.#walletTransactionRepo.findWalletTransactionByUserId(userId);
@@ -85,7 +93,8 @@ export default fp(function transactionManageServicePlugin(fastify, _, done) {
   const transactionManageService = new TransactionManageService(
     fastify.walletTransactionRepo,
     fastify.walletRepo,
-    fastify.profileRepo
+    fastify.profileRepo,
+    fastify.walletExchangeService
   );
   fastify.decorate("transactionManageService", transactionManageService);
   done();

@@ -9,9 +9,7 @@ export default function transactionModuleRoutes(
   const service = fastify.transactionService;
 
   fastify.post("/", async function newTransactionPostHandler(req, rep) {
-    const transactionResult = await service.exchangeTransaction(
-      req.body as any
-    );
+    const transactionResult = await service.createNewExchange(req.body as any);
     return transactionResult;
   });
   done();

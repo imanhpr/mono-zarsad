@@ -12,6 +12,7 @@ import adminMeGetPlugin from "./routes/auth/me-get.ts";
 import adminGurdHook from "../../hooks/admin-gurd-hook.ts";
 import createTransactionPostPlugin from "./routes/transaction/create-transaction-post.ts";
 import getUserTransactionsPlugin from "./routes/transaction/get-user-transaction.ts";
+import finalizeTransactionPostPlugin from "./routes/transaction/finalize-transaction-post.plugin.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -34,6 +35,7 @@ export default function adminRoutesPlugin(
     .register(getUserByFilterPlugin, config)
     .register(adminMeGetPlugin, { prefix: "auth" })
     .register(createTransactionPostPlugin)
-    .register(getUserTransactionsPlugin);
+    .register(getUserTransactionsPlugin)
+    .register(finalizeTransactionPostPlugin);
   done();
 }

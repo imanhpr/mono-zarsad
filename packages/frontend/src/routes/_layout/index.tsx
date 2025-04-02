@@ -207,7 +207,8 @@ function OrderForm({
   const onSumbitHandler = useCallback(
     async function onSumbitHandler(reqPayload) {
       await zarApi.buyRequest(reqPayload);
-    }
+    },
+    [zarApi]
   );
 
   const sellActiveOrderCls = {

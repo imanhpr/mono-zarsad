@@ -1,4 +1,5 @@
 import { format } from "date-fns-jalali";
+import { Decimal } from "decimal.js";
 import { randomInt } from "node:crypto";
 
 export async function randInt(min: number, max: number): Promise<number> {
@@ -20,3 +21,5 @@ export function mapDateToJalali<T extends { createdAt: Date }>(
     });
   });
 }
+
+export const GOLD_CONST = new Decimal("4.331802");
