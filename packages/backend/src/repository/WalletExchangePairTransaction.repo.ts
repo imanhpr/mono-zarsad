@@ -62,7 +62,7 @@ export class WalletExchangePairTransactionRepo {
     });
   }
 
-  find5LatestUserExchangeTransactionByUserId(userId: number) {
+  find5LatestTransaction(userId: number) {
     return this.#em.find(
       WalletExchangePairTransaction,
       {

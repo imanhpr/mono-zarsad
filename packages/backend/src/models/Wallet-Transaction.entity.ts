@@ -17,4 +17,7 @@ export default class WalletTransaction {
 
   @OneToMany("WalletAudit", (e: WalletAudit) => e.walletTransaction)
   walletAudits = new Collection<WalletAudit>(this);
+
+  @Property()
+  createdAt = new Date();
 }

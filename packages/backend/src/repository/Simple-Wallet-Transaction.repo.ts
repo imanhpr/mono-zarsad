@@ -1,6 +1,7 @@
 import { EntityManager } from "@mikro-orm/core";
 import fp from "fastify-plugin";
 import WalletSimpleTransaction, {
+  SimpleWalletTransactionStatus,
   SimpleWalletTransactionType,
 } from "../models/Wallet-Simple-Transaction.entity.ts";
 import type Wallet from "../models/Wallet.entity.ts";
@@ -14,6 +15,8 @@ export class SimpleWalletTransactionRepo {
   create(
     walletTransactionId: string,
     type: SimpleWalletTransactionType,
+    status: SimpleWalletTransactionStatus,
+    amount: string,
     wallet: Wallet
   ) {
     return this.#em.create(WalletSimpleTransaction, {
@@ -21,7 +24,25 @@ export class SimpleWalletTransactionRepo {
       type,
       bankTransactionId: "1",
       wallet,
+      createdAt: new Date(),
+      status,
+      amount,
     });
+  }
+
+  find5LatestTransaction(userId: number) {
+    return this.#em.find(
+      WalletSimpleTransaction,
+      {
+        wallet: { user: userId },
+        type: SimpleWalletTransactionType.CARD_TO_CARD,
+      },
+      {
+        limit: 5,
+        orderBy: { createdAt: "DESC" },
+        populate: ["wallet.currencyType"],
+      }
+    );
   }
 }
 

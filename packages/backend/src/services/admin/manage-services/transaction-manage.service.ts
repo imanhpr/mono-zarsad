@@ -15,7 +15,10 @@ import { type WalletTransactionRepo } from "../../../repository/Wallet-Transacti
 
 import { mapDateToJalali } from "../../../helpers/index.ts";
 import { SimpleWalletTransactionRepo } from "../../../repository/Simple-Wallet-Transaction.repo.ts";
-import { SimpleWalletTransactionType } from "../../../models/Wallet-Simple-Transaction.entity.ts";
+import {
+  SimpleWalletTransactionStatus,
+  SimpleWalletTransactionType,
+} from "../../../models/Wallet-Simple-Transaction.entity.ts";
 
 export class TransactionManageService {
   #walletAudioRepo: WalletAudiRepo;
@@ -50,12 +53,6 @@ export class TransactionManageService {
     const wallet = await this.#walletRepo.selectWalletForUpdate(walletId);
     const walletTransaction = this.#walletTransactionRepo.create("SIMPLE");
 
-    this.#simpleWalletTransactionRepo.create(
-      walletTransaction.id,
-      SimpleWalletTransactionType.CARD_TO_CARD,
-      wallet
-    );
-
     let decimalAmount: Decimal | null = null;
     if (transactionType === "INCREMENT") {
       decimalAmount = new Decimal(amount).abs();
@@ -81,6 +78,14 @@ export class TransactionManageService {
       walletAmount: finalAmount,
       walletTransactionId: walletTransaction.id,
     });
+
+    this.#simpleWalletTransactionRepo.create(
+      walletTransaction.id,
+      SimpleWalletTransactionType.CARD_TO_CARD,
+      SimpleWalletTransactionStatus.SUCCESSFUL,
+      finalAmount.toString(),
+      wallet
+    );
 
     this.#walletRepo.updateWalletAmount(wallet, finalAmount);
     const result = Object.freeze({
