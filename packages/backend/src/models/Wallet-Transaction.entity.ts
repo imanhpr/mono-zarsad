@@ -1,42 +1,20 @@
 import {
   Collection,
-  DecimalType,
   Entity,
-  ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import type CurrencyType from "./Currency-Type.entity.ts";
-import type Wallet from "./Wallet.entity.ts";
-import type WalletExchangePairTransaction from "./WalletExchangePairTransaction.entity.ts";
+import WalletAudit from "./Wallet-Audit.entity.ts";
 
 @Entity()
 export default class WalletTransaction {
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ type: "string" })
+  id!: string;
 
   @Property()
-  type!: "INCREMENT" | "DECREMENT";
+  type!: string;
 
-  @Property({ type: DecimalType, scale: 3, precision: 21 })
-  amount!: string;
-
-  @Property({ type: DecimalType, scale: 3, precision: 21 })
-  walletAmount!: string;
-
-  @Property()
-  createdAt = new Date();
-
-  @Property()
-  source!: string;
-
-  @ManyToOne("CurrencyType")
-  currencyType!: CurrencyType;
-
-  @ManyToOne("Wallet")
-  wallet!: Wallet;
-
-  @ManyToOne("WalletExchangePairTransaction", { nullable: true })
-  walletExchangePair?: WalletExchangePairTransaction;
+  @OneToMany("WalletAudit", (e: WalletAudit) => e.walletTransaction)
+  walletAudits = new Collection<WalletAudit>(this);
 }

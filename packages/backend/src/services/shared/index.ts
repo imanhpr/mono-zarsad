@@ -4,10 +4,11 @@ import { WalletExchangeService } from "./WalletExchange.service.ts";
 export default fp(function shardServicesPlugin(fastify, _, done) {
   // TODO: Check for deps
   const walletExchangeService = new WalletExchangeService(
-    fastify.walletTransactionRepo,
+    fastify.walletAudiRepo,
     fastify.walletRepo,
     fastify.currencyPriceRepo,
-    fastify.walletExchangePairTransactionRepo
+    fastify.walletExchangePairTransactionRepo,
+    fastify.walletTransactionRepo
   );
   fastify.decorate("walletExchangeService", walletExchangeService);
   done();

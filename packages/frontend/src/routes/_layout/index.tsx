@@ -178,11 +178,11 @@ function Index() {
         </div>
       </div>
       <div className="flex md:flex-row flex-col md:gap-x-4 mt-8">
-        <div className="bg-white shadow-lg rounded w-3/5 min-h-82">
+        <div className="bg-white shadow-lg rounded w-4/6 min-h-82">
           <h2 className="p-4 font-extrabold text-2xl">آخرین تراکنش ها</h2>
           <TransactionReport />
         </div>
-        <div className="bg-white shadow-lg rounded w-2/5 min-h-82">
+        <div className="bg-white shadow-lg rounded w-2/6 min-h-82">
           <h2 className="p-4 font-extrabold text-2xl">اطلاعیه ها</h2>
         </div>
       </div>

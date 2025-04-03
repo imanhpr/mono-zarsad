@@ -1,28 +1,32 @@
 import { Transactional } from "@mikro-orm/core";
 import { Decimal } from "decimal.js";
 import { GOLD_CONST } from "../../helpers/index.ts";
-import { type WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
+import { type WalletAudiRepo } from "../../repository/Wallet-Audit.repo.ts";
 import { type WalletRepo } from "../../repository/Wallet.repo.ts";
 import { type CurrencyPriceRepo } from "../../repository/Currency-Price.repo.ts";
 import { type WalletExchangePairTransactionRepo } from "../../repository/WalletExchangePairTransaction.repo.ts";
 import type Wallet from "../../models/Wallet.entity.ts";
+import { WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
 
 export class WalletExchangeService {
-  #transactionRepo: WalletTransactionRepo;
+  #walletAuditRepo: WalletAudiRepo;
   #walletRepo: WalletRepo;
   #currencyPriceRepo: CurrencyPriceRepo;
   #walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo;
+  #walletTransactionRepo: WalletTransactionRepo;
 
   constructor(
-    transactionRepo: WalletTransactionRepo,
+    walletAuditRepo: WalletAudiRepo,
     walletRepo: WalletRepo,
     currencyPriceRepo: CurrencyPriceRepo,
-    walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo
+    walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo,
+    walletTransactionRepo: WalletTransactionRepo
   ) {
-    this.#transactionRepo = transactionRepo;
+    this.#walletAuditRepo = walletAuditRepo;
     this.#walletRepo = walletRepo;
     this.#currencyPriceRepo = currencyPriceRepo;
     this.#walletExchangePairTransactionRepo = walletExchangePairTransactionRepo;
+    this.#walletTransactionRepo = walletTransactionRepo;
   }
   async #getAndLockPairOfWallets(rawWallets: {
     sourceId: number;
@@ -109,6 +113,8 @@ export class WalletExchangeService {
       payload.wallets
     );
 
+    const walletTransaction = this.#walletTransactionRepo.create("EXCHANGE");
+
     const exchangeCurrencyPrice = await this.#getCurrencyTypeBaseOfOrderType(
       payload.orderType,
       { sourceWallet, targetWallet }
@@ -139,6 +145,7 @@ export class WalletExchangeService {
 
     const exchangePairTransaction =
       this.#walletExchangePairTransactionRepo.createInit({
+        id: walletTransaction.id,
         fromWallet: sourceWallet,
         toWallet: targetWallet,
         currencyPrice: exchangeCurrencyPrice,
@@ -190,27 +197,26 @@ export class WalletExchangeService {
       exchangeTransaction.toValue
     );
 
-    const incrementTransaction = this.#transactionRepo.create({
+    const incrementTransaction = this.#walletAuditRepo.create({
       type: "INCREMENT",
       source: "EXCHANGE",
       amount: new Decimal(exchangeTransaction.toValue),
       wallet: targetWallet,
       walletAmount: newTargetWalletAmount,
+      walletTransactionId: exchangeTransaction.id,
     });
 
-    const decrementTransaction = this.#transactionRepo.create({
+    const decrementTransaction = this.#walletAuditRepo.create({
       type: "DECREMENT",
       source: "EXCHANGE",
       amount: new Decimal(exchangeTransaction.fromValue).abs().neg(),
       wallet: sourceWallet,
       walletAmount: newSourceWalletAmount,
+      walletTransactionId: exchangeTransaction.id,
     });
 
     sourceWallet.amount = newSourceWalletAmount.toString();
     targetWallet.amount = newTargetWalletAmount.toString();
-
-    incrementTransaction.walletExchangePair = exchangeTransaction;
-    decrementTransaction.walletExchangePair = exchangeTransaction;
 
     this.#walletExchangePairTransactionRepo.setExchangeStatusToSuccessful(
       exchangeTransaction,

@@ -1,18 +1,16 @@
 import fp from "fastify-plugin";
-import { DecimalType, EntityManager, LockMode } from "@mikro-orm/core";
+import { EntityManager, LockMode } from "@mikro-orm/core";
 
 import WalletExchangePairTransaction, {
   WalletExchangeTransactionStatus,
 } from "../models/WalletExchangePairTransaction.entity.ts";
-import type WalletTransaction from "../models/Wallet-Transaction.entity.ts";
 
 import { monotonicFactory } from "ulid";
+import { type Decimal } from "decimal.js";
 import type CurrencyType from "../models/Currency-Type.entity.ts";
 import type CurrencyPrice from "../models/Currency-Price.entity.ts";
-import { type Decimal } from "decimal.js";
 import type Wallet from "../models/Wallet.entity.ts";
-
-const ulid = monotonicFactory();
+import type WalletAudit from "../models/Wallet-Audit.entity.ts";
 
 export class WalletExchangePairTransactionRepo {
   #em: EntityManager;
@@ -21,6 +19,7 @@ export class WalletExchangePairTransactionRepo {
     this.#em = em;
   }
   createInit(input: {
+    id: string;
     fromCurrency: CurrencyType;
     toCurrency: CurrencyType;
     currencyPrice: CurrencyPrice;
@@ -30,7 +29,7 @@ export class WalletExchangePairTransactionRepo {
     toWallet: Wallet;
   }): WalletExchangePairTransaction {
     return this.#em.create(this.#model, {
-      id: ulid(),
+      id: input.id,
       increment: null,
       decrement: null,
       finalizeAt: null,
@@ -48,8 +47,8 @@ export class WalletExchangePairTransactionRepo {
 
   setExchangeStatusToSuccessful(
     exchange: WalletExchangePairTransaction,
-    increment: WalletTransaction,
-    decrement: WalletTransaction
+    increment: WalletAudit,
+    decrement: WalletAudit
   ) {
     exchange.status = WalletExchangeTransactionStatus.SUCCESSFUL;
     exchange.finalizeAt = new Date();

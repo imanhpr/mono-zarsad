@@ -27,7 +27,7 @@ import AdminSessionRepo from "./repository/Admin-Session.repo.ts";
 import currencyPlugin from "./services/currency/currency.plugin.ts";
 import CurrencyPriceRepo from "./repository/Currency-Price.repo.ts";
 import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
-import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
+import WalletAudiRepo from "./repository/Wallet-Audit.repo.ts";
 import WalletRepo from "./repository/Wallet.repo.ts";
 import "./schema/index.ts";
 import type User from "./models/User.entity.ts";
@@ -36,6 +36,8 @@ import ProfileRepo from "./repository/Profile.repo.ts";
 import transactionModulePlugin from "./services/transaction/index.ts";
 import WalletExchangePairTransactionRepo from "./repository/WalletExchangePairTransaction.repo.ts";
 import sharedServicePlugin from "./services/shared/index.ts";
+import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
+import SimpleWalletTransactionRepo from "./repository/Simple-Wallet-Transaction.repo.ts";
 
 export default function appFactory() {
   const app = Fastify({
@@ -69,10 +71,12 @@ export default function appFactory() {
     .register(AdminSessionRepo)
     .register(CurrencyPriceRepo)
     .register(CurrencyTypeRepo)
+    .register(WalletAudiRepo)
     .register(WalletTransactionRepo)
     .register(WalletRepo)
     .register(ProfileRepo)
     .register(WalletExchangePairTransactionRepo)
+    .register(SimpleWalletTransactionRepo)
     // Business Logics
     .register(sharedServicePlugin)
     .register(authPlugin, { prefix: "auth" })

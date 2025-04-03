@@ -1,29 +1,44 @@
 import fp from "fastify-plugin";
-import { IsolationLevel, Transactional, wrap } from "@mikro-orm/core";
-import { WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
+import {
+  FlushMode,
+  IsolationLevel,
+  Transactional,
+  wrap,
+} from "@mikro-orm/core";
 import { WalletRepo } from "../../../repository/Wallet.repo.ts";
 import { Decimal } from "decimal.js";
 
+import { type WalletAudiRepo } from "../../../repository/Wallet-Audit.repo.ts";
 import { type ProfileRepo } from "../../../repository/Profile.repo.ts";
+import { type WalletExchangeService } from "../../shared/WalletExchange.service.ts";
+import { type WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
+
 import { mapDateToJalali } from "../../../helpers/index.ts";
-import { WalletExchangeService } from "../../shared/WalletExchange.service.ts";
+import { SimpleWalletTransactionRepo } from "../../../repository/Simple-Wallet-Transaction.repo.ts";
+import { SimpleWalletTransactionType } from "../../../models/Wallet-Simple-Transaction.entity.ts";
 
 export class TransactionManageService {
-  #walletTransactionRepo: WalletTransactionRepo;
+  #walletAudioRepo: WalletAudiRepo;
   #walletRepo: WalletRepo;
   #profileRepo: ProfileRepo;
   #shardWalletExchangeService: WalletExchangeService;
+  #walletTransactionRepo: WalletTransactionRepo;
+  #simpleWalletTransactionRepo: SimpleWalletTransactionRepo;
 
   constructor(
-    walletTransactionRepo: WalletTransactionRepo,
+    walletAudioRepo: WalletAudiRepo,
     walletRepo: WalletRepo,
     profileRepo: ProfileRepo,
-    sharedWalletExchangeService: WalletExchangeService
+    sharedWalletExchangeService: WalletExchangeService,
+    walletTransactionRepo: WalletTransactionRepo,
+    simpleWalletTransactionRepo: SimpleWalletTransactionRepo
   ) {
-    this.#walletTransactionRepo = walletTransactionRepo;
+    this.#walletAudioRepo = walletAudioRepo;
     this.#walletRepo = walletRepo;
     this.#profileRepo = profileRepo;
     this.#shardWalletExchangeService = sharedWalletExchangeService;
+    this.#walletTransactionRepo = walletTransactionRepo;
+    this.#simpleWalletTransactionRepo = simpleWalletTransactionRepo;
   }
 
   @Transactional({ isolationLevel: IsolationLevel.SERIALIZABLE })
@@ -33,10 +48,17 @@ export class TransactionManageService {
     transactionType: "INCREMENT" | "DECREMENT"
   ) {
     const wallet = await this.#walletRepo.selectWalletForUpdate(walletId);
+    const walletTransaction = this.#walletTransactionRepo.create("SIMPLE");
+
+    this.#simpleWalletTransactionRepo.create(
+      walletTransaction.id,
+      SimpleWalletTransactionType.CARD_TO_CARD,
+      wallet
+    );
 
     let decimalAmount: Decimal | null = null;
     if (transactionType === "INCREMENT") {
-      decimalAmount = new Decimal(amount);
+      decimalAmount = new Decimal(amount).abs();
     } else {
       decimalAmount = new Decimal(amount).abs().negated();
     }
@@ -51,12 +73,13 @@ export class TransactionManageService {
     if (isAbleToMakeTransaction === false)
       throw new Error("The value must be a positive number");
 
-    this.#walletTransactionRepo.create({
+    this.#walletAudioRepo.create({
       amount: decimalAmount,
       wallet,
       source: "CARD_TO_CARD",
       type: transactionType,
       walletAmount: finalAmount,
+      walletTransactionId: walletTransaction.id,
     });
 
     this.#walletRepo.updateWalletAmount(wallet, finalAmount);
@@ -91,10 +114,12 @@ export class TransactionManageService {
 export default fp(function transactionManageServicePlugin(fastify, _, done) {
   // TODO: Validate Deps
   const transactionManageService = new TransactionManageService(
-    fastify.walletTransactionRepo,
+    fastify.walletAudiRepo,
     fastify.walletRepo,
     fastify.profileRepo,
-    fastify.walletExchangeService
+    fastify.walletExchangeService,
+    fastify.walletTransactionRepo,
+    fastify.simpleWalletTransactionRepo
   );
   fastify.decorate("transactionManageService", transactionManageService);
   done();

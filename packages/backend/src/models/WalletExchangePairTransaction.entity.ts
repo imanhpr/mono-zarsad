@@ -1,17 +1,15 @@
 import {
-  Collection,
   DecimalType,
   Entity,
   Enum,
   ManyToOne,
-  OneToMany,
-  PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import type WalletTransaction from "./Wallet-Transaction.entity.ts";
 import CurrencyPrice from "./Currency-Price.entity.ts";
 import CurrencyType from "./Currency-Type.entity.ts";
 import Wallet from "./Wallet.entity.ts";
+import type WalletAudit from "./Wallet-Audit.entity.ts";
+import WalletTransaction from "./Wallet-Transaction.entity.ts";
 
 export enum WalletExchangeTransactionStatus {
   INIT = "INIT",
@@ -21,14 +19,14 @@ export enum WalletExchangeTransactionStatus {
 }
 @Entity()
 export default class WalletExchangePairTransaction {
-  @PrimaryKey({ type: "string" })
+  @ManyToOne(() => WalletTransaction, { primary: true, type: "string" })
   id!: string;
 
-  @ManyToOne("WalletTransaction", { nullable: true })
-  increment?: WalletTransaction;
+  @ManyToOne("WalletAudit", { nullable: true })
+  increment?: WalletAudit;
 
-  @ManyToOne("WalletTransaction", { nullable: true })
-  decrement?: WalletTransaction;
+  @ManyToOne("WalletAudit", { nullable: true })
+  decrement?: WalletAudit;
 
   @ManyToOne(() => CurrencyType)
   fromCurrency!: CurrencyType;
@@ -50,12 +48,6 @@ export default class WalletExchangePairTransaction {
 
   @Property({ type: DecimalType, scale: 3, precision: 21 })
   toValue!: string;
-
-  @OneToMany(
-    "WalletTransaction",
-    (e: WalletTransaction) => e.walletExchangePair
-  )
-  transactions = new Collection<WalletTransaction>(this);
 
   @Enum({
     items: () => WalletExchangeTransactionStatus,

@@ -25,7 +25,6 @@ function Index() {
   if (!user) navigate({ from: Route.fullPath, to: "/auth/login" });
 
   const [loaderData] = Route.useLoaderData();
-  console.log(loaderData);
   const data = loaderData.map((data) => data.price);
   const labels = loaderData.map((data) => data.createdAt);
   const lastUpdate = loaderData[loaderData.length - 1];
@@ -87,30 +86,34 @@ function Index() {
                 <h6 className="mb-0">سکه</h6>
               </Card.Header>
               <Card.Body>
-                <LineChart
-                  data={data}
-                  label="طلا آب شده"
-                  labels={labels}
-                  backgroundColor="rgb(255, 232, 161)"
-                  borderColor="rgb(255, 182, 47)"
-                />
+                {data && (
+                  <LineChart
+                    data={data}
+                    label="طلا آب شده"
+                    labels={labels}
+                    backgroundColor="rgb(255, 232, 161)"
+                    borderColor="rgb(255, 182, 47)"
+                  />
+                )}
                 <div className="d-flex flex-column text-center">
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>توضیحات</th>
-                        <th>قیمت (تومان)</th>
-                        <th>تاریخ</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>آخرین قیمت</td>
-                        <td>{intl.format(lastUpdate.price)}</td>
-                        <td>{lastUpdate.createdAt}</td>
-                      </tr>
-                    </tbody>
-                  </Table>
+                  {lastUpdate && (
+                    <Table>
+                      <thead>
+                        <tr>
+                          <th>توضیحات</th>
+                          <th>قیمت (تومان)</th>
+                          <th>تاریخ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>آخرین قیمت</td>
+                          <td>{intl.format(lastUpdate.price)}</td>
+                          <td>{lastUpdate.createdAt}</td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  )}
                 </div>
               </Card.Body>
             </Card>

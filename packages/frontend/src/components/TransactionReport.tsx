@@ -2,7 +2,7 @@ import { useRouteContext } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
-type Tabes = "DEPOSIT" | "WITHDRAW" | "EXCHANGE";
+type Tabes = "DEPOSIT" | "WITHDRAW" | "EXCHANGE" | "WALLET_TO_WALLET";
 const intlِDate = new Intl.DateTimeFormat("fa-IR", {
   hour: "numeric",
   minute: "numeric",
@@ -17,12 +17,12 @@ function statusMapper(status: string) {
     case status === "SUCCESSFUL":
       return {
         text: "موفق",
-        color: "text-green-800",
+        color: "text-green-800 bg-green-50",
       };
     case status === "INIT":
       return {
         text: "در حال برسی",
-        color: "text-yellow-600",
+        color: "text-yellow-600 bg-yellow-50",
       };
   }
 }
@@ -71,6 +71,16 @@ export default function TransactionReport() {
               تبدیل
             </button>
           </li>
+          <li className="me-2">
+            <button
+              onClick={() => setActiveTab("WALLET_TO_WALLET")}
+              className={
+                activeTab === "WALLET_TO_WALLET" ? activeCls : normalCls
+              }
+            >
+              کیف به کیف
+            </button>
+          </li>
         </ul>
       </div>
       <div className="relative md:mx-10 mt-4 overflow-x-auto">
@@ -78,27 +88,32 @@ export default function TransactionReport() {
           <table className="mb-8 w-full text-gray-500 dark:text-gray-700 text-sm text-center rtl:text-right">
             <thead>
               <tr className="text-center">
-                <th className="pb-4">شناسه تراکنش</th>
-                <th className="pb-4">وضعیت</th>
-                <th className="pb-4">مبدا</th>
-                <th className="pb-4">مقصد</th>
-                <th className="pb-4">تاریخ ایجاد</th>
+                <th className="me-4">شناسه تراکنش</th>
+                <th className="me-4">وضعیت</th>
+                <th className="me-4">مبدا</th>
+                <th className="me-4">مقصد</th>
+                <th className="me-4">تاریخ ایجاد</th>
               </tr>
             </thead>
             <tbody>
               {tData.length !== 0 &&
                 tData.map((exchangeReport) => {
                   const status = statusMapper(exchangeReport.status);
-                  const textCls = clsx("font-semibold", status?.color);
+                  const textCls = clsx(
+                    "px-2 py-1 border rounded-4xl font-medium",
+                    status?.color
+                  );
                   return (
                     <tr
-                      className="bg-white py-2 border-gray-200 border-b last:border-b-0 text-center"
+                      className="bg-gray-50 py-2 border-gray-200 border-b last:border-b-0 text-center"
                       key={exchangeReport.id}
                     >
                       <td className="py-2 font-medium text-blue-500 underline underline-offset-3 cursor-pointer">
                         {exchangeReport.id}
                       </td>
-                      <td className={textCls}>{status?.text}</td>
+                      <td>
+                        <div className={textCls}>{status?.text}</div>
+                      </td>
                       <td>
                         {intlNumber.format(exchangeReport.fromValue)}{" "}
                         {exchangeReport.fromCurrency.name === "GOLD_18"
