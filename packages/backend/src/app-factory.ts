@@ -38,6 +38,8 @@ import WalletExchangePairTransactionRepo from "./repository/WalletExchangePairTr
 import sharedServicePlugin from "./services/shared/index.ts";
 import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
 import SimpleWalletTransactionRepo from "./repository/Simple-Wallet-Transaction.repo.ts";
+import SystemInfoRepo from "./repository/System-Info.repo.ts";
+import invoiceModulePlugin from "./services/invoice/invoice.plugin.ts";
 
 export default function appFactory() {
   const app = Fastify({
@@ -77,13 +79,15 @@ export default function appFactory() {
     .register(ProfileRepo)
     .register(WalletExchangePairTransactionRepo)
     .register(SimpleWalletTransactionRepo)
+    .register(SystemInfoRepo)
     // Business Logics
     .register(sharedServicePlugin)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })
     .register(currencyPlugin, { prefix: "currency" })
-    .register(transactionModulePlugin);
+    .register(transactionModulePlugin)
+    .register(invoiceModulePlugin);
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));

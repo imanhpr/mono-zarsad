@@ -1,0 +1,19 @@
+meta {
+  name: get transaction by id
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/transaction/:id/report
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 01JQXX8Q7H6EMPS6N0WS50A4E8
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0Mzg2ODcyNywiZXhwIjoxNzQzODcwNTI3fQ.oJbshdR_LTcFZIAimAHLUK7YnOC8R1R5cSws3eEiuy8
+}

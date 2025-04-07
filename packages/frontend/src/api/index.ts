@@ -85,4 +85,16 @@ export default class ZarAPI {
     );
     return response.data;
   }
+
+  async getTransactionReportById(transactionId: string) {
+    const response = await this.#axios.get(
+      `/transaction/${transactionId}/report`
+    );
+    return response.data;
+  }
+
+  async getTransactionInvoiceById(transactionId: string) {
+    const response = await this.#axios.get(`/invoice/${transactionId}`);
+    return response.data;
+  }
 }

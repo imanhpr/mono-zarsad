@@ -13,11 +13,13 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
+import { Route as InvoiceTransactionIdImport } from './routes/invoice.$transactionId'
 import { Route as LayoutAboutImport } from './routes/_layout/about'
 import { Route as AuthRegisterIndexImport } from './routes/auth/register.index'
 import { Route as AuthLogoutIndexImport } from './routes/auth/logout.index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as AuthMethodVerifyImport } from './routes/auth/$method.verify'
+import { Route as LayoutReportTransactionIdIndexImport } from './routes/_layout/report/transaction.$id.index'
 
 // Create/Update Routes
 
@@ -30,6 +32,12 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+
+const InvoiceTransactionIdRoute = InvoiceTransactionIdImport.update({
+  id: '/invoice/$transactionId',
+  path: '/invoice/$transactionId',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const LayoutAboutRoute = LayoutAboutImport.update({
@@ -62,6 +70,13 @@ const AuthMethodVerifyRoute = AuthMethodVerifyImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const LayoutReportTransactionIdIndexRoute =
+  LayoutReportTransactionIdIndexImport.update({
+    id: '/report/transaction/$id/',
+    path: '/report/transaction/$id/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -79,6 +94,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/about'
       preLoaderRoute: typeof LayoutAboutImport
       parentRoute: typeof LayoutImport
+    }
+    '/invoice/$transactionId': {
+      id: '/invoice/$transactionId'
+      path: '/invoice/$transactionId'
+      fullPath: '/invoice/$transactionId'
+      preLoaderRoute: typeof InvoiceTransactionIdImport
+      parentRoute: typeof rootRoute
     }
     '/_layout/': {
       id: '/_layout/'
@@ -115,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/report/transaction/$id/': {
+      id: '/_layout/report/transaction/$id/'
+      path: '/report/transaction/$id'
+      fullPath: '/report/transaction/$id'
+      preLoaderRoute: typeof LayoutReportTransactionIdIndexImport
+      parentRoute: typeof LayoutImport
+    }
   }
 }
 
@@ -123,11 +152,13 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutReportTransactionIdIndexRoute: typeof LayoutReportTransactionIdIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutReportTransactionIdIndexRoute: LayoutReportTransactionIdIndexRoute,
 }
 
 const LayoutRouteWithChildren =
@@ -136,31 +167,37 @@ const LayoutRouteWithChildren =
 export interface FileRoutesByFullPath {
   '': typeof LayoutRouteWithChildren
   '/about': typeof LayoutAboutRoute
+  '/invoice/$transactionId': typeof InvoiceTransactionIdRoute
   '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/logout': typeof AuthLogoutIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
+  '/report/transaction/$id': typeof LayoutReportTransactionIdIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/about': typeof LayoutAboutRoute
+  '/invoice/$transactionId': typeof InvoiceTransactionIdRoute
   '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
   '/auth/logout': typeof AuthLogoutIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
+  '/report/transaction/$id': typeof LayoutReportTransactionIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_layout': typeof LayoutRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
+  '/invoice/$transactionId': typeof InvoiceTransactionIdRoute
   '/_layout/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login/': typeof AuthLoginIndexRoute
   '/auth/logout/': typeof AuthLogoutIndexRoute
   '/auth/register/': typeof AuthRegisterIndexRoute
+  '/_layout/report/transaction/$id/': typeof LayoutReportTransactionIdIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -168,33 +205,40 @@ export interface FileRouteTypes {
   fullPaths:
     | ''
     | '/about'
+    | '/invoice/$transactionId'
     | '/'
     | '/auth/$method/verify'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
+    | '/report/transaction/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
+    | '/invoice/$transactionId'
     | '/'
     | '/auth/$method/verify'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/register'
+    | '/report/transaction/$id'
   id:
     | '__root__'
     | '/_layout'
     | '/_layout/about'
+    | '/invoice/$transactionId'
     | '/_layout/'
     | '/auth/$method/verify'
     | '/auth/login/'
     | '/auth/logout/'
     | '/auth/register/'
+    | '/_layout/report/transaction/$id/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
+  InvoiceTransactionIdRoute: typeof InvoiceTransactionIdRoute
   AuthMethodVerifyRoute: typeof AuthMethodVerifyRoute
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
   AuthLogoutIndexRoute: typeof AuthLogoutIndexRoute
@@ -203,6 +247,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
+  InvoiceTransactionIdRoute: InvoiceTransactionIdRoute,
   AuthMethodVerifyRoute: AuthMethodVerifyRoute,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
   AuthLogoutIndexRoute: AuthLogoutIndexRoute,
@@ -220,6 +265,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/_layout",
+        "/invoice/$transactionId",
         "/auth/$method/verify",
         "/auth/login/",
         "/auth/logout/",
@@ -230,12 +276,16 @@ export const routeTree = rootRoute
       "filePath": "_layout.tsx",
       "children": [
         "/_layout/about",
-        "/_layout/"
+        "/_layout/",
+        "/_layout/report/transaction/$id/"
       ]
     },
     "/_layout/about": {
       "filePath": "_layout/about.tsx",
       "parent": "/_layout"
+    },
+    "/invoice/$transactionId": {
+      "filePath": "invoice.$transactionId.tsx"
     },
     "/_layout/": {
       "filePath": "_layout/index.tsx",
@@ -252,6 +302,10 @@ export const routeTree = rootRoute
     },
     "/auth/register/": {
       "filePath": "auth/register.index.tsx"
+    },
+    "/_layout/report/transaction/$id/": {
+      "filePath": "_layout/report/transaction.$id.index.tsx",
+      "parent": "/_layout"
     }
   }
 }

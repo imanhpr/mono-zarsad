@@ -1,0 +1,28 @@
+meta {
+  name: order create
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://sandbox.zarinpal.com/pg/v4/payment/request.json
+  body: json
+  auth: none
+}
+
+headers {
+  accept: application/json
+}
+
+body:json {
+  {
+    "merchant_id": "e23ae221-101c-4479-a94a-b629c941608b",
+    "amount": 1000,
+    "callback_url": "http://your-site.com/verify",
+    "description": "Transaction description.",
+    "metadata": {
+      "mobile": "09121234567",
+      "email": "info.test@gmail.com"
+    }
+  }
+}

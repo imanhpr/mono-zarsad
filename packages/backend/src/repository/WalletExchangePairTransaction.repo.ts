@@ -76,6 +76,28 @@ export class WalletExchangePairTransactionRepo {
       }
     );
   }
+  findTransactionById(transactionId: string, userId: number) {
+    return this.#em.findOne(
+      this.#model,
+      {
+        id: transactionId,
+        $and: [
+          { fromWallet: { user: { id: userId } } },
+          { toWallet: { user: { id: userId } } },
+        ],
+      },
+      {
+        populate: ["fromCurrency", "toCurrency"],
+        exclude: [
+          "increment",
+          "decrement",
+          "fromWallet",
+          "toWallet",
+          "currencyPrice",
+        ],
+      }
+    );
+  }
 }
 
 export default fp(function walletExchangePairTransactionRepo(fastify, _, done) {

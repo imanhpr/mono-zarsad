@@ -11,10 +11,20 @@ export class WalletTransactionRepo {
     this.#em = em;
   }
 
-  create(transactionType: "EXCHANGE" | "WALLET_TO_WALLET" | "SIMPLE") {
+  create(
+    transactionType: "EXCHANGE" | "WALLET_TO_WALLET" | "SIMPLE",
+    createdAt: Date
+  ) {
     return this.#em.create(WalletTransaction, {
       id: ulid(),
       type: transactionType,
+      createdAt,
+    });
+  }
+
+  findOneByTransactionId(transactionId: string) {
+    return this.#em.findOneOrFail(WalletTransaction, {
+      id: transactionId,
     });
   }
 }

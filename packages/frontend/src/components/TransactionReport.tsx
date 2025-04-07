@@ -1,41 +1,16 @@
-import { useRouteContext } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import {
+  amountAndCurrencyTypetoString,
+  intlِDate,
+  simpleTransactionTypeMapper,
+  statusMapper,
+} from "../helpers";
+import Badge from "./Badge";
 
 type Tabes = "DEPOSIT" | "WITHDRAW" | "EXCHANGE" | "WALLET_TO_WALLET";
-const intlِDate = new Intl.DateTimeFormat("fa-IR", {
-  hour: "numeric",
-  minute: "numeric",
-  month: "long",
-  year: "numeric",
-  day: "numeric",
-});
-const intlNumber = new Intl.NumberFormat("fa-IR");
-
-function statusMapper(status: string) {
-  switch (true) {
-    case status === "SUCCESSFUL":
-      return {
-        text: "موفق",
-        color: "text-green-800 bg-green-50",
-      };
-    case status === "INIT":
-      return {
-        text: "در حال برسی",
-        color: "text-yellow-600 bg-yellow-50",
-      };
-  }
-}
-
-function simpleTransactionTypeMapper(status: string) {
-  switch (true) {
-    case status === "CARD_TO_CARD":
-      return {
-        text: "کارت به کارت",
-        css: "text-blue-600 bg-blue-50",
-      };
-  }
-}
 
 export default function TransactionReport() {
   const zarApi = useRouteContext({ from: "/_layout", select: (t) => t.zarAPI });
@@ -121,20 +96,23 @@ function ExchangeTable({
         {exchangeTransactions.length !== 0 &&
           exchangeTransactions.map((exchangeReport) => {
             const status = statusMapper(exchangeReport.status);
-            const textCls = clsx(
-              "px-2 py-1 border rounded-4xl font-medium",
-              status?.color
-            );
+
             return (
               <tr
                 className="bg-gray-50 py-2 border-gray-200 border-b last:border-b-0 text-center"
                 key={exchangeReport.id}
               >
                 <td className="py-2 font-medium text-blue-500 underline underline-offset-3 cursor-pointer">
-                  {exchangeReport.id}
+                  <Link
+                    from="/"
+                    to={`/report/transaction/$id`}
+                    params={{ id: exchangeReport.id }}
+                  >
+                    {exchangeReport.id}
+                  </Link>
                 </td>
                 <td>
-                  <div className={textCls}>{status?.text}</div>
+                  <Badge color={status?.color}>{status?.text}</Badge>
                 </td>
                 <td>
                   {amountAndCurrencyTypetoString(
@@ -177,28 +155,24 @@ function SimpleTransactionTable({
         {simpleTransactions.map((simpleTransaction) => {
           const status = statusMapper(simpleTransaction.status);
           const tType = simpleTransactionTypeMapper(simpleTransaction.type);
-          const textCls = clsx(
-            "px-2 py-1 border rounded-4xl font-medium",
-            status?.color
-          );
-
-          const typeCls = clsx(
-            "px-2 py-1 border rounded-4xl font-medium",
-            tType?.css
-          );
           return (
             <tr
               className="bg-gray-50 py-2 border-gray-200 border-b last:border-b-0 text-center"
               key={simpleTransaction.id}
             >
               <td className="py-2 font-medium text-blue-500 underline underline-offset-3 cursor-pointer">
-                {simpleTransaction.id}
+                <Link
+                  to="/report/transaction/$id"
+                  params={{ id: simpleTransaction.id }}
+                >
+                  {simpleTransaction.id}
+                </Link>
               </td>
               <td className="pe-4">
-                <div className={textCls}>{status?.text}</div>
+                <Badge color={status?.color as any}>{status?.text}</Badge>
               </td>
               <td>
-                <div className={typeCls}>{tType?.text}</div>
+                <Badge color={tType?.color as any}>{tType?.text}</Badge>
               </td>
               <td>
                 {amountAndCurrencyTypetoString(
@@ -233,11 +207,4 @@ function tableFactory(
   return (
     <div className="text-center">تراکنشی برای شما برای نمایش وجود ندارد.</div>
   );
-}
-
-function amountAndCurrencyTypetoString(amount: string, currencyType: string) {
-  let currencyText = "تومان";
-  if (currencyType === "GOLD_18") currencyText = "گرم";
-  const amountText = intlNumber.format(amount as unknown as number);
-  return `${amountText} ${currencyText}`;
 }

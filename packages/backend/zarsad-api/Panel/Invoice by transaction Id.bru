@@ -1,0 +1,19 @@
+meta {
+  name: Invoice by transaction Id
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:3000/invoice/:transactionId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  transactionId: 01JR3RVNT7XYQ659QQSQYEHC9M
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0Mzk1Mzk0OCwiZXhwIjoxNzQzOTU1NzQ4fQ.s529ZPj6xvXkv_uyRPgX6TvWsQ3hU732ApZOCAzxcJM
+}

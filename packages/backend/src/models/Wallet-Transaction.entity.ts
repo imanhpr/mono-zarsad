@@ -13,7 +13,7 @@ export default class WalletTransaction {
   id!: string;
 
   @Property()
-  type!: string;
+  type!: "EXCHANGE" | "WALLET_TO_WALLET" | "SIMPLE";
 
   @OneToMany("WalletAudit", (e: WalletAudit) => e.walletTransaction)
   walletAudits = new Collection<WalletAudit>(this);

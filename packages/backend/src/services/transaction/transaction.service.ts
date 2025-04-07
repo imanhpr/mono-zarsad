@@ -1,6 +1,7 @@
 import fp from "fastify-plugin";
 import { WalletExchangeService } from "../shared/WalletExchange.service.ts";
 import WalletReportService from "../shared/WalletReport.service.ts";
+import { isNil } from "es-toolkit";
 
 export class TransactionService {
   #shardWalletExchangeService: WalletExchangeService;
@@ -28,6 +29,16 @@ export class TransactionService {
 
   async reportLast5Exchange(userId: number) {
     return this.#walletReportService.find5LatestReportByUserId(userId);
+  }
+
+  async reportTransaction(transactionId: string, userId: number) {
+    const result = await this.#walletReportService.findTransactionById(
+      transactionId,
+      userId
+    );
+    if (isNil(result)) throw new Error("Transaction not found");
+
+    return result;
   }
 
   async reportLast5WalletTransaction(userId: number) {}

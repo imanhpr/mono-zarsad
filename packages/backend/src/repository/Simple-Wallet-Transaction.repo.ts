@@ -44,6 +44,20 @@ export class SimpleWalletTransactionRepo {
       }
     );
   }
+
+  findTransactionById(transactionId: string, userId: number) {
+    return this.#em.findOne(
+      WalletSimpleTransaction,
+      {
+        id: transactionId,
+        wallet: { user: { id: userId } },
+      },
+      {
+        populate: ["wallet", "wallet.currencyType"],
+        exclude: ["wallet.user", "wallet.amount"],
+      }
+    );
+  }
 }
 
 export default fp(

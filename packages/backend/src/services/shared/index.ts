@@ -14,7 +14,8 @@ export default fp(function shardServicesPlugin(fastify, _, done) {
 
   const walletReportService = new WalletReportService(
     fastify.simpleWalletTransactionRepo,
-    fastify.walletExchangePairTransactionRepo
+    fastify.walletExchangePairTransactionRepo,
+    fastify.walletTransactionRepo
   );
 
   fastify.decorate("walletExchangeService", walletExchangeService);

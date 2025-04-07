@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/admin/transaction/finalize/01JQXXX8J4MNY1CZEWFKTV7WF5
+  url: http://localhost:3000/admin/transaction/finalize/:transactionId
   body: json
   auth: none
+}
+
+params:path {
+  transactionId: 01JR3RVNT7XYQ659QQSQYEHC9M
 }
 
 body:json {
