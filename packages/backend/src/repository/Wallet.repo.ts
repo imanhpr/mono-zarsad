@@ -5,6 +5,7 @@ import Wallet from "../models/Wallet.entity.ts";
 import { Decimal } from "decimal.js";
 import type CurrencyType from "../models/Currency-Type.entity.ts";
 import type User from "../models/User.entity.ts";
+import { CurrencyTypeEnum } from "../types/currency-types.ts";
 
 export class WalletRepo {
   #em: EntityManager;
@@ -26,8 +27,29 @@ export class WalletRepo {
     );
   }
 
+  selectWalletForUpdateWithLockByUserIdAndType(
+    userId: number,
+    type: CurrencyTypeEnum
+  ) {
+    return this.#em.findOneOrFail(
+      Wallet,
+      {
+        user: { id: userId },
+        currencyType: { name: type },
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+      }
+    );
+  }
+
   createNew(currencyType: CurrencyType, user: User) {
-    const wallet = this.#em.create(Wallet, { amount: "0", currencyType, user });
+    const wallet = this.#em.create(Wallet, {
+      amount: "0",
+      currencyType,
+      user,
+      lockAmount: "0",
+    });
     return wallet;
   }
 

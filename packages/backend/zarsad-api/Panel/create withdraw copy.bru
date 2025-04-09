@@ -1,0 +1,22 @@
+meta {
+  name: create withdraw copy
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:3000/transaction/withdraw
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0NDExMzQwNiwiZXhwIjoxNzQ0MTE1MjA2fQ.hj0zskPtSCeSc68S9Vp4sIUhpfWv1RM0chinYIet_kA
+}
+
+body:json {
+  {
+    "walletId" : 1,
+    "amount" : "1.2"
+  }
+}

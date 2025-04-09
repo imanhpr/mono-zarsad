@@ -10,9 +10,12 @@ import Wallet from "./Wallet.entity.ts";
 
 export enum SimpleWalletTransactionStatus {
   SUCCESSFUL = "SUCCESSFUL",
+  INIT = "INIT",
 }
 export enum SimpleWalletTransactionType {
   CARD_TO_CARD = "CARD_TO_CARD",
+  PHYSICAL_GOLD_WITHDRAW = "PHYSICAL_GOLD_WITHDRAW",
+  TOMAN_WITHDRAW = "TOMAN_WITHDRAW",
 }
 
 @Entity()

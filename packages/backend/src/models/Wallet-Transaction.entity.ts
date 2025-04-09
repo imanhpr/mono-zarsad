@@ -19,5 +19,11 @@ export default class WalletTransaction {
   walletAudits = new Collection<WalletAudit>(this);
 
   @Property()
+  isLockable!: boolean;
+
+  @Property()
+  isLock!: boolean;
+
+  @Property()
   createdAt = new Date();
 }

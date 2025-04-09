@@ -15,10 +15,16 @@ export default class WalletAudit {
   id!: number;
 
   @Property()
-  type!: "INCREMENT" | "DECREMENT";
+  type!: "INCREMENT" | "DECREMENT" | "LOCK" | "LOCK_FREE";
 
   @Property({ type: DecimalType, scale: 3, precision: 21 })
   amount!: string;
+
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
+  lock!: string;
+
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
+  lockAmount!: string;
 
   @Property({ type: DecimalType, scale: 3, precision: 21 })
   walletAmount!: string;

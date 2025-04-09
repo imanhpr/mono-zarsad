@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { SyncDoneFn } from "../../types/fastify-done.ts";
+import { CurrencyTypeEnum } from "../../types/currency-types.ts";
 
 export default function transactionModuleRoutes(
   fastify: FastifyInstance,
@@ -33,6 +34,38 @@ export default function transactionModuleRoutes(
         user.id
       );
       return Object.assign({ user }, transactionReport);
+    }
+  );
+
+  fastify.post(
+    "/withdraw",
+    { preHandler: [fastify.jwtBearerAuth] },
+    async function transactionWithdrawPostHandler(req) {
+      const { currencyType, amount } = req.body;
+      let c: CurrencyTypeEnum | null = null;
+
+      if (currencyType === CurrencyTypeEnum.GOLD_18)
+        c = CurrencyTypeEnum.GOLD_18;
+      else if (currencyType === CurrencyTypeEnum.TOMAN)
+        c = CurrencyTypeEnum.TOMAN;
+      else throw new Error("invalid currencyType");
+
+      const userId = req.user.id;
+      const service = fastify.withdrawService;
+      const result = await service.withdrawInit(c, userId, amount);
+      return result;
+    }
+  );
+
+  fastify.post(
+    "/withdraw/finalize",
+    { preHandler: fastify.jwtBearerAuth },
+    function transactionWithdrawFinalizePostHandler(req) {
+      const service = fastify.withdrawService;
+      const { transactionId } = req.body;
+      const userId = req.user.id;
+
+      return service.withdrawFinalize(transactionId, userId);
     }
   );
   done();

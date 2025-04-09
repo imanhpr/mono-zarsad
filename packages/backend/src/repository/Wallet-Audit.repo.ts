@@ -17,7 +17,7 @@ export class WalletAudiRepo {
     wallet: Wallet;
     walletTransactionId: string;
   }) {
-    const walletTransaction = this.#em.create(WalletAudit, {
+    const walletAudit = this.#em.create(WalletAudit, {
       amount: payload.amount.toString(),
       createdAt: new Date(),
       currencyType: payload.wallet.currencyType,
@@ -26,10 +26,34 @@ export class WalletAudiRepo {
       wallet: payload.wallet,
       walletAmount: payload.walletAmount.toString(),
       walletTransaction: payload.walletTransactionId,
+      lockAmount: "0",
+      lock: "0",
     });
 
-    this.#em.persist(walletTransaction);
-    return walletTransaction;
+    return walletAudit;
+  }
+
+  createLockAudit(
+    type: "LOCK" | "LOCK_FREE",
+    amountToLockOrFree: Decimal,
+    newWalletLockAmount: Decimal,
+    wallet: Wallet,
+    walletTransactionId: string,
+    createdAt: Date
+  ) {
+    const walletAudit = this.#em.create(WalletAudit, {
+      type: type,
+      amount: "0",
+      walletAmount: wallet.amount,
+      currencyType: wallet.currencyType,
+      createdAt,
+      source: "delete me",
+      wallet: wallet,
+      walletTransaction: walletTransactionId,
+      lockAmount: newWalletLockAmount.toString(),
+      lock: amountToLockOrFree.toString(),
+    });
+    return walletAudit;
   }
 
   async findWalletTransactionByUserId(userId: number) {

@@ -1,10 +1,11 @@
-import { EntityManager } from "@mikro-orm/core";
+import { EntityManager, LockMode } from "@mikro-orm/core";
 import fp from "fastify-plugin";
 import WalletSimpleTransaction, {
   SimpleWalletTransactionStatus,
   SimpleWalletTransactionType,
 } from "../models/Wallet-Simple-Transaction.entity.ts";
 import type Wallet from "../models/Wallet.entity.ts";
+import { randomUUID } from "crypto";
 
 export class SimpleWalletTransactionRepo {
   #em: EntityManager;
@@ -22,7 +23,7 @@ export class SimpleWalletTransactionRepo {
     return this.#em.create(WalletSimpleTransaction, {
       id: walletTransactionId,
       type,
-      bankTransactionId: "1",
+      bankTransactionId: randomUUID(),
       wallet,
       createdAt: new Date(),
       status,
@@ -42,6 +43,20 @@ export class SimpleWalletTransactionRepo {
         orderBy: { createdAt: "DESC" },
         populate: ["wallet.currencyType"],
       }
+    );
+  }
+
+  selectTransactionByIdWithLockForUpdate(
+    transactionId: string,
+    userId: number
+  ) {
+    return this.#em.findOneOrFail(
+      WalletSimpleTransaction,
+      {
+        id: transactionId,
+        wallet: { user: { id: userId } },
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE }
     );
   }
 

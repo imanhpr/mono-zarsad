@@ -13,7 +13,7 @@ export default function loginPostPlugin(
   });
   fastify
     .register(phoneNumberValidationHook)
-    .register(arcAptchaPlugin)
+    // .register(arcAptchaPlugin)
     .post<{
       Body: ILoginRequestBodySchema;
     }>(

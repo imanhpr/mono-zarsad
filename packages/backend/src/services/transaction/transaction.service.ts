@@ -2,16 +2,20 @@ import fp from "fastify-plugin";
 import { WalletExchangeService } from "../shared/WalletExchange.service.ts";
 import WalletReportService from "../shared/WalletReport.service.ts";
 import { isNil } from "es-toolkit";
+import type WithdrawService from "../shared/WalletSimpleTransaction.service.ts";
 
 export class TransactionService {
   #shardWalletExchangeService: WalletExchangeService;
   #walletReportService: WalletReportService;
+  #withdrawService: WithdrawService;
   constructor(
     shardWalletExchangeService: WalletExchangeService,
-    walletReportService: WalletReportService
+    walletReportService: WalletReportService,
+    withdrawService: WithdrawService
   ) {
     this.#shardWalletExchangeService = shardWalletExchangeService;
     this.#walletReportService = walletReportService;
+    this.#withdrawService = withdrawService;
   }
   async createNewExchange(payload: {
     orderType: "sell" | "buy";

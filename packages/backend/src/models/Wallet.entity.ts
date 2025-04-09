@@ -11,6 +11,7 @@ import {
 import type CurrencyType from "./Currency-Type.entity.ts";
 import type User from "./User.entity.ts";
 import type WalletAudit from "./Wallet-Audit.entity.ts";
+import { Decimal } from "decimal.js";
 
 @Entity()
 export default class Wallet {
@@ -23,6 +24,9 @@ export default class Wallet {
   @Property({ type: DecimalType, scale: 3, precision: 21 })
   amount!: string;
 
+  @Property({ type: DecimalType, scale: 3, precision: 21 })
+  lockAmount!: string;
+
   @OneToMany("WalletAudit", (e: WalletAudit) => e.wallet, {
     cascade: [Cascade.ALL],
   })
@@ -30,4 +34,10 @@ export default class Wallet {
 
   @ManyToOne("User", { deleteRule: "cascade" })
   user!: User;
+
+  availableAmount() {
+    const amountDecimal = new Decimal(this.amount);
+    const lockAmountDecimal = new Decimal(this.lockAmount);
+    return amountDecimal.minus(lockAmountDecimal);
+  }
 }
