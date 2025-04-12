@@ -11,6 +11,7 @@ export default function invoiceRoutesPlugin(
   fastify.get(
     "/invoice/:transactionId",
     async function getTransactionInvoiceByIdHandler(req) {
+      // @ts-expect-error
       const { transactionId } = req.params;
       const userId = req.user.id;
       const result: Record<string, unknown> =

@@ -1,6 +1,5 @@
 import fp from "fastify-plugin";
 import { MikroORM, RequestContext } from "@mikro-orm/core";
-
 export default fp(
   async function mikroOrmPlugin(fastify) {
     const orm = await MikroORM.init();

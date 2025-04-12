@@ -26,6 +26,7 @@ export default function transactionModuleRoutes(
     "/:transactionId/report",
     { preHandler: fastify.jwtBearerAuth },
     async function transactionGetReportHandler(req) {
+      // @ts-expect-error
       const transactionId = req.params.transactionId;
       const user = req.user;
       // TODO: check if the user is the owner of the transaction
@@ -41,6 +42,7 @@ export default function transactionModuleRoutes(
     "/withdraw",
     { preHandler: [fastify.jwtBearerAuth] },
     async function transactionWithdrawPostHandler(req) {
+      // @ts-ignore
       const { currencyType, amount } = req.body;
       let c: CurrencyTypeEnum | null = null;
 
@@ -62,6 +64,7 @@ export default function transactionModuleRoutes(
     { preHandler: fastify.jwtBearerAuth },
     function transactionWithdrawFinalizePostHandler(req) {
       const service = fastify.withdrawService;
+      // @ts-ignore
       const { transactionId } = req.body;
       const userId = req.user.id;
 

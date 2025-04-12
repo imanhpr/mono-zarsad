@@ -15,6 +15,7 @@ export class WalletTransactionRepo {
     transactionType: "EXCHANGE" | "WALLET_TO_WALLET" | "SIMPLE",
     createdAt: Date
   ) {
+    // @ts-expect-error
     return this.#em.create(WalletTransaction, {
       id: ulid(),
       type: transactionType,

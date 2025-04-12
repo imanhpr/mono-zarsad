@@ -50,9 +50,11 @@ export class TransactionService {
 
 export default fp(function transactionServicePlugin(fastify, _, done) {
   // TODO: Dep check guard
+
   const transactionService = new TransactionService(
     fastify.walletExchangeService,
-    fastify.walletReportService
+    fastify.walletReportService,
+    fastify.withdrawService
   );
 
   fastify.decorate("transactionService", transactionService);

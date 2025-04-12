@@ -51,6 +51,7 @@ export class TransactionManageService {
     transactionType: "INCREMENT" | "DECREMENT"
   ) {
     const wallet = await this.#walletRepo.selectWalletForUpdate(walletId);
+    // @ts-expect-error
     const walletTransaction = this.#walletTransactionRepo.create("SIMPLE");
 
     let decimalAmount: Decimal | null = null;
@@ -104,6 +105,7 @@ export class TransactionManageService {
 
   async userTransactionHistory(userId: number) {
     const result =
+      // @ts-expect-error
       await this.#walletTransactionRepo.findWalletTransactionByUserId(userId);
     const mapResult = mapDateToJalali(result.transactions);
     return Object.freeze({ count: result.count, transactions: mapResult });

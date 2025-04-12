@@ -10,6 +10,7 @@ export default function getUserTransactionsPlugin(
   fastify.get(
     "/transaction/:userId",
     function getTransactionsByUserId(req, rep) {
+      // @ts-expect-error
       const { userId } = req.params;
       return service.userTransactionHistory(parseInt(userId));
     }

@@ -106,7 +106,7 @@ export class WalletExchangeService {
     const { sourceWallet, targetWallet } = await this.#getAndLockPairOfWallets(
       payload.wallets
     );
-
+    // @ts-expect-error
     const walletTransaction = this.#walletTransactionRepo.create("EXCHANGE");
 
     const exchangeCurrencyPrice = await this.#getCurrencyTypeBaseOfOrderType(

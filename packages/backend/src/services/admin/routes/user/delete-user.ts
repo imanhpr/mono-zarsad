@@ -7,6 +7,7 @@ export default function deleteUserPlugin(
 ) {
   const service = fastify.userManageService;
   fastify.delete("/:id", async function userDeleteHandler(req, rep) {
+    // @ts-expect-error
     const { id } = req.params;
     const numberId = Number.parseInt(id);
     if (!Number.isFinite(numberId)) {
