@@ -40,6 +40,7 @@ import WalletTransactionRepo from "./repository/Wallet-Transaction.repo.ts";
 import SimpleWalletTransactionRepo from "./repository/Simple-Wallet-Transaction.repo.ts";
 import SystemInfoRepo from "./repository/System-Info.repo.ts";
 import invoiceModulePlugin from "./services/invoice/invoice.plugin.ts";
+import paymentModulePlugin from "./services/payment/index.ts";
 
 export default function appFactory() {
   const app = Fastify({
@@ -87,7 +88,8 @@ export default function appFactory() {
     .register(adminPlugin, { prefix: "admin" })
     .register(currencyPlugin, { prefix: "currency" })
     .register(transactionModulePlugin)
-    .register(invoiceModulePlugin);
+    .register(invoiceModulePlugin)
+    .register(paymentModulePlugin);
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));
