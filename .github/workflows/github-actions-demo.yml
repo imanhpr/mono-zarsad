@@ -34,7 +34,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: db-migration-cache
-          key: ${{ hashFiles('packages/backend/src/models') }}
+          key: db-migration-cache-${{ hashFiles('packages/backend/src/models/**') }}
+          restore-keys: |
+            db-migration-cache-
 
       - name: build migration image
         if: steps.db-migration-cache.outputs.cache-hit != 'true'
