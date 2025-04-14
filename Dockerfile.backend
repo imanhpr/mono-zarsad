@@ -23,8 +23,8 @@ FROM base_build AS prod_build
 WORKDIR /build
 RUN rm packages/backend/src/mikro-orm.config.ts
 RUN mv packages/backend/src/mikro-orm.config.production.ts packages/backend/src/mikro-orm.config.ts
-RUN npm run -w packages/backend build
 RUN npm run -w packages/backend db-cache-generate
+RUN npm run -w packages/backend build
 
 RUN mv packages/backend/dist ./dist
 RUN mv packages/backend/temp ./temp

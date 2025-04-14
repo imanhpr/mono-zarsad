@@ -1,4 +1,4 @@
-name: github action
+name: zarinbyte backend build
 run-name: build and push zarinbyte backend
 
 on: workflow_dispatch
