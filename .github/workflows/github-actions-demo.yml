@@ -1,0 +1,12 @@
+name: github action
+run-name: ${{github.actor}}
+
+on: workflow_dispatch
+jobs:
+  hello:
+    name: print hello job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: print hello message in persian
+        run: echo salam ${{github.actor}}
