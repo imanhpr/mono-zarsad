@@ -1,12 +1,30 @@
 name: github action
-run-name: ${{github.actor}}
+run-name: build and push zarinbyte backend
 
 on: workflow_dispatch
+
+permissions:
+  packages: write
+
+env:
+  container_tag: ${{github.sha}}
+
 jobs:
-  hello:
+  build_and_push:
     name: print hello job
     runs-on: ubuntu-latest
 
     steps:
-      - name: print hello message in persian
-        run: echo salam ${{github.actor}}
+      - name: "Login to github packages"
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "build and push"
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: "ghcr.io/${{ github.actor }}/zarinbyte-backend:${{ github.sha }}"
+          file: "./Dockerfile.backend"
