@@ -43,6 +43,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
+          target: "migrate_build"
+          file: "./Dockerfile.backend"
           tags: |
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:${{ github.sha }}"
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
