@@ -7,7 +7,7 @@ permissions:
   packages: write
 
 env:
-  container_tag: ${{github.sha}}
+  container_tag: ${{ github.sha }}
 
 jobs:
   build_and_push:
@@ -28,3 +28,19 @@ jobs:
           push: true
           tags: "ghcr.io/${{ github.actor }}/zarinbyte-backend:${{ github.sha }}"
           file: "./Dockerfile.backend"
+
+      - name: db migration cache
+        id: db-migration-cache
+        uses: actions/cache@v4
+        with:
+          path: db-migration-cache
+          key: ${{ hashFiles('packages/backend/src/models') }}
+
+      - name: build migration image
+        if: steps.db-migration-cache.outputs.cache-hit != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:${{ github.sha }}"
+            "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
