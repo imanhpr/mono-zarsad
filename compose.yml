@@ -1,0 +1,39 @@
+services:
+  node_backend:
+    image: ghcr.io/imanhpr/zarinbyte-backend:latest
+    build: 
+      dockerfile: ./Dockerfile.backend
+    depends_on:
+      - pg-db
+
+    restart: "always"
+    environment:
+      - MIKRO_ORM_DB_HOST=pg-db
+      - MIKRO_ORM_DB_PORT=5432
+      - MIKRO_ORM_DB_NAME=zarsad-db
+      - MIKRO_ORM_DB_PASSWORD=testpass
+      - MIKRO_ORM_DB_USER=postgres
+      - NODE_ENV=development
+      - APP_PORT=3007
+
+  pg-db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=testpass
+      - POSTGRES_DB=zarsad-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "zarsad-db"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  reverse_proxy:
+    image: nginx:alpine
+    volumes:
+      - ./nginx-config/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 80:80
+  redis_stack:
+   image: redis/redis-stack-server
+

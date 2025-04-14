@@ -5,7 +5,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "node --env-file=.env --watch --import tsx src/main.ts",
-    "create-admin": "node --env-file=.env --import tsx src/scripts/create-owner.ts"
+    "create-admin": "node --env-file=.env --import tsx src/scripts/create-owner.ts",
+    "db-fresh": "mikro-orm-esm schema:fresh -r",
+    "db-cache-generate": "mikro-orm-esm cache:generate --combined"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +15,7 @@
   "devDependencies": {
     "@faker-js/faker": "^9.5.1",
     "@mikro-orm/cli": "^6.4.5",
+    "@mikro-orm/migrations": "^6.4.5",
     "@mikro-orm/sqlite": "^6.4.5",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.13.1",
@@ -51,5 +54,12 @@
     "i18next": "^24.2.2",
     "luxon": "^3.5.0",
     "ulid": "^3.0.0"
+  },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/src/mikro-orm.config.js"
+    ]
   }
 }
