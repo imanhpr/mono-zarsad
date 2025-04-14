@@ -11,9 +11,14 @@ const DB_NAME = process.env.MIKRO_ORM_DB_NAME!;
 const DB_PASSWORD = process.env.MIKRO_ORM_DB_PASSWORD!;
 const DB_USER = process.env.MIKRO_ORM_DB_USERNAME!;
 
-const cacheData = await import("../temp/metadata.json", {
+const cacheData: unknown = await import("../temp/metadata.json" as string, {
   with: { type: "json" },
 });
+if (!cacheData) {
+  throw new Error(
+    "metadata.json is missing – did you forget to run db-cache-generate?"
+  );
+}
 const config: Options = {
   extensions: [SeedManager],
   // for simplicity, we use the SQLite database, as it's available pretty much everywhere

@@ -1,6 +1,7 @@
 drop-fresh-db-schema.sh
 zarsad-api
-temp
+packages/backend/dist
+packages/backend/temp
 *.db
 # Logs
 logs

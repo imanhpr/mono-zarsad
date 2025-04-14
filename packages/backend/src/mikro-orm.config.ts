@@ -24,10 +24,6 @@ const config: Options = {
   // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
   metadataProvider: TsMorphMetadataProvider,
   // enable debug mode to log SQL queries and discovery information
-  ensureDatabase: {
-    create: true,
-    forceCheck: true,
-  },
   debug: true,
 };
 
