@@ -1,0 +1,19 @@
+name: "Deploy zarinbyte backend"
+run-name: "${{ github.action }} deplys to zarinbyte backend cluster"
+
+on: workflow_dispatch
+
+permissions:
+  packages: read
+
+jobs:
+  deploy_to_swarm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into remote host
+        uses: appleboy/ssh-action@v1
+        with:
+          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+          host: ${{ secrets.MANAGER_SWARM_HOST }}
+          username: ${{ env.MANAGER_SWARM_USER }}
+          script: whoami
