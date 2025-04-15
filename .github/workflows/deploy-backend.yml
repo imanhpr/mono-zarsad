@@ -10,6 +10,7 @@ jobs:
   deploy_to_swarm:
     runs-on: ubuntu-latest
     steps:
+      - run: echo ${{  env.MANAGER_SWARM_USER }}
       - name: SSH into remote host
         uses: appleboy/ssh-action@v1
         with:
