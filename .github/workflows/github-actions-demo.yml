@@ -56,8 +56,9 @@ jobs:
       COMMIT_HASH: ${{ github.sha }}
       app_version: ${{ github.sha }}
     steps:
+      - uses: actions/checkout@v4
       - name: Copy docker compose file
-        uses: actions/checkout@v4
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.MANAGER_SWARM_HOST }}
           username: ${{ vars.MANAGER_SWARM_USER }}
