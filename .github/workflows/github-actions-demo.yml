@@ -54,8 +54,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COMMIT_HASH: ${{ github.sha }}
+      app_version: ${{ github.sha }}
     steps:
-      - name: SSH into remote host
+      - name: Copy docker compose file
+        uses: actions/checkout@v4
+        with:
+          host: ${{ secrets.MANAGER_SWARM_HOST }}
+          username: ${{ vars.MANAGER_SWARM_USER }}
+          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+          source: "compose.production.yml"
+          target: ~/zarinbyte/compose.yml
+      - name: SSH into remote host and deploy
         uses: appleboy/ssh-action@v1
         with:
           key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
@@ -64,6 +73,7 @@ jobs:
           script: |
             cd zarinbyte
             export COMMIT_HASH=${{ env.COMMIT_HASH }}
+            export npm_package_version=${{ env.app_version }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker stack deploy -c compose.yml test-zarinbyte
             docker logout ghcr.io
