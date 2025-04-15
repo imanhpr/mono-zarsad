@@ -3,14 +3,13 @@ run-name: build and push zarinbyte backend
 
 on: workflow_dispatch
 
-permissions:
-  packages: write
-
 env:
   container_tag: ${{ github.sha }}
 
 jobs:
   build_and_push:
+    permissions:
+      packages: write
     name: print hello job
     runs-on: ubuntu-latest
 
@@ -48,3 +47,23 @@ jobs:
           tags: |
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:${{ github.sha }}"
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
+
+  deploy_to_swarm:
+    permissions:
+      packages: read
+    runs-on: ubuntu-latest
+    env:
+      COMMIT_HASH: ${{ github.sha }}
+    steps:
+      - name: SSH into remote host
+        uses: appleboy/ssh-action@v1
+        with:
+          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+          host: ${{ secrets.MANAGER_SWARM_HOST }}
+          username: ${{ vars.MANAGER_SWARM_USER }}
+          script: |
+            cd zarinbyte
+            export COMMIT_HASH=${{ env.COMMIT_HASH }}
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker stack deploy -c compose.yml test-zarinbyte
+            docker logout ghcr.io
