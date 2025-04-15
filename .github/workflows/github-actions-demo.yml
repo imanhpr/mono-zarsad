@@ -12,7 +12,6 @@ jobs:
       packages: write
     name: print hello job
     runs-on: ubuntu-latest
-
     steps:
       - name: "Login to github packages"
         uses: docker/login-action@v3
@@ -49,6 +48,7 @@ jobs:
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
 
   deploy_to_swarm:
+    needs: build_and_push
     permissions:
       packages: read
     runs-on: ubuntu-latest
