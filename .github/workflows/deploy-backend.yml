@@ -9,6 +9,8 @@ permissions:
 jobs:
   deploy_to_swarm:
     runs-on: ubuntu-latest
+    env:
+      COMMIT_HASH: latest
     steps:
       - name: SSH into remote host
         uses: appleboy/ssh-action@v1
@@ -18,4 +20,5 @@ jobs:
           username: ${{ vars.MANAGER_SWARM_USER }}
           script: |
             cd zarinbyte
-            docker compose restart --no-deps
+            export COMMIT_HASH=${{ env.COMMIT_HASH }}
+            docker stack deploy -c compose.yml test-zarinbyte
