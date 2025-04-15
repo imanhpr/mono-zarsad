@@ -12,7 +12,9 @@ services:
 
   certbot:
     image: certbot/certbot
-
+    deploy:
+      mode: global
+      replicas: 0
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/certs/:/etc/letsencrypt/:rw
@@ -20,6 +22,10 @@ services:
   zarinbyte_backend:
     image: ghcr.io/imanhpr/zarinbyte-backend:${COMMIT_HASH}
     restart: always
+    deploy:
+      mode: replicated
+      replicas: 2
+
     environment:
       - MIKRO_ORM_DB_HOST=pg-db
       - MIKRO_ORM_DB_PORT=5432
