@@ -61,7 +61,7 @@ export default function appFactory() {
       origin: [
         "http://localhost:5173",
         "http://localhost:5174",
-        "https://api.zarcoin.top",
+        "https://panel.zarcoin.top",
       ],
       credentials: true,
     })
