@@ -23,5 +23,5 @@ jobs:
             -e MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }} \
             -e MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }} \
             -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }} \
-            --entrypoint "./packages/backend/db-seed.sh" \
+            --entrypoint "sh ./packages/backend/db-seed.sh" \
             ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
