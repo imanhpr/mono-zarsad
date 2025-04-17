@@ -16,9 +16,6 @@ COPY packages/backend/package.json ./packages/backend/package.json
 RUN npm i -d -w packages/backend
 COPY packages/backend ./packages/backend
 
-FROM base_build AS migrate_build
-WORKDIR /build
-
 FROM base_build AS prod_build
 WORKDIR /build
 

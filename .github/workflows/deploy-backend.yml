@@ -1,18 +1,85 @@
-name: "Deploy zarinbyte backend"
-run-name: "${{ github.action }} deplys to zarinbyte backend cluster"
+name: zarinbyte backend build
+run-name: build and push zarinbyte backend
 
 on: workflow_dispatch
 
-permissions:
-  packages: read
+env:
+  container_tag: ${{ github.sha }}
 
 jobs:
+  build_and_push:
+    permissions:
+      packages: write
+    name: print hello job
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Login to github packages"
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "build and push"
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: "ghcr.io/${{ github.actor }}/zarinbyte-backend:${{ github.sha }}"
+          file: "./Dockerfile.backend"
+
+      - name: db migration cache
+        id: db-migration-cache
+        uses: actions/cache@v4
+        with:
+          path: db-migration-cache
+          key: db-migration-cache-${{ hashFiles('packages/backend/src/models/**') }}
+          restore-keys: |
+            db-migration-cache-
+
+      - name: build migration image
+        if: steps.db-migration-cache.outputs.cache-hit != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: "./Dockerfile.db-migration"
+          tags: |
+            "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:${{ github.sha }}"
+            "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
+
+  db_migration:
+    needs: build_and_push
+    permissions:
+      packages: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into remote host to run migration
+        uses: appleboy/ssh-action@v1
+        with:
+          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+          host: ${{ secrets.MANAGER_SWARM_HOST }}
+          username: ${{ vars.MANAGER_SWARM_USER }}
+          script: |
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker service create --network test-zarinbyte_default --name db-migration --mode replicated-job --replicas 1 --restart-condition=none ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
   deploy_to_swarm:
+    needs: db_migration
+    permissions:
+      packages: read
     runs-on: ubuntu-latest
     env:
-      COMMIT_HASH: latest
+      COMMIT_HASH: ${{ github.sha }}
+      app_version: ${{ github.sha }}
     steps:
-      - name: SSH into remote host
+      - uses: actions/checkout@v4
+      - name: Copy docker compose file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.MANAGER_SWARM_HOST }}
+          username: ${{ vars.MANAGER_SWARM_USER }}
+          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+          source: "compose.production.yml"
+          target: ~/zarinbyte
+      - name: SSH into remote host and deploy
         uses: appleboy/ssh-action@v1
         with:
           key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
@@ -21,4 +88,7 @@ jobs:
           script: |
             cd zarinbyte
             export COMMIT_HASH=${{ env.COMMIT_HASH }}
-            docker stack deploy -c compose.yml test-zarinbyte
+            export npm_package_version=${{ env.app_version }}
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker stack deploy -c compose.production.yml test-zarinbyte
+            docker logout ghcr.io

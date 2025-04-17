@@ -1,7 +1,8 @@
-drop-fresh-db-schema.sh
-zarsad-api
+packages/backend/zarsad-api
+packages/backend/drop-fresh-db-schema.sh
 packages/backend/dist
 packages/backend/temp
+packages/backend/node_modules
 *.db
 # Logs
 logs
