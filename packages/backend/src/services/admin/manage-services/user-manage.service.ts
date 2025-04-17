@@ -1,40 +1,19 @@
 import fp from "fastify-plugin";
 import { type UserRepo } from "../../../repository/User.repo.ts";
 import { type ICreateNewUser } from "../../../types/user.ts";
-import { type WalletRepo } from "../../../repository/Wallet.repo.ts";
-import { type CurrencyTypeRepo } from "../../../repository/Currency-Type.repo.ts";
-import { Transactional } from "@mikro-orm/core";
 import { mapDateToJalali } from "../../../helpers/index.ts";
+import UserFactoryService from "../../shared/UserFactory.service.ts";
 
 class UserManageService {
   #repo: UserRepo;
-  #walletRepo: WalletRepo;
-  #currencyTypeRepo: CurrencyTypeRepo;
-  constructor(
-    repo: UserRepo,
-    walletRepo: WalletRepo,
-    currencyTypeRepo: CurrencyTypeRepo
-  ) {
+  #sharedUserFactoryService: UserFactoryService;
+  constructor(repo: UserRepo, userFactoryService: UserFactoryService) {
     this.#repo = repo;
-    this.#walletRepo = walletRepo;
-    this.#currencyTypeRepo = currencyTypeRepo;
+    this.#sharedUserFactoryService = userFactoryService;
   }
 
-  @Transactional()
-  async createUser(input: ICreateNewUser) {
-    const currencyTypes = await this.#currencyTypeRepo.findAll();
-
-    const user = this.#repo.createNormal(input);
-    currencyTypes.map((currencyType) =>
-      this.#walletRepo.createNew(currencyType, user)
-    );
-
-    return Object.freeze({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      nationalCode: user.nationalCode,
-      phoneNumber: user.phoneNumber,
-    });
+  createUser(input: ICreateNewUser) {
+    return this.#sharedUserFactoryService.createNormalUser(input);
   }
 
   async getLatestUsers() {

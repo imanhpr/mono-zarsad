@@ -2,6 +2,7 @@ import fp from "fastify-plugin";
 import { WalletExchangeService } from "./WalletExchange.service.ts";
 import WalletReportService from "./WalletReport.service.ts";
 import WithdrawService from "./WalletSimpleTransaction.service.ts";
+import UserFactoryService from "./UserFactory.service.ts";
 
 export default fp(function shardServicesPlugin(fastify, _, done) {
   // TODO: Check for deps
@@ -26,9 +27,16 @@ export default fp(function shardServicesPlugin(fastify, _, done) {
     fastify.walletTransactionRepo
   );
 
+  const userFactoryService = new UserFactoryService(
+    fastify.userRepo,
+    fastify.walletRepo,
+    fastify.currencyTypeRepo
+  );
+
   fastify.decorate("walletExchangeService", walletExchangeService);
   fastify.decorate("walletReportService", walletReportService);
   fastify.decorate("withdrawService", withdrawService);
+  fastify.decorate("userFactoryService", userFactoryService);
 
   done();
 });
@@ -38,5 +46,6 @@ declare module "fastify" {
     walletExchangeService: InstanceType<typeof WalletExchangeService>;
     walletReportService: InstanceType<typeof WalletReportService>;
     withdrawService: InstanceType<typeof WithdrawService>;
+    userFactoryService: InstanceType<typeof UserFactoryService>;
   }
 }

@@ -10,6 +10,8 @@ import { type IOtpSender } from "../../plugins/sms-provider/types.ts";
 import { type JWT } from "@fastify/jwt";
 import type { SessionRepo } from "../../repository/Session.repo.ts";
 import type UserSession from "../../models/User-Session.entity.ts";
+import { Transactional } from "@mikro-orm/core";
+import UserFactoryService from "../shared/UserFactory.service.ts";
 
 type CreateUser = Pick<
   User,
@@ -18,6 +20,7 @@ type CreateUser = Pick<
 
 class AuthService {
   #userRepo: UserRepo;
+  #sharedUserFactoryService: UserFactoryService;
   #otpService: IOtpSender;
   #cache: Cache;
   #sessionRepo: SessionRepo<typeof UserSession, typeof User>;
@@ -27,13 +30,15 @@ class AuthService {
     otpService: IOtpSender,
     cache: Cache,
     sessionRepo: SessionRepo<typeof UserSession, typeof User>,
-    jwtSign: Pick<JWT, "sign">["sign"]
+    jwtSign: Pick<JWT, "sign">["sign"],
+    sharedUserFactoryService: UserFactoryService
   ) {
     this.#userRepo = userRepo;
     this.#otpService = otpService;
     this.#cache = cache;
     this.#sessionRepo = sessionRepo;
     this.#jwtSign = jwtSign;
+    this.#sharedUserFactoryService = sharedUserFactoryService;
   }
 
   async login(phoneNumber: string) {
@@ -57,7 +62,7 @@ class AuthService {
   }
   async register(user: CreateUser) {
     const result = await this.#sendOTP(user.phoneNumber);
-    await this.#userRepo.createNormal(user);
+    await this.#sharedUserFactoryService.createNormalUser(user);
     return { success: result };
   }
 
@@ -123,7 +128,8 @@ export default fp(
       fastify.sms,
       fastify.cache,
       fastify.userSessionRepo,
-      fastify.jwt.sign
+      fastify.jwt.sign,
+      fastify.userFactoryService
     );
     fastify.decorate("authService", authService);
     done();
