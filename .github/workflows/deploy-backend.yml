@@ -66,7 +66,7 @@ jobs:
             -e MIKRO_ORM_DB_PASSWORD=${{ secrets.MIKRO_ORM_DB_PASSWORD }} \
             -e MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }} \
             -e MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }} \
-            -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }}
+            -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }} \
             ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
   deploy_to_swarm:
     needs: db_migration
