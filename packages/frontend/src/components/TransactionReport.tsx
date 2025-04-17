@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import clsx from "clsx";
+import { useRouteContext } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   amountAndCurrencyTypetoString,

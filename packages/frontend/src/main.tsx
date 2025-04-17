@@ -12,8 +12,9 @@ import { AuthContext } from "./context/contexts";
 import axios from "axios";
 import ZarAPI from "./api";
 
+const baseurl = "http://localhost:3007";
 // Create a new router instance
-const ax = axios.create({ baseURL: "http://localhost:3000" });
+const ax = axios.create({ baseURL: baseurl });
 const zarAPI = new ZarAPI(ax);
 const router = createRouter({
   routeTree,

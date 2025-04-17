@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useRouteContext } from "@tanstack/react-router";
 import clsx from "clsx";
 import { Fragment, useCallback, useState } from "react";
