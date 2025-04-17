@@ -51,6 +51,7 @@ jobs:
     permissions:
       packages: read
     runs-on: ubuntu-latest
+    cancel-timeout-minutes: 1
     steps:
       - name: SSH into remote host to run migration
         uses: appleboy/ssh-action@v1
@@ -60,12 +61,13 @@ jobs:
           username: ${{ vars.MANAGER_SWARM_USER }}
           script: |
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            export MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }}
-            export MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }}
-            export MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }}
-            export MIKRO_ORM_DB_PASSWORD=${{ secrets.MIKRO_ORM_DB_PASSWORD }}
-            export MIKRO_ORM_DB_USER=${{ secrets.MIKRO_ORM_DB_USER }}
-            docker service create --network test-zarinbyte_default --name db-migration --mode replicated-job --replicas 1 --restart-condition=none ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
+            docker service create --network test-zarinbyte_default --name db-migration --mode replicated-job --replicas 1 \
+            --restart-condition=none -e MIKRO_ORM_DB_USER=${{ secrets.MIKRO_ORM_DB_USER }} \
+            -e MIKRO_ORM_DB_PASSWORD=${{ secrets.MIKRO_ORM_DB_PASSWORD }} \
+            -e MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }} \
+            -e MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }} \
+            -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }}
+            ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
   deploy_to_swarm:
     needs: db_migration
     permissions:
