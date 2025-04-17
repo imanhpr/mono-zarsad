@@ -45,8 +45,7 @@ export default fp(
     // TODO: Add validation for walletRepo and currencyTypeRepo
     const userManageService = new UserManageService(
       fastify.userRepo,
-      fastify.walletRepo,
-      fastify.currencyTypeRepo
+      fastify.userFactoryService
     );
     fastify.decorate("userManageService", userManageService);
     done();
