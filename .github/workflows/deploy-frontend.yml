@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-22.04
     name: Deploy to arvan
     steps:
+      - run: env
+      - run: echo ${{ env.BASE_URL }}
       - name: Checkout
         uses: actions/checkout@v4
       - uses: actions/setup-node@v4
