@@ -12,6 +12,7 @@
   "workspaces": [
     "packages/backend",
     "packages/frontend",
-    "packages/admin-frontend"
+    "packages/admin-frontend",
+    "packages/telegram-notification-worker"
   ]
 }
