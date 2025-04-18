@@ -4,6 +4,8 @@ on: workflow_dispatch
 
 jobs:
   deploy:
+    env:
+      BASE_URL: https://api.zarcoin.top
     runs-on: ubuntu-22.04
     name: Deploy to arvan
     steps:
