@@ -14,4 +14,4 @@ jobs:
       - name: build project
         run: npm run -w packages/frontend build
       - name: upload to arvan storage
-        run: node packages/frontend/deploy-to-storge.js "${{ vars.ARVAN_SIMIN_URL }}" "${{ secrets.ARVAN_SIMIN_ACCESS_KEY }}" "${{ secrets.ARVAN_SIMIN_SECRET_KEY }}" "${{ vars.TEST_SIMIN_FRONT_BUCKETNAME }}"
+        run: node --experimental-detect-module packages/frontend/deploy-to-storge.js "${{ vars.ARVAN_SIMIN_URL }}" "${{ secrets.ARVAN_SIMIN_ACCESS_KEY }}" "${{ secrets.ARVAN_SIMIN_SECRET_KEY }}" "${{ vars.TEST_SIMIN_FRONT_BUCKETNAME }}"

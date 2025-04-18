@@ -2,6 +2,7 @@ import * as minio from "minio";
 import fs from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
+
 const _dirname = import.meta.dirname;
 
 // ARGS: URL AccessKey SecretKey BucketName
