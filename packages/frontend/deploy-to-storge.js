@@ -1,8 +1,7 @@
-import * as minio from "minio";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import fs from "node:fs";
-import { join } from "node:path";
-import process from "node:process";
-
+import { extname, join } from "node:path";
+import mime from "mime";
 const _dirname = import.meta.dirname;
 console.log(_dirname);
 
@@ -17,12 +16,14 @@ const ACCESS_KEY = validateArgs(process.argv[3]);
 const SECRET_KEY = validateArgs(process.argv[4]);
 
 const BUCKET_NAME = validateArgs(process.argv[5]);
-const objectStorage = new minio.Client({
-  accessKey: ACCESS_KEY,
-  secretKey: SECRET_KEY,
-  endPoint: SIMIN_URL,
+
+const client = new S3Client({
+  endpoint: SIMIN_URL,
   region: "default",
-  useSSL: true,
+  credentials: {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_KEY,
+  },
 });
 
 const rootName = ".";
@@ -34,12 +35,21 @@ for (const filePath of fileList) {
   const res = fs.statSync(filePath);
   if (res.isFile() === false) continue;
   const fileBuffer = fs.readFileSync(filePath);
-  const uploadResult = await objectStorage.putObject(
-    BUCKET_NAME,
-    join(rootName, fileName),
-    fileBuffer,
-    undefined
+  const ContentType = mime.getType(extname(fileName));
+  const Key = join(rootName, fileName);
+  await client.send(
+    new PutObjectCommand({
+      ACL: "public-read",
+      Key,
+      Bucket: BUCKET_NAME,
+      ContentType,
+      Body: fileBuffer,
+    })
   );
 
-  console.log(uploadResult);
+  console.log({
+    Key,
+    ContentType,
+    message: "successful",
+  });
 }
