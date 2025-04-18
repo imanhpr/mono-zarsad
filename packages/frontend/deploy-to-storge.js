@@ -4,6 +4,7 @@ import { join } from "node:path";
 import process from "node:process";
 
 const _dirname = import.meta.dirname;
+console.log(_dirname);
 
 // ARGS: URL AccessKey SecretKey BucketName
 
