@@ -10,7 +10,6 @@ jobs:
     name: Deploy to arvan
     steps:
       - run: echo "BASE_URL=${{env.BASE_URL}}" >> "$GITHUB_ENV"
-      - run: env
       - name: Checkout
         uses: actions/checkout@v4
       - uses: actions/setup-node@v4
