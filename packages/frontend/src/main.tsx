@@ -12,7 +12,7 @@ import { AuthContext } from "./context/contexts";
 import axios from "axios";
 import ZarAPI from "./api";
 
-const baseurl = import.meta.env.BASE_URL;
+const baseurl = import.meta.env.VITE_API_URL;
 // Create a new router instance
 const ax = axios.create({ baseURL: baseurl });
 const zarAPI = new ZarAPI(ax);
