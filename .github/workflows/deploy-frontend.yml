@@ -1,0 +1,16 @@
+name: Deploy user panel frontend
+run-name: Deploy user panel frontend to "${{ vars.TEST_SIMIN_FRONT_BUCKETNAME }}"
+on: workflow_dispatch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    name: Deploy to arvan
+    steps:
+      - uses: action/checkout@4
+      - name: install packages
+        run: npm ci -w packages/frontend
+      - name: build project
+        run: npm run -w packages/frontend build
+      - name: upload to arvan storage
+        run: node packages/frontend/deploy-to-storge.js ${{ vars.ARVAN_SIMIN_URL }} ${{ secrets.ARVAN_SIMIN_ACCESS_KEY }} ${{ secrets.ARVAN_SIMIN_SECRET_KEY }} ${{ vars.TEST_SIMIN_FRONT_BUCKETNAME }}
