@@ -12,7 +12,7 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 const ax = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:3007",
   headers: {
     "Content-Type": "application/json",
   },

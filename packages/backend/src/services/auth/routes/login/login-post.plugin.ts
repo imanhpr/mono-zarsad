@@ -1,19 +1,17 @@
 import { FastifyInstance } from "fastify";
 import { ILoginRequestBodySchema, LoginRequestBodySchema } from "./schema.ts";
 import phoneNumberValidationHook from "../../../../hooks/phoneNumber-validation.hook.ts";
-import arcAptchaPlugin from "../../../../plugins/arc-aptcha.plugin.ts";
+import responseNormalizerHook from "../../../../hooks/response-normalizer.hook.ts";
 export default function loginPostPlugin(
   fastify: FastifyInstance,
   _: unknown,
   done: (err?: Error) => void
 ) {
   const service = fastify.authService;
-  fastify.addHook("preHandler", async (req) => {
-    console.log("body", req.body);
-  });
+
   fastify
+    .register(responseNormalizerHook)
     .register(phoneNumberValidationHook)
-    // .register(arcAptchaPlugin)
     .post<{
       Body: ILoginRequestBodySchema;
     }>(

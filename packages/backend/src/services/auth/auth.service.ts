@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 
 import fp from "fastify-plugin";
-import { randInt } from "../../helpers/index.ts";
+import { BusinessOperationResult, randInt } from "../../helpers/index.ts";
 
 import type User from "../../models/User.entity.ts";
 import { type UserRepo } from "../../repository/User.repo.ts";
@@ -10,15 +10,16 @@ import { type IOtpSender } from "../../plugins/sms-provider/types.ts";
 import { type JWT } from "@fastify/jwt";
 import type { SessionRepo } from "../../repository/Session.repo.ts";
 import type UserSession from "../../models/User-Session.entity.ts";
-import { Transactional } from "@mikro-orm/core";
 import UserFactoryService from "../shared/UserFactory.service.ts";
+import { BusinessOperationException } from "../../exceptions/index.ts";
+import i18next from "i18next";
 
 type CreateUser = Pick<
   User,
   "firstName" | "lastName" | "nationalCode" | "phoneNumber"
 >;
 
-class AuthService {
+export class AuthService {
   #userRepo: UserRepo;
   #sharedUserFactoryService: UserFactoryService;
   #otpService: IOtpSender;
@@ -41,10 +42,31 @@ class AuthService {
     this.#sharedUserFactoryService = sharedUserFactoryService;
   }
 
-  async login(phoneNumber: string) {
-    const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
+  async login(phoneNumber: string): Promise<
+    BusinessOperationResult<{
+      isOtpSend: boolean;
+    }>
+  > {
+    let user: User | null;
+    try {
+      user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
+    } catch (err) {
+      throw new BusinessOperationException(
+        400,
+        i18next.t("USER_NOT_FOUND_WITH_PHONE_NUMBER"),
+        {
+          phoneNumber,
+        }
+      );
+    }
     const result = await this.#sendOTP(user.phoneNumber);
-    return { success: result };
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("OTP_SUCCESS_MESSAGE"),
+      {
+        isOtpSend: result,
+      }
+    );
   }
 
   async verify(phoneNumber: string, code: string) {
@@ -90,7 +112,11 @@ class AuthService {
 
   async #sendOTP(phoneNumber: string) {
     const code = await randInt(10000, 99999);
-    await this.#cache.set(phoneNumber, code, 1000 * 60 * 2);
+    try {
+      await this.#cache.set(phoneNumber, code, 1000 * 60 * 2);
+    } catch (err) {
+      return false;
+    }
     const result = await this.#otpService.sendOTP(code, phoneNumber);
     return result;
   }

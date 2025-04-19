@@ -16,12 +16,16 @@ export class MelipayamakApi implements IOtpSender {
       to,
       args: [code.toString()],
     };
-    const result = await axios.post(
-      this.#API_URL,
-      JSON.stringify(payload),
-      this.#headers
-    );
-    if (result.status === 200) return true;
-    return false;
+    try {
+      const result = await axios.post(
+        this.#API_URL,
+        JSON.stringify(payload),
+        this.#headers
+      );
+      if (result.status === 200) return true;
+      return false;
+    } catch {
+      return false;
+    }
   }
 }

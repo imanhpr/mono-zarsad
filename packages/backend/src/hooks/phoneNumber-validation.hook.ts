@@ -1,5 +1,7 @@
 import vine from "@vinejs/vine";
 import fp from "fastify-plugin";
+import { BusinessOperationException } from "../exceptions/index.ts";
+import i18next from "i18next";
 
 export const phoneNumberSchema = vine
   .string()
@@ -12,13 +14,17 @@ export default fp(
 
     fastify.addHook<{ Body: { phoneNumber: string } }>(
       "preHandler",
-      async function phoneNumberVineValidatorHook(req, rep) {
+      async function phoneNumberVineValidatorHook(req) {
         const { phoneNumber } = req.body;
         try {
           await fastify.vineValidator(phoneNumberSchema, phoneNumber);
         } catch (err) {
           req.log.warn({ phoneNumber }, "phoneNumber is invalid.");
-          return rep.badRequest("لطفا شماره تلفن معتبر وارد کنید.");
+          throw new BusinessOperationException(
+            400,
+            i18next.t("INVALID_PHONE_NUMBER"),
+            { phoneNumber }
+          );
         }
       }
     );
