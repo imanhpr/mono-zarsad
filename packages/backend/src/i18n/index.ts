@@ -1,12 +1,12 @@
 import fp from "fastify-plugin";
 import i18next from "i18next";
-import fa from "./fa.json" with { type: "json" };
+const fa = await import("./fa.json", { with: { type: "json" } });
 
-export default fp(
-  async function i18nPlugin() {
+export default fp<{ debug?: boolean }>(
+  async function i18nPlugin(_, config) {
     await i18next.init({
-      lng: "fa", // if you're using a language detector, do not define the lng option
-      debug: true,
+      lng: "fa",
+      debug: config.debug || false,
       resources: {
         fa: {
           translation: fa,

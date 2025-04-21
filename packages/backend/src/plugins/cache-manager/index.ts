@@ -1,17 +1,21 @@
-import { createCache } from "cache-manager";
 import fp from "fastify-plugin";
+import fastifyRedis, { FastifyRedis } from "@fastify/redis";
+import Keyv from "keyv";
+import KeyvValkey from "@keyv/valkey";
 
 export default fp(
-  function cacheManager(fastify, _, done) {
-    const cache = createCache();
-    fastify.decorate("cache", cache);
-    done();
+  async function cacheManager(fastify, _) {
+    await fastify.register(fastifyRedis, { host: "localhost" });
+    const keyVal = new KeyvValkey(fastify.redis as any);
+    const keyv = new Keyv<typeof fastify.redis>({ store: keyVal });
+
+    fastify.decorate("cache", keyv);
   },
   { name: "cacheManager" }
 );
 
 declare module "fastify" {
   interface FastifyInstance {
-    cache: ReturnType<typeof createCache>;
+    cache: InstanceType<typeof Keyv<FastifyRedis>>;
   }
 }

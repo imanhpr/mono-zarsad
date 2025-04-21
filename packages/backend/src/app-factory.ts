@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { FastifyBaseLogger } from "fastify";
 import fastifyJwt from "@fastify/jwt";
 import fastifySensible from "@fastify/sensible";
 import {
@@ -8,6 +8,7 @@ import {
 import fastifyCookie from "@fastify/cookie";
 import fastifyAuth from "@fastify/auth";
 import fastifyCors from "@fastify/cors";
+import fastifyReqContext from "@fastify/request-context";
 
 import mikroOrmPlugin from "./plugins/mikro-orm.plugin.ts";
 import root from "./services/root.ts";
@@ -41,18 +42,30 @@ import SimpleWalletTransactionRepo from "./repository/Simple-Wallet-Transaction.
 import SystemInfoRepo from "./repository/System-Info.repo.ts";
 import invoiceModulePlugin from "./services/invoice/invoice.plugin.ts";
 import paymentModulePlugin from "./services/payment/index.ts";
-
+import { randomUUID } from "node:crypto";
 export default function appFactory() {
   const app = Fastify({
     logger: {
       transport: { target: "pino-pretty" },
     },
+    genReqId: () => randomUUID(),
+    trustProxy: true,
   })
     .setValidatorCompiler(TypeBoxValidatorCompiler)
     .withTypeProvider<TypeBoxTypeProvider>()
 
     .register(appConfig)
     .register(i18n)
+    .register(mikroOrmPlugin)
+    .register(fastifyReqContext, {
+      defaultStoreValues: (req) => ({
+        reqLogger: req.log.child({
+          path: req.url.toString(),
+          method: req.method,
+        }),
+      }),
+      prefix: "custom_ctx_",
+    })
     .register(fastifyJwt, { secret: "verySecret" })
     .register(fastifySensible)
     .register(fastifyCookie, { secret: "verySecretKey" })
@@ -68,7 +81,6 @@ export default function appFactory() {
     .register(userGuardHook)
     .register(vineValidator)
     .register(cacheManager)
-    .register(mikroOrmPlugin)
     .register(smsProvider)
     .register(root)
     // Repo
@@ -108,5 +120,11 @@ export default function appFactory() {
 declare module "@fastify/jwt" {
   interface FastifyJWT {
     user: User | Omit<Admin, "password">; // user type is return type of `request.user` object
+  }
+}
+
+declare module "@fastify/request-context" {
+  interface RequestContextData {
+    reqLogger: FastifyBaseLogger;
   }
 }

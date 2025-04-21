@@ -25,13 +25,11 @@ export function mapDateToJalali<T extends { createdAt: Date }>(
 export const GOLD_CONST = new Decimal("4.331802");
 
 export class BusinessOperationResult<T extends unknown> {
-  public readonly time: Date;
   public readonly status: "success" | "failed";
   public readonly message: string;
   public readonly data: T;
 
   constructor(status: "success" | "failed", message: string, data: T) {
-    this.time = new Date();
     this.status = status;
     this.message = message;
     this.data = data;

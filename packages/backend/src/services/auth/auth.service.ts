@@ -5,7 +5,6 @@ import { BusinessOperationResult, randInt } from "../../helpers/index.ts";
 
 import type User from "../../models/User.entity.ts";
 import { type UserRepo } from "../../repository/User.repo.ts";
-import { type Cache } from "cache-manager";
 import { type IOtpSender } from "../../plugins/sms-provider/types.ts";
 import { type JWT } from "@fastify/jwt";
 import type { SessionRepo } from "../../repository/Session.repo.ts";
@@ -13,26 +12,32 @@ import type UserSession from "../../models/User-Session.entity.ts";
 import UserFactoryService from "../shared/UserFactory.service.ts";
 import { BusinessOperationException } from "../../exceptions/index.ts";
 import i18next from "i18next";
+import Keyv from "keyv";
+import { FastifyRedis } from "@fastify/redis";
+import { RequestContext } from "@fastify/request-context";
+import { NotFoundError } from "@mikro-orm/core";
 
 type CreateUser = Pick<
   User,
   "firstName" | "lastName" | "nationalCode" | "phoneNumber"
 >;
-
 export class AuthService {
+  #OTP_TTL = 1000 * 60 * 2; // 2 MIN
   #userRepo: UserRepo;
   #sharedUserFactoryService: UserFactoryService;
   #otpService: IOtpSender;
-  #cache: Cache;
+  #cache: Keyv<FastifyRedis>;
   #sessionRepo: SessionRepo<typeof UserSession, typeof User>;
   #jwtSign: Pick<JWT, "sign">["sign"];
+  #ctx: RequestContext;
   constructor(
     userRepo: UserRepo,
     otpService: IOtpSender,
-    cache: Cache,
+    cache: Keyv,
     sessionRepo: SessionRepo<typeof UserSession, typeof User>,
     jwtSign: Pick<JWT, "sign">["sign"],
-    sharedUserFactoryService: UserFactoryService
+    sharedUserFactoryService: UserFactoryService,
+    ctx: RequestContext
   ) {
     this.#userRepo = userRepo;
     this.#otpService = otpService;
@@ -40,6 +45,7 @@ export class AuthService {
     this.#sessionRepo = sessionRepo;
     this.#jwtSign = jwtSign;
     this.#sharedUserFactoryService = sharedUserFactoryService;
+    this.#ctx = ctx;
   }
 
   async login(phoneNumber: string): Promise<
@@ -47,17 +53,25 @@ export class AuthService {
       isOtpSend: boolean;
     }>
   > {
+    const logger = this.#ctx.get("reqLogger")!;
+    logger.info({ phoneNumber }, "User not found. Try to send login otp");
+
     let user: User | null;
     try {
       user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
+      logger.info({ phoneNumber, userId: user.id }, "User has just found");
     } catch (err) {
-      throw new BusinessOperationException(
-        400,
-        i18next.t("USER_NOT_FOUND_WITH_PHONE_NUMBER"),
-        {
-          phoneNumber,
-        }
-      );
+      if (err instanceof NotFoundError) {
+        logger.warn(err, "Try to return BusinessOperationException exception");
+        throw new BusinessOperationException(
+          400,
+          i18next.t("USER_NOT_FOUND_WITH_PHONE_NUMBER"),
+          {
+            phoneNumber,
+          }
+        );
+      }
+      throw err;
     }
     const result = await this.#sendOTP(user.phoneNumber);
     return new BusinessOperationResult(
@@ -111,11 +125,17 @@ export class AuthService {
   }
 
   async #sendOTP(phoneNumber: string) {
+    const key = `OTP_REQ-${phoneNumber}`;
     const code = await randInt(10000, 99999);
-    try {
-      await this.#cache.set(phoneNumber, code, 1000 * 60 * 2);
-    } catch (err) {
-      return false;
+    const isSentBefore = await this.#cache.has(key);
+    if (isSentBefore) {
+      throw new BusinessOperationException(400, i18next.t("OTP_RESEND_ERROR"), {
+        phoneNumber,
+      });
+    }
+    const cacheSetResult = await this.#cache.set(key, code, this.#OTP_TTL);
+    if (!cacheSetResult) {
+      throw new Error("Internal Server Error");
     }
     const result = await this.#otpService.sendOTP(code, phoneNumber);
     return result;
@@ -155,7 +175,8 @@ export default fp(
       fastify.cache,
       fastify.userSessionRepo,
       fastify.jwt.sign,
-      fastify.userFactoryService
+      fastify.userFactoryService,
+      fastify.requestContext
     );
     fastify.decorate("authService", authService);
     done();

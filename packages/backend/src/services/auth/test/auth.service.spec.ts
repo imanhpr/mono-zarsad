@@ -1,141 +1,180 @@
-import test, { before, describe, mock } from "node:test";
-import { AuthService } from "../auth.service.ts";
-import { createCache } from "cache-manager";
+import { describe, expect, test, vi } from "vitest";
+import authServicePlugin, { AuthService } from "../auth.service.ts";
 import User from "../../../models/User.entity.ts";
-import assert from "node:assert";
+import Keyv from "keyv";
+import { IOtpSender } from "../../../plugins/sms-provider/types.ts";
+import fastify from "fastify";
+import i18n from "../../../i18n/index.ts";
 import { NotFoundError } from "@mikro-orm/core";
-import { UserRepo } from "../../../repository/User.repo.ts";
+import i18next from "i18next";
 
-describe("auth.service unit tests", () => {
-  test("login method", async (t) => {
-    t.plan(3);
-    await t.test("Happy path for login method", async (t) => {
-      t.plan(10);
-      const phoneNumber = "+989025121222";
-      const fakeUser = new User();
-      fakeUser.phoneNumber = phoneNumber;
+describe("AuthService unit tests", () => {
+  function testingModuleFactory({
+    fakeKv,
+    fakeOtpService,
+    fakeReqCtx,
+    fakeUserRepo,
+    fakeUserSessionRepo,
+    fakeUserFactoryService,
+    fakeJwt,
+  }: {
+    fakeUserRepo?: any;
+    fakeReqCtx?: any;
+    fakeOtpService?: any;
+    fakeKv?: any;
+    fakeUserSessionRepo?: any;
+    fakeUserFactoryService?: any;
+    fakeJwt?: any;
+  }) {
+    return fastify()
+      .decorate("userRepo", fakeUserRepo ?? {})
+      .decorate("requestContext", fakeReqCtx ?? {})
+      .decorate("sms", fakeOtpService ?? {})
+      .decorate("cache", fakeKv ?? {})
+      .decorate("userSessionRepo", fakeUserSessionRepo ?? {})
+      .decorate("jwt", fakeJwt ?? {})
+      .decorate("userFactoryService", fakeUserFactoryService ?? {})
+      .register(i18n)
+      .register(authServicePlugin);
+  }
 
-      const userRepo = {
-        findUserByPhoneNumber: mock.fn(async () => fakeUser),
+  const fakeReqCtx = {
+    get: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+    })),
+  };
+
+  describe("login method", () => {
+    test("Happy path", async () => {
+      const fakeRandomOtpCode = 10000;
+      const fakeValidPhoneNumber = "+989025121233";
+      const user = new User();
+      user.phoneNumber = fakeValidPhoneNumber;
+
+      const fakeUserRepo = {
+        findUserByPhoneNumber: vi.fn(() => user),
       };
-      const otpService = { sendOTP: mock.fn(async () => true) };
 
-      const cacheManager = { set: mock.fn(async () => 1) };
-      const authService: Pick<AuthService, "login"> = new AuthService(
-        userRepo as any,
-        otpService as any,
-        cacheManager as any,
-        {} as any,
-        {} as any,
-        {} as any
-      );
-      const result = await authService.login(phoneNumber);
+      const fakeKv = new Keyv();
 
-      const findUserCallCount = userRepo.findUserByPhoneNumber.mock.callCount();
-      const findUserCallArgs =
-        userRepo.findUserByPhoneNumber.mock.calls[0].arguments.at(0);
-      // @ts-ignore
-      t.assert.deepStrictEqual(result, {
-        status: "success",
-        message: "completed",
-        success: true,
+      const kvHasSpy = vi.spyOn(fakeKv, "has");
+      kvHasSpy.mockResolvedValueOnce(false);
+
+      const kvSetSpy = vi.spyOn(fakeKv, "set");
+      kvSetSpy.mockResolvedValueOnce(true);
+
+      const sendOTP = vi.fn();
+      sendOTP.mockResolvedValueOnce(true);
+
+      const fakeOtpService: IOtpSender = { sendOTP };
+
+      vi.mock(import("../../../helpers/index.ts"), async (original) => {
+        const mod = await original();
+        const fakeRandomOtpCode = 10000;
+        return {
+          ...mod,
+          randInt: vi.fn(async () => fakeRandomOtpCode),
+        };
       });
 
-      const sendOtpCallCount = otpService.sendOTP.mock.callCount();
-      const sendOtpCallArgs = otpService.sendOTP.mock.calls[0].arguments;
+      const testingModule = testingModuleFactory({
+        fakeUserRepo,
+        fakeReqCtx,
+        fakeOtpService,
+        fakeKv,
+      });
 
-      const cacheSetCallCount = cacheManager.set.mock.callCount();
-      const cacheSetArgs = cacheManager.set.mock.calls[0].arguments;
+      await testingModule.ready();
+      const authService = testingModule.authService;
 
-      t.assert.equal(findUserCallCount, 1);
-      t.assert.equal(sendOtpCallCount, 1);
-      t.assert.equal(cacheSetCallCount, 1);
-      // first argument phoneNumber : string
-      t.assert.equal(findUserCallArgs, phoneNumber);
+      const result = await authService.login(fakeValidPhoneNumber);
 
-      // first argument code : number
-      // @ts-ignore
-      t.assert.ok(
-        typeof sendOtpCallArgs.at(0) === "number",
-        "it must be a random number like 34502"
+      expect(authService).toBeDefined();
+      expect(result).toMatchSnapshot();
+
+      expect(fakeUserRepo.findUserByPhoneNumber).toBeCalledWith(
+        fakeValidPhoneNumber
       );
-      // second argument phoneNumber : string
-      t.assert.equal(sendOtpCallArgs.at(1), phoneNumber);
+      expect(fakeOtpService.sendOTP).toBeCalledWith(
+        fakeRandomOtpCode,
+        fakeValidPhoneNumber
+      );
 
-      // first argument phoneNumber : string
-      t.assert.equal(cacheSetArgs.at(0), phoneNumber);
-      // second argument code : random number
-      // @ts-ignore
-      t.assert.ok(typeof cacheSetArgs.at(1) === "number");
-      // third argument time :
-      // @ts-ignore
-      t.assert.ok(typeof cacheSetArgs.at(2) === "number");
+      expect(kvHasSpy).toBeCalledWith(`OTP_REQ-${fakeValidPhoneNumber}`);
+      expect(kvSetSpy).toHaveBeenCalledExactlyOnceWith(
+        `OTP_REQ-${fakeValidPhoneNumber}`,
+        fakeRandomOtpCode,
+        120000
+      );
+    });
+    test("it should throw BusinessOperationException since phoneNumber is invalid and user doesn't exist", async () => {
+      const fakeInvalidPhoneNumber = "+989025123333";
+      const fakeMethod = vi.fn();
+      fakeMethod.mockRejectedValueOnce(new NotFoundError("Dummy Message"));
+      const fakeUserRepo = { findUserByPhoneNumber: fakeMethod };
+
+      const testingModule = testingModuleFactory({ fakeUserRepo, fakeReqCtx });
+      await testingModule.ready();
+
+      const authService: Pick<AuthService, "login"> = testingModule.authService;
+
+      return expect(async () =>
+        authService.login(fakeInvalidPhoneNumber)
+      ).rejects.toThrowError(i18next.t("USER_NOT_FOUND_WITH_PHONE_NUMBER"));
     });
 
-    await t.test(
-      "it should return false when #userRepo.findUserByPhoneNumber fails",
-      async (t) => {
-        t.plan(1);
-        const fakeInvalidPhoneNumber = "+989025121223";
-        const userRepo = {
-          findUserByPhoneNumber: mock.fn(async () => {
-            throw new NotFoundError(
-              `User not found ({ phoneNumber: '${fakeInvalidPhoneNumber}' })`
-            );
-          }),
-        };
+    test("it should return a BusinessOperationException since the code has sent before", async () => {
+      const fakeValidPhoneNumber = "+989025123333";
+      const user = new User();
+      user.phoneNumber = fakeValidPhoneNumber;
+      const fakeMethod = vi.fn();
+      fakeMethod.mockResolvedValueOnce(user);
+      const fakeKv = new Keyv();
+      const kvHasSpy = vi.spyOn(fakeKv, "has");
+      kvHasSpy.mockResolvedValueOnce(true);
+      const fakeUserRepo = { findUserByPhoneNumber: fakeMethod };
+      const testingModule = testingModuleFactory({
+        fakeReqCtx,
+        fakeUserRepo,
+        fakeKv,
+      });
+      await testingModule.ready();
 
-        const authService: Pick<AuthService, "login"> = new AuthService(
-          userRepo as any,
-          {} as any,
-          {} as any,
-          {} as any,
-          {} as any,
-          {} as any
-        );
-        const result = await authService.login(fakeInvalidPhoneNumber);
+      const authService: Pick<AuthService, "login"> = testingModule.authService;
 
-        const _ = t.assert.deepStrictEqual(result, {
-          status: "failed",
-          message: "user not found",
-          success: false,
-        });
-      }
-    );
+      return expect(async () =>
+        authService.login(fakeValidPhoneNumber)
+      ).rejects.toThrowError(i18next.t("OTP_RESEND_ERROR"));
+    });
 
-    await t.test(
-      "it should return false when #cache.set throws an error",
-      async (t) => {
-        t.plan(1);
-        const fakeValidPhoneNumber = "+989025121233";
-        const userRepo = {
-          findUserByPhoneNumber: mock.fn(async () => new User()),
-        };
+    test("it should return an Error since it has returned false when it was trying to set random number in cache", async () => {
+      const fakeValidPhoneNumber = "+989025123333";
+      const user = new User();
+      user.phoneNumber = fakeValidPhoneNumber;
+      const fakeMethod = vi.fn();
+      fakeMethod.mockResolvedValue(user);
+      const fakeUserRepo = { findUserByPhoneNumber: fakeMethod };
 
-        const cacheManager = {
-          set: mock.fn(async () => {
-            // At runtime it has different type.
-            throw new Error("Dummy error");
-          }),
-        };
+      const fakeKv = new Keyv();
+      const kvHasSpy = vi.spyOn(fakeKv, "has");
+      const kvSetSpy = vi.spyOn(fakeKv, "set");
+      kvHasSpy.mockResolvedValueOnce(false);
+      kvSetSpy.mockResolvedValueOnce(false);
 
-        const authService: Pick<AuthService, "login"> = new AuthService(
-          userRepo as any,
-          {} as any,
-          cacheManager as any,
-          {} as any,
-          {} as any,
-          {} as any
-        );
+      const testingModule = testingModuleFactory({
+        fakeKv,
+        fakeUserRepo,
+        fakeReqCtx,
+      });
 
-        const result = await authService.login(fakeValidPhoneNumber);
-        // @ts-ignore
-        t.assert.deepStrictEqual(result, {
-          status: "success",
-          message: "completed",
-          success: false,
-        });
-      }
-    );
+      await testingModule.ready();
+
+      const authService: Pick<AuthService, "login"> = testingModule.authService;
+
+      return expect(() =>
+        authService.login(fakeValidPhoneNumber)
+      ).rejects.toThrowError(Error);
+    });
   });
 });

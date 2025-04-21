@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AuthService unit tests > login method > Happy path 1`] = `
+BusinessOperationResult {
+  "data": {
+    "isOtpSend": true,
+  },
+  "message": "پیامک حاوی کد ورود برای شما با موفقیت ارسال شد.",
+  "status": "success",
+}
+`;
