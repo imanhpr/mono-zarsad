@@ -159,16 +159,6 @@ export class AuthService {
 
 export default fp(
   function authServicePlugin(fastify, _, done) {
-    const hasUserRepo = fastify.hasDecorator("userRepo");
-    const hasSmsService = fastify.hasDecorator("sms");
-    const hasCacheManager = fastify.hasDecorator("cache");
-    const hasUserSessionRepo = fastify.hasDecorator("userSessionRepo");
-
-    if (!hasUserRepo) throw new Error("Please init userRepo");
-    if (!hasSmsService) throw new Error("Please init smsService");
-    if (!hasCacheManager) throw new Error("Please init `cache` manager");
-    if (!hasUserSessionRepo) throw new Error("Please init userSessionRepo");
-
     const authService = new AuthService(
       fastify.userRepo,
       fastify.sms,
@@ -181,7 +171,20 @@ export default fp(
     fastify.decorate("authService", authService);
     done();
   },
-  { name: "authServicePlugin" }
+  {
+    name: "authServicePlugin",
+    decorators: {
+      fastify: [
+        "userRepo",
+        "sms",
+        "cache",
+        "userSessionRepo",
+        "jwt",
+        "userFactoryService",
+        "requestContext",
+      ],
+    },
+  }
 );
 
 declare module "fastify" {
