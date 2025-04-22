@@ -7,7 +7,6 @@ import type User from "../../models/User.entity.ts";
 import { type UserRepo } from "../../repository/User.repo.ts";
 import { type IOtpSender } from "../../plugins/sms-provider/types.ts";
 import { type JWT } from "@fastify/jwt";
-import type { SessionRepo } from "../../repository/Session.repo.ts";
 import type UserSession from "../../models/User-Session.entity.ts";
 import UserFactoryService from "../shared/UserFactory.service.ts";
 import { BusinessOperationException } from "../../exceptions/index.ts";
@@ -15,29 +14,43 @@ import i18next from "i18next";
 import Keyv from "keyv";
 import { FastifyRedis } from "@fastify/redis";
 import { RequestContext } from "@fastify/request-context";
-import { NotFoundError } from "@mikro-orm/core";
+import {
+  Loaded,
+  NotFoundError,
+  Transactional,
+  UniqueConstraintViolationException,
+} from "@mikro-orm/core";
+import * as luxon from "luxon";
+import { type UserSessionRepo } from "../../repository/User-Session.repo.ts";
+import { type RefreshTokenRepo } from "../../repository/Refresh-Token.repo.ts";
+import type RefreshToken from "../../models/Refresh-Token.entity.ts";
 
 type CreateUser = Pick<
   User,
   "firstName" | "lastName" | "nationalCode" | "phoneNumber"
 >;
 export class AuthService {
-  #OTP_TTL = 1000 * 60 * 2; // 2 MIN
+  #OTP_TTL = luxon.Duration.fromObject({ minutes: 2 })
+    .shiftTo("milliseconds")
+    .toMillis();
   #userRepo: UserRepo;
   #sharedUserFactoryService: UserFactoryService;
   #otpService: IOtpSender;
   #cache: Keyv<FastifyRedis>;
-  #sessionRepo: SessionRepo<typeof UserSession, typeof User>;
+  #sessionRepo: UserSessionRepo;
   #jwtSign: Pick<JWT, "sign">["sign"];
   #ctx: RequestContext;
+  #refreshTokenRepo: RefreshTokenRepo;
+
   constructor(
     userRepo: UserRepo,
     otpService: IOtpSender,
     cache: Keyv,
-    sessionRepo: SessionRepo<typeof UserSession, typeof User>,
+    sessionRepo: UserSessionRepo,
     jwtSign: Pick<JWT, "sign">["sign"],
     sharedUserFactoryService: UserFactoryService,
-    ctx: RequestContext
+    ctx: RequestContext,
+    refreshTokenRepo: RefreshTokenRepo
   ) {
     this.#userRepo = userRepo;
     this.#otpService = otpService;
@@ -46,6 +59,7 @@ export class AuthService {
     this.#jwtSign = jwtSign;
     this.#sharedUserFactoryService = sharedUserFactoryService;
     this.#ctx = ctx;
+    this.#refreshTokenRepo = refreshTokenRepo;
   }
 
   async login(phoneNumber: string): Promise<
@@ -82,50 +96,159 @@ export class AuthService {
       }
     );
   }
-
-  async verify(phoneNumber: string, code: string) {
-    const cacheCode = await this.#cache.get<number>(phoneNumber);
+  @Transactional()
+  async verify(phoneNumber: string, code: string, userAgent: string) {
+    const logger = this.#ctx.get("reqLogger")!;
+    const key = AuthService.#otpKeyFactory(phoneNumber);
+    const now = luxon.DateTime.now();
+    const sessionDuration = luxon.Duration.fromObject({ days: 14 });
+    const sessionExpireDate = now.plus(sessionDuration);
+    logger.debug({ phoneNumber }, "Try to find otp code");
+    const cacheCode = await this.#cache.get<number>(key);
     if (
       cacheCode &&
       timingSafeEqual(Buffer.from(cacheCode.toString()), Buffer.from(code))
     ) {
+      logger.debug(
+        { key },
+        "otp code has just found. try to delete it from cache"
+      );
+      await this.#cache.delete(key);
+
+      logger.debug({ phoneNumber }, "try to find user by phone number");
       const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
-      const session = await this.#sessionRepo.createNew(user.id);
-      const token = await this.#createJwtToken(session.user);
-      return Object.freeze({ session, token });
+      logger.debug("try to create active session for user");
+      const session = await this.#sessionRepo.create(user, userAgent, true);
+      logger.debug("try to create refresh token for user");
+      const refreshToken = this.#refreshTokenRepo.create(
+        session,
+        now.toJSDate(),
+        sessionExpireDate.toJSDate()
+      );
+      logger.debug("try to create access token for user");
+      const accessToken = await this.#createJwtToken(session.user, session);
+      logger.info(
+        "Every thing sound good. return refresh token and access token to user"
+      );
+      return Object.freeze({ refreshToken, accessToken });
     }
-    throw new Error("Code Not Found");
+    logger.info(
+      { userInputOtpCode: code },
+      "otp code not found for user. return 400 error to user"
+    );
+    throw new BusinessOperationException(
+      400,
+      i18next.t("OTP_CODE_IS_INVALID"),
+      { phoneNumber, code }
+    );
   }
   async register(user: CreateUser) {
-    const result = await this.#sendOTP(user.phoneNumber);
-    await this.#sharedUserFactoryService.createNormalUser(user);
-    return { success: result };
-  }
-
-  async refreshToken(sid: string) {
-    const session = await this.#sessionRepo.findOne(sid);
-    const now = new Date();
-    // TODO: Check for expire date
-    if (now >= session.expireAt) throw new Error("Invalid TOken");
-    if (!session) throw new Error("Session Not found");
-
-    const newSession = await this.#sessionRepo.createNew(session.user.id);
-    const token = await this.#createJwtToken(newSession.user);
-
-    return { session: newSession, token };
-  }
-
-  async logout(sid: string) {
-    const session = await this.#sessionRepo.findOne(sid);
-    const now = new Date();
-    if (now >= session.expireAt) {
-      throw new Error("Invalid Token");
+    const logger = this.#ctx.get("reqLogger")!;
+    logger.debug(
+      { phoneNumber: user.phoneNumber },
+      "try to send otp code to user"
+    );
+    const isOtpSent = await this.#sendOTP(user.phoneNumber);
+    logger.debug({ isOtpSent }, "otp send result");
+    if (isOtpSent) {
+      logger.debug("Try to create new normal user");
+      try {
+        await this.#sharedUserFactoryService.createNormalUser(user);
+      } catch (err) {
+        if (err instanceof UniqueConstraintViolationException) {
+          logger.error("User with this stuff already exists in db, return 409");
+          throw new BusinessOperationException(
+            409,
+            i18next.t("USER_EXISTS_BEFORE"),
+            user
+          );
+        }
+        logger.error(
+          err,
+          "unhandled error, please check this error and add correct handler for it"
+        );
+        throw err;
+      }
+      logger.info(
+        "User has just created successfully, return success response"
+      );
+      return new BusinessOperationResult(
+        "success",
+        i18next.t("NEW_USER_CREATE_MESSAGE"),
+        { isOtpSent }
+      );
     }
-    return this.#sessionRepo.expireById(sid);
+    logger.warn("something bad has happened and i don't know why");
+    throw new Error("Internal Server Error");
+  }
+
+  @Transactional()
+  async refreshToken(refreshToken: string) {
+    const now = luxon.DateTime.now();
+    const sessionDuration = luxon.Duration.fromObject({ days: 14 });
+    const sessionExpireDate = now.plus(sessionDuration);
+    const refToken =
+      await this.#refreshTokenRepo.findRefreshTokenByIdAndActiveSession(
+        refreshToken
+      );
+
+    this.#isRefreshTokenExpired(refToken.expireAt);
+    try {
+      await this.#refreshTokenRepo.expireRefreshToken(refToken);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+
+    const newRefToken = await this.#refreshTokenRepo.create(
+      refToken.session,
+      now.toJSDate(),
+      sessionExpireDate.toJSDate()
+    );
+    const accessToken = await this.#createJwtToken(
+      refToken.session.user,
+      refToken.session
+    );
+
+    return { refreshToken: newRefToken, accessToken };
+  }
+
+  async logout(refreshToken: string) {
+    let currentRefreshToken: Loaded<
+      RefreshToken,
+      "session",
+      "*",
+      never
+    > | null = null;
+
+    try {
+      currentRefreshToken =
+        await this.#refreshTokenRepo.findRefreshTokenByIdAndActiveSession(
+          refreshToken
+        );
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        throw new BusinessOperationException(
+          400,
+          i18next.t("INVALID_REFRESH_TOKEN")
+        );
+      }
+      throw err;
+    }
+    await this.#sessionRepo.deactivateSession(currentRefreshToken.session);
+  }
+
+  #isRefreshTokenExpired(refreshTokenExpireDate: Date) {
+    const now = luxon.DateTime.now();
+    if (now >= luxon.DateTime.fromJSDate(refreshTokenExpireDate)) {
+      throw new BusinessOperationException(
+        401,
+        i18next.t("EXPIRED_REFRESH_TOKEN")
+      );
+    }
   }
 
   async #sendOTP(phoneNumber: string) {
-    const key = `OTP_REQ-${phoneNumber}`;
+    const key = AuthService.#otpKeyFactory(phoneNumber);
     const code = await randInt(10000, 99999);
     const isSentBefore = await this.#cache.has(key);
     if (isSentBefore) {
@@ -140,20 +263,32 @@ export class AuthService {
     const result = await this.#otpService.sendOTP(code, phoneNumber);
     return result;
   }
-  #createJwtToken(user: User): Promise<{ token: string; expireAt: number }> {
+  #createJwtToken(
+    user: User,
+    session: UserSession
+  ): Promise<{ token: string; expireAt: string }> {
     const { promise, reject, resolve } = Promise.withResolvers<{
       token: string;
-      expireAt: number;
+      expireAt: string;
     }>();
-    const exp = Date.now() + 1000 * 60 * 30;
+    const now = luxon.DateTime.now();
+    const exp = luxon.Duration.fromObject({ minutes: 59 });
+    const expireAt = now.plus(exp);
     const jwtPayload = {
       userId: user.id,
+      sessionId: session.id,
     };
-    this.#jwtSign(jwtPayload, { expiresIn: "30m" }, (err, token) => {
-      if (err) return reject(err);
-      resolve({ token, expireAt: exp });
+    this.#jwtSign(jwtPayload, { expiresIn: "1h" }, (err, token) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve({ token, expireAt: expireAt.toUTC().toISO() });
     });
     return promise;
+  }
+
+  static #otpKeyFactory(phoneNumber: string) {
+    return `OTP_REQ:${phoneNumber}`;
   }
 }
 
@@ -166,7 +301,8 @@ export default fp(
       fastify.userSessionRepo,
       fastify.jwt.sign,
       fastify.userFactoryService,
-      fastify.requestContext
+      fastify.requestContext,
+      fastify.refreshTokenRepo
     );
     fastify.decorate("authService", authService);
     done();
@@ -182,6 +318,7 @@ export default fp(
         "jwt",
         "userFactoryService",
         "requestContext",
+        "refreshTokenRepo",
       ],
     },
   }

@@ -22,10 +22,10 @@ export default class User {
   @Property()
   lastName!: string;
 
-  @Property()
+  @Property({ unique: true })
   phoneNumber!: string;
 
-  @Property()
+  @Property({ unique: true })
   nationalCode!: string;
 
   @OneToMany("UserSession", (session: UserSession) => session.user, {

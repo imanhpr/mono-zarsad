@@ -177,4 +177,8 @@ describe("AuthService unit tests", () => {
       ).rejects.toThrowError(Error);
     });
   });
+
+  describe("register method", () => {
+    test("Happy path", async () => {});
+  });
 });

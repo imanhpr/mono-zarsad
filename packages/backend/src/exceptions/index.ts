@@ -1,11 +1,11 @@
 export class BusinessOperationException<T extends unknown> extends Error {
   public readonly httpCode: number;
   public readonly message: string;
-  public readonly input: T;
+  public readonly input?: T;
   constructor(
     httpCode: number,
     publicMessage: string,
-    input: T,
+    input?: T,
     privateMessageToLog?: string,
     options?: ConstructorParameters<typeof Error>[1]
   ) {

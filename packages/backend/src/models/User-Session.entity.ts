@@ -1,6 +1,14 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from "@mikro-orm/core";
 import { randomUUID } from "node:crypto";
 import User from "./User.entity.ts";
+import RefreshToken from "./Refresh-Token.entity.ts";
 
 @Entity()
 export default class UserSession {
@@ -14,5 +22,17 @@ export default class UserSession {
   createdAt: Date = new Date();
 
   @Property()
-  expireAt!: Date;
+  lastOnline!: Date;
+
+  @Property()
+  updatedAt!: Date;
+
+  @Property()
+  device!: string;
+
+  @Property()
+  isActive!: boolean;
+
+  @OneToMany(() => RefreshToken, (r) => r.session)
+  refreshTokens = new Collection<RefreshToken>(this);
 }

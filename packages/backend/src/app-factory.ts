@@ -42,6 +42,8 @@ import SimpleWalletTransactionRepo from "./repository/Simple-Wallet-Transaction.
 import SystemInfoRepo from "./repository/System-Info.repo.ts";
 import invoiceModulePlugin from "./services/invoice/invoice.plugin.ts";
 import paymentModulePlugin from "./services/payment/index.ts";
+import RefreshTokenRepoPlugin from "./repository/Refresh-Token.repo.ts";
+
 import { randomUUID } from "node:crypto";
 export default function appFactory() {
   const app = Fastify({
@@ -97,6 +99,7 @@ export default function appFactory() {
     .register(WalletExchangePairTransactionRepo)
     .register(SimpleWalletTransactionRepo)
     .register(SystemInfoRepo)
+    .register(RefreshTokenRepoPlugin)
     // Business Logics
     .register(sharedServicePlugin)
     .register(authPlugin, { prefix: "auth" })

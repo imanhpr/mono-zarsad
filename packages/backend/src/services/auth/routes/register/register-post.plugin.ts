@@ -19,8 +19,9 @@ export default function registerPostPlugin(
     .post<IRequestBody>(
       "/register",
       { schema: { body: RegisterRequestBodySchema } },
-      function registerHandler(req) {
-        return service.register(req.body);
+      async function registerHandler(req, rep) {
+        const result = await service.register(req.body);
+        rep.code(201).send(result);
       }
     );
   done();

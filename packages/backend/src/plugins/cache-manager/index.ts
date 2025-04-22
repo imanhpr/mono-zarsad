@@ -7,7 +7,10 @@ export default fp(
   async function cacheManager(fastify, _) {
     await fastify.register(fastifyRedis, { host: "localhost" });
     const keyVal = new KeyvValkey(fastify.redis as any);
-    const keyv = new Keyv<typeof fastify.redis>({ store: keyVal });
+    const keyv = new Keyv<typeof fastify.redis>(
+      { store: keyVal },
+      { useKeyPrefix: false }
+    );
 
     fastify.decorate("cache", keyv);
   },

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { IVerifyRequestBodySchema, VerifyRequestBodySchema } from "./schema.ts";
 import phoneNumberValidationHook from "../../../../hooks/phoneNumber-validation.hook.ts";
+import { UAParser } from "ua-parser-js";
 
 export default function verifyPostPlugin(
   fastify: FastifyInstance,
@@ -13,11 +14,16 @@ export default function verifyPostPlugin(
     Body: IVerifyRequestBodySchema;
   }>("/verify", { schema: { body: VerifyRequestBodySchema } }, async function verifyHandler(req, rep) {
     const { code, phoneNumber } = req.body;
-    const result = await service.verify(phoneNumber, code);
-    // TODO: validation for session-id
+    const rawUserAgent = req.headers["user-agent"];
+    const agent = UAParser(rawUserAgent);
+    req.log.info({ userAgent: agent, phoneNumber }, "Try to verify otp code");
+    const result = await service.verify(phoneNumber, code, rawUserAgent || "");
     rep
-      .setCookie("session-id", result.session.id, { path: "/auth" })
-      .send(result.token);
+      .setCookie("session-id", result.refreshToken.id, {
+        path: "/auth",
+        httpOnly: true,
+      })
+      .send(result.accessToken);
   });
   done();
 }

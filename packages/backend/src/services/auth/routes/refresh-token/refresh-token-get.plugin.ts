@@ -10,18 +10,23 @@ export default function refreshTokenGetPlugin(
 
   const service = fastify.authService;
   fastify
-    .addHook("onRequest", async (req, rep) => {
+    .addHook("onRequest", async (req) => {
       await fastify.vineValidator(
         sessionIdVineValidationSchema,
         req.cookies["session-id"]
       );
     })
     .get("/refresh", async function refreshTokenHandler(req, rep) {
-      // TODO: validation for session-id
-      const sid = req.cookies["session-id"]!;
-      const result = await service.refreshToken(sid);
-      rep.setCookie("session-id", result.session.id, { path: "/auth" });
-      return result.token;
+      const sid = req.cookies["session-id"];
+      if (sid) {
+        const result = await service.refreshToken(sid);
+        rep.setCookie("session-id", result.refreshToken.id, {
+          path: "/auth",
+          httpOnly: true,
+        });
+        return result.accessToken;
+      }
+      rep.unauthorized();
     });
   done();
 }

@@ -2,9 +2,12 @@ import process from "node:process";
 import appFactory from "./app-factory.ts";
 import { BusinessOperationException } from "./exceptions/index.ts";
 import { BusinessOperationResult } from "./helpers/index.ts";
-import { ValidationError } from "@mikro-orm/core";
+import {
+  DriverException,
+  UniqueConstraintViolationException,
+} from "@mikro-orm/core";
 const app = appFactory();
-
+UniqueConstraintViolationException;
 app.setErrorHandler(function exceptHandler(err, _, rep) {
   if (err instanceof BusinessOperationException) {
     rep
@@ -12,7 +15,7 @@ app.setErrorHandler(function exceptHandler(err, _, rep) {
       .send(new BusinessOperationResult("failed", err.message, err.input));
     return;
   }
-  if (err instanceof ValidationError) {
+  if (err instanceof DriverException) {
     rep
       .code(500)
       .send({ message: "Internal Server Error - Please Call Server Admin" });

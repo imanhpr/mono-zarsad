@@ -11,10 +11,15 @@ export default function logOutGetPlugin(
     .register(userGuardHook)
     .get("/logout", async function logOutHandler(req, rep) {
       // TODO: Type safety
-      const sid = req.cookies["session-id"]!;
-      const result = await service.logout(sid);
-      console.log(result);
-      rep.clearCookie("session-id", { path: "/auth" }).send({ result: "ok" });
+      const sid = req.cookies["session-id"];
+      if (sid) {
+        await service.logout(sid);
+        return rep
+          .clearCookie("session-id", { path: "/auth" })
+          .code(204)
+          .send();
+      }
+      rep.unauthorized();
     });
   done();
 }
