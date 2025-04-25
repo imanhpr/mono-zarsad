@@ -1,8 +1,9 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import BaseAuthPage from "../../components/Base-Auth";
-import { useContext, useRef } from "react";
-import { useSelector } from "react-redux";
-import { AuthContext } from "../../context/contexts";
+import { useRef } from "react";
+import { store } from "../../store";
+import { verifyLoginRequest } from "../../store/auth.slice";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 
 export const Route = createFileRoute("/auth/$method/verify")({
   component: RouteComponent,
@@ -10,21 +11,18 @@ export const Route = createFileRoute("/auth/$method/verify")({
     if (!["register", "login"].some((v) => v === ctx.params.method)) {
       throw notFound();
     }
-    if (ctx.context.auth?.accessToken) {
+    const st = store.getState();
+    if (st.auth.accessToken) {
       throw redirect({ to: "/", replace: true });
     }
   },
 });
 
 function RouteComponent() {
-  const { zarAPI } = Route.useRouteContext();
-
+  const dispatch = useAppDispatch();
   const navigation = Route.useNavigate();
-  const { setAccessToken } = useContext(AuthContext);
   const params = Route.useParams();
-  const phoneNumber = useSelector<any, string>(
-    (state) => state.phoneNumber.value
-  );
+  const phoneNumber = useAppSelector((state) => state.phoneNumber.value);
   const codeRef = useRef<HTMLInputElement>(null);
 
   let title = "ورود به سامانه";
@@ -34,12 +32,10 @@ function RouteComponent() {
   function submitHandler(e: React.FormEvent) {
     e.preventDefault();
     if (!codeRef.current) throw new Error("CodeRef NotFound");
+    if (!phoneNumber) throw new Error("Phone Number not found");
     const code = codeRef.current.value;
-    const response = zarAPI.verify(phoneNumber, code);
-    response.then((response) => {
-      console.log("nice token cookie", response);
-      setAccessToken(response.data.token);
-      navigation({ to: "/", replace: true });
+    dispatch(verifyLoginRequest({ code, phoneNumber })).then(() => {
+      navigation({ from: Route.fullPath, to: "/" });
     });
   }
 

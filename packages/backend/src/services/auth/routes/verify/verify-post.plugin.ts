@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { IVerifyRequestBodySchema, VerifyRequestBodySchema } from "./schema.ts";
 import phoneNumberValidationHook from "../../../../hooks/phoneNumber-validation.hook.ts";
 import { UAParser } from "ua-parser-js";
+import * as luxon from "luxon";
 
 export default function verifyPostPlugin(
   fastify: FastifyInstance,
@@ -20,8 +21,9 @@ export default function verifyPostPlugin(
     const result = await service.verify(phoneNumber, code, rawUserAgent || "");
     rep
       .setCookie("session-id", result.refreshToken.id, {
-        path: "/auth",
+        // path: "/auth",
         httpOnly: true,
+        expires: luxon.DateTime.now().plus({ days: 4 }).toJSDate(),
       })
       .send(result.accessToken);
   });

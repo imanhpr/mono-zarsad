@@ -148,38 +148,33 @@ export class AuthService {
       { phoneNumber: user.phoneNumber },
       "try to send otp code to user"
     );
+
+    logger.debug("Try to create new normal user");
+    try {
+      await this.#sharedUserFactoryService.createNormalUser(user);
+    } catch (err) {
+      if (err instanceof UniqueConstraintViolationException) {
+        logger.error("User with this stuff already exists in db, return 409");
+        throw new BusinessOperationException(
+          409,
+          i18next.t("USER_EXISTS_BEFORE"),
+          user
+        );
+      }
+      logger.error(
+        err,
+        "unhandled error, please check this error and add correct handler for it"
+      );
+      throw err;
+    }
+    logger.info("User has just created successfully, return success response");
     const isOtpSent = await this.#sendOTP(user.phoneNumber);
     logger.debug({ isOtpSent }, "otp send result");
-    if (isOtpSent) {
-      logger.debug("Try to create new normal user");
-      try {
-        await this.#sharedUserFactoryService.createNormalUser(user);
-      } catch (err) {
-        if (err instanceof UniqueConstraintViolationException) {
-          logger.error("User with this stuff already exists in db, return 409");
-          throw new BusinessOperationException(
-            409,
-            i18next.t("USER_EXISTS_BEFORE"),
-            user
-          );
-        }
-        logger.error(
-          err,
-          "unhandled error, please check this error and add correct handler for it"
-        );
-        throw err;
-      }
-      logger.info(
-        "User has just created successfully, return success response"
-      );
-      return new BusinessOperationResult(
-        "success",
-        i18next.t("NEW_USER_CREATE_MESSAGE"),
-        { isOtpSent }
-      );
-    }
-    logger.warn("something bad has happened and i don't know why");
-    throw new Error("Internal Server Error");
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("NEW_USER_CREATE_MESSAGE"),
+      { isOtpSent }
+    );
   }
 
   @Transactional()
@@ -266,9 +261,9 @@ export class AuthService {
   #createJwtToken(
     user: User,
     session: UserSession
-  ): Promise<{ token: string; expireAt: string }> {
+  ): Promise<{ accessToken: string; expireAt: string }> {
     const { promise, reject, resolve } = Promise.withResolvers<{
-      token: string;
+      accessToken: string;
       expireAt: string;
     }>();
     const now = luxon.DateTime.now();
@@ -282,7 +277,7 @@ export class AuthService {
       if (err) {
         return reject(err);
       }
-      resolve({ token, expireAt: expireAt.toUTC().toISO() });
+      resolve({ accessToken: token, expireAt: expireAt.toUTC().toISO() });
     });
     return promise;
   }

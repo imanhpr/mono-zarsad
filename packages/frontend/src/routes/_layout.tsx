@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import PanelContainer from "../components/Panel-Container";
-import { useContext } from "react";
-import { AuthContext } from "../context/contexts";
+import { useSelector } from "react-redux";
+import { AuthState } from "../store/auth.slice";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
@@ -9,8 +9,10 @@ export const Route = createFileRoute("/_layout")({
 
 function RouteComponent() {
   const navigate = Route.useNavigate();
-  const { accessToken } = useContext(AuthContext);
-  if (accessToken === null) {
+  const accessToken = useSelector(
+    (state: { auth: AuthState }) => state.auth.accessToken
+  );
+  if (!accessToken) {
     return navigate({ from: Route.fullPath, to: "/auth/login" });
   }
   return (

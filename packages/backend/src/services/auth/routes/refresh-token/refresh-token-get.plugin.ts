@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import vine from "@vinejs/vine";
+import * as luxon from "luxon";
 
 export default function refreshTokenGetPlugin(
   fastify: FastifyInstance,
@@ -21,8 +22,9 @@ export default function refreshTokenGetPlugin(
       if (sid) {
         const result = await service.refreshToken(sid);
         rep.setCookie("session-id", result.refreshToken.id, {
-          path: "/auth",
+          // path: "/auth",
           httpOnly: true,
+          expires: luxon.DateTime.now().plus({ days: 4 }).toJSDate(),
         });
         return result.accessToken;
       }

@@ -7,33 +7,49 @@ import {
 import BaseAuthPage from "../../components/Base-Auth";
 import { useRef, useState } from "react";
 import { phoneNumberSliceActions } from "../../store/verify-phone-number.slice";
-import { useDispatch } from "react-redux";
-import Captcha from "../../components/Captcha";
+import { motion } from "motion/react";
+import { store } from "../../store";
+import { useAppDispatch } from "../../hooks/redux-hooks";
+import DuolingoButton from "../../components/DuolingoButton";
+import DuolingoInput from "../../components/DuolingoInput";
+import { LoginRequestPayloadSchema } from "../../schema/LoginResponse.schema";
 
 export const Route = createFileRoute("/auth/login/")({
   component: LoginPage,
-  beforeLoad(ctx) {
-    if (ctx.context.auth?.accessToken) {
+  beforeLoad() {
+    const st = store.getState();
+    if (st.auth.accessToken) {
       throw redirect({ to: "/", replace: true });
     }
   },
 });
 function LoginPage() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigator = useNavigate();
+  const [errMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const phoneNumber = useRef<HTMLInputElement>(null);
   const { zarAPI } = Route.useRouteContext();
 
-  const [showError, setShowError] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-
   function submitHandler(e: React.FormEvent) {
     e.preventDefault();
-    if (!captchaToken) return setShowError(true);
-    const validPhoneNumber = `+${phoneNumber.current?.value}`;
-    const response = zarAPI.login(validPhoneNumber, captchaToken);
-    response.then(() => {
-      dispatch(phoneNumberSliceActions.insert(validPhoneNumber));
+    if (phoneNumber === null) throw Error("Something bad happened");
+    const rawPhoneNumberValue = phoneNumber.current?.value;
+    const parseResult = LoginRequestPayloadSchema.safeParse({
+      phoneNumber: rawPhoneNumberValue,
+    });
+    console.log("objectddd", parseResult);
+
+    if (!parseResult.success) {
+      setErrorMessage(parseResult.error.errors.map((e) => e.message)[0]);
+      return;
+    }
+    setErrorMessage(undefined);
+    zarAPI.login(parseResult.data.phoneNumber).then((result) => {
+      if (result && result.status === "failed") {
+        setErrorMessage(result.message);
+        return;
+      }
+      dispatch(phoneNumberSliceActions.insert(parseResult.data.phoneNumber));
       navigator({
         from: Route.fullPath,
         to: "/auth/$method/verify",
@@ -42,42 +58,38 @@ function LoginPage() {
       });
     });
   }
+
   return (
     <BaseAuthPage title="ورود به سامانه">
-      <form onSubmit={submitHandler} className="flex flex-col space-y-4">
-        <div className="flex flex-col space-y-2">
-          <label htmlFor="" className="text-right">
-            موبایل
-          </label>
-          <input
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1 },
+        }}
+      >
+        <form onSubmit={submitHandler} className="flex flex-col space-y-4">
+          <DuolingoInput
+            label="موبایل"
+            placeholder="شماره موبایل"
+            disabled={false}
+            className="placeholder-shown:text-right fa-numeric-mono"
+            btnDir="ltr"
+            containerDir="rtl"
             ref={phoneNumber}
-            type="number"
-            className="py-1 border border-yellow-400 rounded-md focus:outline-none text-xl text-center"
-            placeholder="0902"
-            defaultValue="98"
+            error={errMessage}
           />
-        </div>
-        <div dir="rtl" className="flex flex-col justify-center items-center">
-          <Captcha onSubmit={setCaptchaToken} />
-          {showError && (
-            <p className="text-red-500">لطفا کپچا را به درستی انجام دهید.</p>
-          )}
-        </div>
-        <div className="flex">
-          <button
-            className="bg-yellow-400 hover:bg-yellow-500 px-4 py-1 border rounded-md w-full text-md duration-150 cursor-pointer"
-            type="submit"
-          >
-            ارسال پیامک
-          </button>
-        </div>
-        <div className="flex md:flex-row-reverse flex-col justify-between items-center mt-6">
-          <p>هنوز ثبت‌نام نکرده‌اید؟</p>
-          <Link to="/auth/register" className="font-bold text-yellow-600">
-            ساخت حساب کاربری
-          </Link>
-        </div>
-      </form>
+          <DuolingoButton>ارسال پیامک</DuolingoButton>
+          <div className="flex md:flex-row-reverse flex-col justify-between items-center mt-6">
+            <p>هنوز ثبت‌نام نکرده‌اید؟</p>
+            <Link to="/auth/register" className="font-bold text-yellow-600">
+              ساخت حساب کاربری
+            </Link>
+          </div>
+        </form>
+      </motion.div>
     </BaseAuthPage>
   );
 }

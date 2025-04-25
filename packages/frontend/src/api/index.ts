@@ -1,6 +1,15 @@
-import { type Axios } from "axios";
+import axios, { AxiosResponse, isAxiosError, type Axios } from "axios";
+import { AccessToken, AccessTokenSchema } from "../schema/RefreshToken.schema";
+import {
+  LoginResponse,
+  LoginResponseSchema,
+} from "../schema/LoginResponse.schema";
+import {
+  RegisterResponse,
+  RegisterResponseSchema,
+} from "../schema/RegisterResponse.schema";
 
-export default class ZarAPI {
+export class ZarAPI {
   #axios: Axios;
   constructor(axios: Axios) {
     this.#axios = axios;
@@ -13,18 +22,27 @@ export default class ZarAPI {
 
     this.#axios.defaults.headers.common["Authorization"] = "";
   }
-  async login(phoneNumber: string, captchaToken: string) {
-    const response = await this.#axios.post("/auth/login", {
-      phoneNumber,
-      "arcaptcha-token": captchaToken,
-    });
-    console.log(response.data);
+  async login(phoneNumber: string): Promise<LoginResponse | undefined> {
+    try {
+      const response = await this.#axios.post("/auth/login", {
+        phoneNumber,
+      });
+      const parseResult = await LoginResponseSchema.parseAsync(response.data);
+      return parseResult;
+    } catch (err) {
+      if (isAxiosError(err) && err.status === 400) {
+        const parseResult = await LoginResponseSchema.parseAsync(
+          err.response?.data
+        );
+        return parseResult;
+      }
+    }
   }
-  async refresh() {
+  async refresh(): Promise<AccessToken> {
     const response = await this.#axios.get("/auth/refresh", {
       withCredentials: true,
     });
-    return response;
+    return AccessTokenSchema.parse(response.data);
   }
 
   async getMe() {
@@ -39,7 +57,7 @@ export default class ZarAPI {
     return response;
   }
 
-  async verify(phoneNumber: string, code: string) {
+  async verify(phoneNumber: string, code: string): Promise<AccessToken> {
     const response = await this.#axios.post(
       "/auth/verify",
       {
@@ -48,7 +66,7 @@ export default class ZarAPI {
       },
       { withCredentials: true }
     );
-    return response;
+    return AccessTokenSchema.parse(response.data);
   }
 
   async register(payload: {
@@ -56,9 +74,14 @@ export default class ZarAPI {
     firstName: string;
     lastName: string;
     nationalCode: string;
-  }) {
+  }): Promise<RegisterResponse | undefined> {
     const response = await this.#axios.post("/auth/register", payload);
-    return response;
+    if (response.status === 200) {
+      const parseResult = await RegisterResponseSchema.parseAsync(
+        response.data
+      );
+      if (parseResult.data.isOtpSend === true) return parseResult;
+    }
   }
 
   async userInfo() {
@@ -98,3 +121,9 @@ export default class ZarAPI {
     return response.data;
   }
 }
+
+const BASE_URL = import.meta.env.VITE_API_URL;
+const ax = axios.create({ baseURL: BASE_URL });
+export const zarApiInstance = new ZarAPI(ax);
+
+export default zarApiInstance;
