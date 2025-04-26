@@ -139,7 +139,11 @@ function Index() {
         </div>
       </div>
 
-      <div className="flex flex-col bg-white shadow-lg mt-12 p-4 rounded min-w-full min-h-64">
+      <motion.div
+        initial={{ x: -60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="flex flex-col bg-white shadow-lg mt-12 p-4 rounded min-w-full min-h-64"
+      >
         <div>
           <h1 className="font-extrabold text-2xl">خرید و فروش سریع</h1>
         </div>
@@ -178,15 +182,23 @@ function Index() {
             />
           </div>
         </div>
-      </div>
+      </motion.div>
       <div className="flex md:flex-row flex-col md:gap-x-4 mt-8">
-        <div className="bg-white shadow-lg rounded w-4/6 min-h-82">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white shadow-lg rounded w-4/6 min-h-82"
+        >
           <h2 className="p-4 font-extrabold text-2xl">آخرین تراکنش ها</h2>
           <TransactionReport />
-        </div>
-        <div className="bg-white shadow-lg rounded w-2/6 min-h-82">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white shadow-lg rounded w-2/6 min-h-82"
+        >
           <h2 className="p-4 font-extrabold text-2xl">اطلاعیه ها</h2>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
