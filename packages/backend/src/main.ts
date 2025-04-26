@@ -10,6 +10,7 @@ const app = appFactory();
 UniqueConstraintViolationException;
 app.setErrorHandler(function exceptHandler(err, _, rep) {
   if (err instanceof BusinessOperationException) {
+    console.log("err code: ", err.httpCode);
     rep
       .code(err.httpCode)
       .send(new BusinessOperationResult("failed", err.message, err.input));

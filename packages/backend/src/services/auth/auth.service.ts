@@ -105,49 +105,66 @@ export class AuthService {
     const sessionExpireDate = now.plus(sessionDuration);
     logger.debug({ phoneNumber }, "Try to find otp code");
     const cacheCode = await this.#cache.get<number>(key);
-    if (
-      cacheCode &&
-      timingSafeEqual(Buffer.from(cacheCode.toString()), Buffer.from(code))
-    ) {
-      logger.debug(
-        { key },
-        "otp code has just found. try to delete it from cache"
-      );
-      await this.#cache.delete(key);
-
-      logger.debug({ phoneNumber }, "try to find user by phone number");
-      const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
-      logger.debug("try to create active session for user");
-      const session = await this.#sessionRepo.create(user, userAgent, true);
-      logger.debug("try to create refresh token for user");
-      const refreshToken = this.#refreshTokenRepo.create(
-        session,
-        now.toJSDate(),
-        sessionExpireDate.toJSDate()
-      );
-      logger.debug("try to create access token for user");
-      const accessToken = await this.#createJwtToken(session.user, session);
-      logger.info(
-        "Every thing sound good. return refresh token and access token to user"
-      );
-      return [
-        refreshToken,
-        new BusinessOperationResult(
-          "success",
-          i18next.t("ACCESS_TOKEN_GRANTED"),
-          Object.freeze(accessToken)
-        ),
-      ] as const;
-    }
-    logger.info(
-      { userInputOtpCode: code },
-      "otp code not found for user. return 400 error to user"
-    );
-    throw new BusinessOperationException(
+    const otpError = new BusinessOperationException(
       400,
       i18next.t("OTP_CODE_IS_INVALID"),
       { phoneNumber, code }
     );
+
+    if (!cacheCode) throw otpError;
+
+    let eqCheck: boolean | null = null;
+    try {
+      eqCheck = timingSafeEqual(
+        Buffer.from(cacheCode.toString()),
+        Buffer.from(code)
+      );
+    } catch (err) {
+      logger.error(err);
+      throw otpError;
+    }
+
+    if (!(cacheCode && eqCheck)) {
+      logger.info(
+        { userInputOtpCode: code },
+        "otp code not found for user. return 400 error to user"
+      );
+      throw new BusinessOperationException(
+        400,
+        i18next.t("OTP_CODE_IS_INVALID"),
+        { phoneNumber, code }
+      );
+    }
+
+    logger.debug(
+      { key },
+      "otp code has just found. try to delete it from cache"
+    );
+    await this.#cache.delete(key);
+
+    logger.debug({ phoneNumber }, "try to find user by phone number");
+    const user = await this.#userRepo.findUserByPhoneNumber(phoneNumber);
+    logger.debug("try to create active session for user");
+    const session = await this.#sessionRepo.create(user, userAgent, true);
+    logger.debug("try to create refresh token for user");
+    const refreshToken = this.#refreshTokenRepo.create(
+      session,
+      now.toJSDate(),
+      sessionExpireDate.toJSDate()
+    );
+    logger.debug("try to create access token for user");
+    const accessToken = await this.#createJwtToken(session.user, session);
+    logger.info(
+      "Every thing sound good. return refresh token and access token to user"
+    );
+    return [
+      refreshToken,
+      new BusinessOperationResult(
+        "success",
+        i18next.t("ACCESS_TOKEN_GRANTED"),
+        Object.freeze(accessToken)
+      ),
+    ] as const;
   }
   async register(user: CreateUser) {
     const logger = this.#ctx.get("reqLogger")!;
@@ -211,7 +228,14 @@ export class AuthService {
       refToken.session
     );
 
-    return { refreshToken: newRefToken, accessToken };
+    return [
+      newRefToken,
+      new BusinessOperationResult(
+        "success",
+        i18next.t("ACCESS_TOKEN_GRANTED"),
+        Object.freeze(accessToken)
+      ),
+    ] as const;
   }
 
   async logout(refreshToken: string) {

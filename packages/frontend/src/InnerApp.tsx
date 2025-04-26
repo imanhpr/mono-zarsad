@@ -1,4 +1,4 @@
-import LoadingSpinnerPage from "./components/LoadingSpinner";
+import LoadingSpinnerPage from "./components/LoadingSpinnerPage";
 import { refreshAccessToken } from "./store/auth.slice";
 import { AnimatePresence, motion } from "motion/react";
 import { useAppDispatch, useAppSelector } from "./hooks/redux-hooks";

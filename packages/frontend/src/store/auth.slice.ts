@@ -9,6 +9,7 @@ export type AuthState = {
   };
   accessToken?: string;
   status: "loading" | "idle" | "success";
+  verifyLoginThunkState: "loading" | "idle" | "success";
 };
 
 export const refreshAccessToken = createAsyncThunk<
@@ -19,8 +20,6 @@ export const refreshAccessToken = createAsyncThunk<
   const res = await zarApi.refresh();
   if (res.status === "success") {
     zarApi.setAccessToken(res.data.accessToken);
-  } else {
-    throw new Error("Oh! bad error - 1");
   }
   return res;
 });
@@ -35,14 +34,13 @@ export const verifyLoginRequest = createAsyncThunk<
     const res = await zarApi.verify(phoneNumber, code);
     if (res.status === "success") {
       zarApi.setAccessToken(res.data.accessToken);
-    } else {
-      throw new Error("Oh! bad error - 2");
     }
     return res;
   }
 );
 const initialState: AuthState = {
   status: "idle",
+  verifyLoginThunkState: "idle",
 };
 
 export const authSlice = createSlice({
@@ -62,6 +60,7 @@ export const authSlice = createSlice({
         state.status = "success";
         if (action.payload.status === "success")
           state.accessToken = action.payload.data.accessToken;
+        else state.accessToken = undefined;
       })
       .addCase(refreshAccessToken.rejected, (state) => {
         state.status = "success";
@@ -69,12 +68,16 @@ export const authSlice = createSlice({
 
     builder
       .addCase(verifyLoginRequest.pending, (state) => {
-        state.status = "loading";
+        state.verifyLoginThunkState = "loading";
       })
       .addCase(verifyLoginRequest.fulfilled, (state, action) => {
-        state.status = "success";
+        state.verifyLoginThunkState = "success";
         if (action.payload.status === "success")
           state.accessToken = action.payload.data.accessToken;
+        else state.accessToken = undefined;
+      })
+      .addCase(verifyLoginRequest.rejected, (state) => {
+        state.verifyLoginThunkState = "success";
       });
   },
 });
