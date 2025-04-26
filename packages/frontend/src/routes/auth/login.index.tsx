@@ -37,7 +37,6 @@ function LoginPage() {
     const parseResult = LoginRequestPayloadSchema.safeParse({
       phoneNumber: rawPhoneNumberValue,
     });
-    console.log("objectddd", parseResult);
 
     if (!parseResult.success) {
       setErrorMessage(parseResult.error.errors.map((e) => e.message)[0]);
@@ -54,14 +53,13 @@ function LoginPage() {
         from: Route.fullPath,
         to: "/auth/$method/verify",
         params: { method: "login" },
-        replace: true,
       });
     });
   }
 
   return (
     <BaseAuthPage title="ورود به سامانه">
-      <motion.div
+      <motion.form
         initial="hidden"
         animate="visible"
         exit="exit"
@@ -69,27 +67,27 @@ function LoginPage() {
           hidden: { opacity: 0 },
           visible: { opacity: 1 },
         }}
+        onSubmit={submitHandler}
+        className="flex flex-col space-y-4"
       >
-        <form onSubmit={submitHandler} className="flex flex-col space-y-4">
-          <DuolingoInput
-            label="موبایل"
-            placeholder="شماره موبایل"
-            disabled={false}
-            className="placeholder-shown:text-right fa-numeric-mono"
-            btnDir="ltr"
-            containerDir="rtl"
-            ref={phoneNumber}
-            error={errMessage}
-          />
-          <DuolingoButton>ارسال پیامک</DuolingoButton>
-          <div className="flex md:flex-row-reverse flex-col justify-between items-center mt-6">
-            <p>هنوز ثبت‌نام نکرده‌اید؟</p>
-            <Link to="/auth/register" className="font-bold text-yellow-600">
-              ساخت حساب کاربری
-            </Link>
-          </div>
-        </form>
-      </motion.div>
+        <DuolingoInput
+          label="موبایل"
+          placeholder="شماره موبایل"
+          disabled={false}
+          className="placeholder-shown:text-right fa-numeric-mono"
+          btnDir="ltr"
+          containerDir="rtl"
+          ref={phoneNumber}
+          error={errMessage}
+        />
+        <DuolingoButton>ارسال پیامک</DuolingoButton>
+        <div className="flex md:flex-row-reverse flex-col justify-between items-center mt-6">
+          <p>هنوز ثبت‌نام نکرده‌اید؟</p>
+          <Link to="/auth/register" className="font-bold text-yellow-600">
+            ساخت حساب کاربری
+          </Link>
+        </div>
+      </motion.form>
     </BaseAuthPage>
   );
 }

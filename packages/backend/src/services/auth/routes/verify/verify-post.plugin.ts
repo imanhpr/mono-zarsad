@@ -18,14 +18,17 @@ export default function verifyPostPlugin(
     const rawUserAgent = req.headers["user-agent"];
     const agent = UAParser(rawUserAgent);
     req.log.info({ userAgent: agent, phoneNumber }, "Try to verify otp code");
-    const result = await service.verify(phoneNumber, code, rawUserAgent || "");
+    const [refreshToken, response] = await service.verify(
+      phoneNumber,
+      code,
+      rawUserAgent || ""
+    );
     rep
-      .setCookie("session-id", result.refreshToken.id, {
-        // path: "/auth",
+      .setCookie("session-id", refreshToken.id, {
         httpOnly: true,
-        expires: luxon.DateTime.now().plus({ days: 4 }).toJSDate(),
+        expires: luxon.DateTime.now().plus({ days: 13 }).toJSDate(),
       })
-      .send(result.accessToken);
+      .send(response);
   });
   done();
 }

@@ -13,12 +13,14 @@ export type AuthState = {
 
 export const refreshAccessToken = createAsyncThunk<
   Awaited<ReturnType<InstanceType<typeof ZarAPI>["refresh"]>>,
-  unknown,
+  void,
   { extra: InstanceType<typeof ZarAPI> }
 >("auth/refreshAccessToken", async (_, { extra: zarApi }) => {
   const res = await zarApi.refresh();
-  if (res.accessToken) {
-    zarApi.setAccessToken(res.accessToken);
+  if (res.status === "success") {
+    zarApi.setAccessToken(res.data.accessToken);
+  } else {
+    throw new Error("Oh! bad error - 1");
   }
   return res;
 });
@@ -31,8 +33,10 @@ export const verifyLoginRequest = createAsyncThunk<
   "auth/verify-login-request",
   async ({ phoneNumber, code }, { extra: zarApi }) => {
     const res = await zarApi.verify(phoneNumber, code);
-    if (res.accessToken) {
-      zarApi.setAccessToken(res.accessToken);
+    if (res.status === "success") {
+      zarApi.setAccessToken(res.data.accessToken);
+    } else {
+      throw new Error("Oh! bad error - 2");
     }
     return res;
   }
@@ -56,7 +60,8 @@ export const authSlice = createSlice({
       })
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         state.status = "success";
-        state.accessToken = action.payload.accessToken;
+        if (action.payload.status === "success")
+          state.accessToken = action.payload.data.accessToken;
       })
       .addCase(refreshAccessToken.rejected, (state) => {
         state.status = "success";
@@ -68,7 +73,8 @@ export const authSlice = createSlice({
       })
       .addCase(verifyLoginRequest.fulfilled, (state, action) => {
         state.status = "success";
-        state.accessToken = action.payload.accessToken;
+        if (action.payload.status === "success")
+          state.accessToken = action.payload.data.accessToken;
       });
   },
 });

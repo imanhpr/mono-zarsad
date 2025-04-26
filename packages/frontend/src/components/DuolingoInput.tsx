@@ -21,7 +21,7 @@ export default function DuolingoInput({
   ...props
 }: React.PropsWithChildren<DuolingoInputProps> & {
   className: string;
-  disabled: boolean;
+  disabled?: boolean;
   containerDir: "rtl" | "ltr";
   btnDir: "rtl" | "ltr";
   ref: React.RefObject<HTMLInputElement | null>;
@@ -38,7 +38,10 @@ export default function DuolingoInput({
   return (
     <div
       dir={containerDir}
-      className={clsx("flex flex-col gap-1.5", fullWidth ? "w-full" : "w-auto")}
+      className={clsx(
+        "flex flex-col gap-1.5 w-full",
+        fullWidth ? "w-full" : "w-auto"
+      )}
     >
       {label && (
         <label className="font-medium text-gray-800 text-sm">{label}</label>
@@ -67,10 +70,11 @@ export default function DuolingoInput({
       <AnimatePresence>
         {error && (
           <motion.p
-            initial={{ y: -5 }}
-            animate={{ y: 0 }}
-            exit={{ y: -5 }}
-            className="text-red-500 text-sm"
+            key={error}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="w-1/2 text-red-500 text-sm truncate text-wrap"
           >
             {error}
           </motion.p>

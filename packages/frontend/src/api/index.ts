@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, isAxiosError, type Axios } from "axios";
+import axios, { isAxiosError, type Axios } from "axios";
 import { AccessToken, AccessTokenSchema } from "../schema/RefreshToken.schema";
 import {
   LoginResponse,
@@ -58,15 +58,22 @@ export class ZarAPI {
   }
 
   async verify(phoneNumber: string, code: string): Promise<AccessToken> {
-    const response = await this.#axios.post(
-      "/auth/verify",
-      {
-        phoneNumber,
-        code,
-      },
-      { withCredentials: true }
-    );
-    return AccessTokenSchema.parse(response.data);
+    try {
+      const response = await this.#axios.post(
+        "/auth/verify",
+        {
+          phoneNumber,
+          code,
+        },
+        { withCredentials: true }
+      );
+      return AccessTokenSchema.parse(response.data);
+    } catch (err) {
+      if (isAxiosError(err) && err.status === 400) {
+        return AccessTokenSchema.parse(err.response?.data);
+      }
+      throw err;
+    }
   }
 
   async register(payload: {

@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { store } from "../../store";
 import { verifyLoginRequest } from "../../store/auth.slice";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import DuolingoInput from "../../components/DuolingoInput";
+import DuolingoButton from "../../components/DuolingoButton";
 
 export const Route = createFileRoute("/auth/$method/verify")({
   component: RouteComponent,
@@ -12,7 +14,7 @@ export const Route = createFileRoute("/auth/$method/verify")({
       throw notFound();
     }
     const st = store.getState();
-    if (st.auth.accessToken) {
+    if (st.auth.accessToken || st.phoneNumber.value === undefined) {
       throw redirect({ to: "/", replace: true });
     }
   },
@@ -42,17 +44,16 @@ function RouteComponent() {
   return (
     <BaseAuthPage title={title}>
       <form onSubmit={submitHandler} className="flex flex-col space-y-4">
-        <div className="flex flex-col space-y-2">
-          <label htmlFor="" className="text-right">
-            کد فعال سازی
-          </label>
-          <input
-            ref={codeRef}
-            type="number"
-            className="py-1 border border-yellow-400 rounded-md focus:outline-none text-xl text-center"
-            placeholder="- - - - -"
-          />
-        </div>
+        <DuolingoInput
+          placeholder="-- -- -- -- --"
+          ref={codeRef}
+          type="number"
+          label="کد فعال سازی"
+          className="text-center fa-numeric-mono"
+          btnDir="ltr"
+          containerDir="rtl"
+        />
+
         <span dir="rtl" className="text-gray-500 text-xs">
           لطفا رمز یکبار مصرف پیامک شده به{" "}
           <span dir="ltr" className="font-bold">
@@ -60,14 +61,7 @@ function RouteComponent() {
           </span>{" "}
           را وارد کنید.
         </span>
-        <div className="flex">
-          <button
-            className="bg-yellow-400 hover:bg-yellow-500 px-4 py-1 border rounded-md w-full text-md duration-150 cursor-pointer"
-            type="submit"
-          >
-            ورود به حساب کاربری
-          </button>
-        </div>
+        <DuolingoButton>ورود به حساب کاربری</DuolingoButton>
       </form>
     </BaseAuthPage>
   );

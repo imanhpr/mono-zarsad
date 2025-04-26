@@ -130,7 +130,14 @@ export class AuthService {
       logger.info(
         "Every thing sound good. return refresh token and access token to user"
       );
-      return Object.freeze({ refreshToken, accessToken });
+      return [
+        refreshToken,
+        new BusinessOperationResult(
+          "success",
+          i18next.t("ACCESS_TOKEN_GRANTED"),
+          Object.freeze(accessToken)
+        ),
+      ] as const;
     }
     logger.info(
       { userInputOtpCode: code },
