@@ -5,6 +5,7 @@ import { Fragment, useCallback, useState } from "react";
 import { Decimal } from "decimal.js";
 import num2persian from "num2persian";
 import { LuArrowDown } from "react-icons/lu";
+import { motion } from "motion/react";
 const GOLD_CONST = "4.331802";
 
 function walletpayload(
@@ -83,7 +84,7 @@ export default function OrderForm({
           "flex-col-reverse": orderType === "sell",
         })}
       >
-        <div className="w-3/4">
+        <motion.div layout className="w-3/4">
           <label className="text-xl">تومانء</label>
           <input
             dir="ltr"
@@ -116,11 +117,11 @@ export default function OrderForm({
           {payload.tomanAmount !== "0" && (
             <span>{num2persian(payload.tomanAmount)} تومانء</span>
           )}
-        </div>
-        <div className="bg-amber-400 my-2 p-2 rounded-full">
+        </motion.div>
+        <motion.div layout className="bg-amber-400 my-2 p-2 rounded-full">
           <LuArrowDown size={32} />
-        </div>
-        <div className="w-3/4">
+        </motion.div>
+        <motion.div layout className="w-3/4">
           <label className="text-xl">طلا</label>
           <input
             dir="ltr"
@@ -147,7 +148,7 @@ export default function OrderForm({
           {!new Decimal(payload.goldAmount).eq(0) && (
             <span>{goldAmountText(payload.goldAmount)}</span>
           )}
-        </div>
+        </motion.div>
       </div>
       <button
         onClick={() => onSumbitHandler(requestPayload)}
@@ -169,7 +170,7 @@ function goldAmountText(amount: string) {
   }
 
   if (soot && Number.parseFloat(soot) !== 0) {
-    const sootText = num2persian(soot) + " " + "سوت";
+    const sootText = num2persian(soot) + " " + "میلی";
     sentence.push(sootText);
   }
   return sentence.join(" و ");

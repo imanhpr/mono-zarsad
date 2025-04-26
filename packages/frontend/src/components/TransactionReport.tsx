@@ -8,6 +8,7 @@ import {
   statusMapper,
 } from "../helpers";
 import Badge from "./Badge";
+import { motion } from "motion/react";
 
 type Tabes = "DEPOSIT" | "WITHDRAW" | "EXCHANGE" | "WALLET_TO_WALLET";
 
@@ -26,7 +27,7 @@ export default function TransactionReport() {
   const normalCls =
     "inline-block p-4 hover:border-gray-300 border-transparent border-b-2 rounded-t-lg font-semibold hover:text-gray-600 dark:hover:text-gray-300 hover:cursor-pointer";
   const activeCls =
-    "inline-block p-4 border-b-2 border-blue-600 dark:border-blue-500 rounded-t-lg font-semibold text-blue-600 dark:text-blue-500 hover:cursor-pointer active";
+    "inline-block p-4 rounded-t-lg font-semibold text-blue-600 hover:cursor-pointer active";
 
   return (
     <>
@@ -39,6 +40,12 @@ export default function TransactionReport() {
             >
               واریز
             </button>
+            {activeTab === "DEPOSIT" && (
+              <motion.div
+                layoutId="tabs"
+                className="border-b-2 border-blue-600 w-full"
+              ></motion.div>
+            )}
           </li>
           <li className="me-2">
             <button
@@ -47,6 +54,12 @@ export default function TransactionReport() {
             >
               برداشت
             </button>
+            {activeTab === "WITHDRAW" && (
+              <motion.div
+                layoutId="tabs"
+                className="border-b-2 border-blue-600 w-full"
+              ></motion.div>
+            )}
           </li>
           <li className="me-2">
             <button
@@ -55,6 +68,12 @@ export default function TransactionReport() {
             >
               تبدیل
             </button>
+            {activeTab === "EXCHANGE" && (
+              <motion.div
+                layoutId="tabs"
+                className="border-b-2 border-blue-600 w-full"
+              ></motion.div>
+            )}
           </li>
           <li className="me-2">
             <button
@@ -65,6 +84,12 @@ export default function TransactionReport() {
             >
               کیف به کیف
             </button>
+            {activeTab === "WALLET_TO_WALLET" && (
+              <motion.div
+                layoutId="tabs"
+                className="border-b-2 border-blue-600 w-full"
+              ></motion.div>
+            )}
           </li>
         </ul>
       </div>

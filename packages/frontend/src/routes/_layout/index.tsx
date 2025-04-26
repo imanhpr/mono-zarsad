@@ -17,6 +17,7 @@ import { Line } from "react-chartjs-2";
 import { Point } from "chart.js/auto";
 import OrderForm from "../../components/OrderForm";
 import TransactionReport from "../../components/TransactionReport";
+import { motion } from "motion/react";
 
 ChartJS.register(
   CategoryScale,
@@ -200,7 +201,11 @@ function GradientCard(props: {
 }) {
   const cls = clsx("shadow-2xl p-4 rounded text-white", props.gradient);
   return (
-    <div className={cls}>
+    <motion.div
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className={cls}
+    >
       <div className="flex flex-col items-start gap-4 min-w-64 min-h-32">
         <p className="font-bold text-xl">{props.title}</p>
         <p className="font-black text-4xl">
@@ -213,6 +218,6 @@ function GradientCard(props: {
           <p className="text-gray-200 text-sm">{props.footer}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
