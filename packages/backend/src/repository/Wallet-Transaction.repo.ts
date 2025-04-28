@@ -13,12 +13,15 @@ export class WalletTransactionRepo {
 
   create(
     transactionType: "EXCHANGE" | "WALLET_TO_WALLET" | "SIMPLE",
-    createdAt: Date
+    createdAt: Date,
+    isLockable: boolean,
+    isLock: boolean
   ) {
-    // @ts-expect-error
     return this.#em.create(WalletTransaction, {
       id: ulid(),
       type: transactionType,
+      isLock,
+      isLockable,
       createdAt,
     });
   }

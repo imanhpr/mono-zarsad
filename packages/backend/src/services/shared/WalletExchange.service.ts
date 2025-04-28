@@ -103,11 +103,16 @@ export class WalletExchangeService {
     tomanAmount: string;
     goldAmount: string;
   }) {
+    const transactionTime = new Date();
     const { sourceWallet, targetWallet } = await this.#getAndLockPairOfWallets(
       payload.wallets
     );
-    // @ts-expect-error
-    const walletTransaction = this.#walletTransactionRepo.create("EXCHANGE");
+    const walletTransaction = this.#walletTransactionRepo.create(
+      "EXCHANGE",
+      transactionTime,
+      false,
+      false
+    );
 
     const exchangeCurrencyPrice = await this.#getCurrencyTypeBaseOfOrderType(
       payload.orderType,
