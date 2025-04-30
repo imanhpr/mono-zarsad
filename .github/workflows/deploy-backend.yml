@@ -1,4 +1,4 @@
-name: zarinbyte backend build
+name: zarinbyte backend deploy
 run-name: build and push zarinbyte backend
 
 on: workflow_dispatch
@@ -46,30 +46,30 @@ jobs:
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:${{ github.sha }}"
             "ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest"
 
-  db_migration:
-    needs: build_and_push
-    permissions:
-      packages: read
-    runs-on: ubuntu-latest
-    cancel-timeout-minutes: 1
-    steps:
-      - name: SSH into remote host to run migration
-        uses: appleboy/ssh-action@v1
-        with:
-          key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
-          host: ${{ secrets.MANAGER_SWARM_HOST }}
-          username: ${{ vars.MANAGER_SWARM_USER }}
-          script: |
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker service create --network test-zarinbyte_default --name db-migration --mode replicated-job --replicas 1 \
-            --restart-condition=none -e MIKRO_ORM_DB_USER=${{ secrets.MIKRO_ORM_DB_USER }} \
-            -e MIKRO_ORM_DB_PASSWORD=${{ secrets.MIKRO_ORM_DB_PASSWORD }} \
-            -e MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }} \
-            -e MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }} \
-            -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }} \
-            ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
+  # db_migration:
+  #   needs: build_and_push
+  #   permissions:
+  #     packages: read
+  #   runs-on: ubuntu-latest
+  #   cancel-timeout-minutes: 1
+  #   steps:
+  #     - name: SSH into remote host to run migration
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         key: ${{ secrets.MANAGER_SWARM_PRIVATE_KEY }}
+  #         host: ${{ secrets.MANAGER_SWARM_HOST }}
+  #         username: ${{ vars.MANAGER_SWARM_USER }}
+  #         script: |
+  #           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  #           docker service create --network test-zarinbyte_default --name db-migration --mode replicated-job --replicas 1 \
+  #           --restart-condition=none -e MIKRO_ORM_DB_USER=${{ secrets.MIKRO_ORM_DB_USER }} \
+  #           -e MIKRO_ORM_DB_PASSWORD=${{ secrets.MIKRO_ORM_DB_PASSWORD }} \
+  #           -e MIKRO_ORM_DB_NAME=${{ vars.MIKRO_ORM_DB_NAME }} \
+  #           -e MIKRO_ORM_DB_PORT=${{ vars.MIKRO_ORM_DB_PORT }} \
+  #           -e MIKRO_ORM_DB_HOST=${{ vars.MIKRO_ORM_DB_HOST }} \
+  #           ghcr.io/${{ github.actor }}/zarinbyte-db-migration:latest
   deploy_to_swarm:
-    needs: db_migration
+    needs: build_and_push
     permissions:
       packages: read
     runs-on: ubuntu-latest
