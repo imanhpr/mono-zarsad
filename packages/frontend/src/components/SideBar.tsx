@@ -30,7 +30,6 @@ export default function SideBar() {
       className={`md:hidden inset-0 bg-black opacity-60 fixed ${showSideBar ? "hidden" : "block"} z-10`}
     ></div>
   );
-  console.log(currentPath);
   const OverlayPortal = createPortal(Overlay, document.body);
   const clsNames = clsx(
     "bg-zinc-700 border-slate-300 border-l-1",
