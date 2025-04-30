@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: "ghcr.io/${{ github.actor }}/zarinbyte-backend:${{ github.sha }}"
+          tags: "ghcr.io/${{ github.actor }}/node_backend:${{ github.sha }}"
           file: "./Dockerfile.backend"
 
       - name: db migration cache

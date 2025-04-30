@@ -19,8 +19,8 @@ services:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/certs/:/etc/letsencrypt/:rw
 
-  zarinbyte_backend:
-    image: ghcr.io/imanhpr/zarinbyte-backend:${COMMIT_HASH}
+  node_backend::
+    image: ghcr.io/imanhpr/node_backend:${COMMIT_HASH}
     restart: always
     deploy:
       mode: replicated
@@ -35,11 +35,13 @@ services:
       - NODE_ENV=production
       - APP_PORT=3007
       - npm_package_version=${npm_package_version}
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis_stack
     depends_on:
       - pg-db
 
   pg-db:
-    image: postgres
+    image: postgres:17.4
     environment:
       - POSTGRES_PASSWORD=testpass
       - POSTGRES_DB=zarsad-db
@@ -49,4 +51,5 @@ services:
       timeout: 60s
       retries: 5
       start_period: 80s
-
+  redis_stack:
+   image: redis/redis-stack-server:7.4.0-v3
