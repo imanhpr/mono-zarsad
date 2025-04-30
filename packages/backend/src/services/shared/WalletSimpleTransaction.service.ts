@@ -42,7 +42,9 @@ export default class WithdrawService {
 
     const walletTransaction = await this.#walletTransactionRepo.create(
       "SIMPLE",
-      transactionTime
+      transactionTime,
+      false,
+      false
     );
 
     let transactionType:
