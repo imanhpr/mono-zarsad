@@ -1,8 +1,5 @@
 import { FastifyInstance } from "fastify";
-import userPasswordAuth from "../../plugins/user-password-auth/index.ts";
-import Admin from "../../models/Admin.entity.ts";
 import passwordServicePlugin from "../../plugins/password/index.ts";
-import AdminSession from "../../models/Admin-Session.entity.ts";
 import createUserPostPlugin from "./routes/user/create-user-post.ts";
 import getLatestUsersPlugin from "./routes/user/latest-users-get.ts";
 import deleteUserPlugin from "./routes/user/delete-user.ts";
@@ -13,6 +10,8 @@ import adminGurdHook from "../../hooks/admin-gurd-hook.ts";
 import createTransactionPostPlugin from "./routes/transaction/create-transaction-post.ts";
 import getUserTransactionsPlugin from "./routes/transaction/get-user-transaction.ts";
 import finalizeTransactionPostPlugin from "./routes/transaction/finalize-transaction-post.plugin.ts";
+import adminAuthLoginPostPlugin from "./routes/auth/login-post.plugin.ts";
+import adminRefreshTokenGetPlugin from "./routes/auth/refresh-get.plugin.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -20,20 +19,18 @@ export default function adminRoutesPlugin(
   done: (err?: Error) => void
 ) {
   const config = { prefix: "user" };
+  const authPrefix = { prefix: "auth" };
 
   fastify
     .register(adminGurdHook)
-    .register(passwordServicePlugin)
-    .register(userPasswordAuth, {
-      entityRef: Admin,
-      sessionRef: AdminSession,
-    })
+    .register(adminAuthLoginPostPlugin, authPrefix)
+    .register(adminRefreshTokenGetPlugin, authPrefix)
     .register(createUserPostPlugin, config)
     .register(getLatestUsersPlugin, config)
     .register(deleteUserPlugin, config)
     .register(updateUserPutPlugin, config)
     .register(getUserByFilterPlugin, config)
-    .register(adminMeGetPlugin, { prefix: "auth" })
+    .register(adminMeGetPlugin, authPrefix)
     .register(createTransactionPostPlugin)
     .register(getUserTransactionsPlugin)
     .register(finalizeTransactionPostPlugin);

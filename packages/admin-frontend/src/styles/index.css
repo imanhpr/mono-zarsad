@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+
+    @font-face {
+        font-family: 'IRANYekanXVF';
+        src: url('fonts/IRANYekanXVF.woff') format('woff-variations'),
+            /* will be the standard and works in Safari now */
+            url('fonts/IRANYekanXVF.woff') format('woff');
+        /* for the other supporting browsers */
+        font-weight: 100 1000;
+        font-display: fallback;
+
+
+        @font-face {
+            font-family: IRANYekanX;
+            src: url('fonts/IRANYekanX-Regular.woff') format('woff');
+        }
+
+        @font-face {
+            font-family: IRANYekanX;
+            src: url('fonts/IRANYekanX-Bold.woff') format('woff');
+            font-weight: 700;
+        }
+    }
+
+    body {
+        font-family: 'IRANYekanXVF', IRANYekanX, tahoma;
+    }
+
+    @supports (font-variation-settings: normal) {
+        body {
+            font-family: 'IRANYekanXVF', tahoma;
+        }
+    }
+}
+
+@utility dot-4 {
+    font-variation-settings: "dots"4
+}
+
+@utility dot-3 {
+    font-variation-settings: "dots"3
+}
+
+@utility dot-2 {
+    font-variation-settings: "dots"2
+}
+
+@utility dot-1 {
+    font-variation-settings: "dots"1
+}
+
+@utility dot-0 {
+    font-variation-settings: "dots"0
+}
+
+@utility fa-numeric {
+    -moz-font-feature-settings: "ss02";
+    -webkit-font-feature-settings: "ss02";
+    font-feature-settings: "ss02";
+}
+
+@utility fa-numeric-mono {
+    -moz-font-feature-settings: "ss03";
+    -webkit-font-feature-settings: "ss03";
+    font-feature-settings: "ss03";
+}

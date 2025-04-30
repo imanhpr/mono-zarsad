@@ -12,12 +12,20 @@ export default fp(
       keys: [],
       auth(key, req) {
         const { promise, resolve, reject } = Promise.withResolvers<boolean>();
-        fastify.jwt.verify(key, async (err, result) => {
+        fastify.jwt.verify(key, async (err, result: unknown) => {
           if (err) reject(err);
-          if (result) {
+          if (
+            typeof result === "object" &&
+            result !== null &&
+            "type" in result &&
+            typeof result.type === "string" &&
+            result.type === "admin" &&
+            "adminId" in result &&
+            typeof result.adminId === "number"
+          ) {
             const user = await fastify.adminRepo.findById(
               // TODO: Add type safety
-              result.id
+              result.adminId
             );
             req.user = user;
             return resolve(true);

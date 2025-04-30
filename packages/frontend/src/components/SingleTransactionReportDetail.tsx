@@ -66,9 +66,11 @@ function ExchangeTransactionDetail({ data }: { data: any }) {
           <td className="px-4 py-2">
             {dateIntl.format(new Date(data.transactionReport.createdAt))}
           </td>
-          <td className="px-4 py-2">
-            {dateIntl.format(new Date(data.transactionReport.finalizeAt))}
-          </td>
+          {data.transactionReport.finalizeAt && (
+            <td className="px-4 py-2">
+              {dateIntl.format(new Date(data.transactionReport.finalizeAt))}
+            </td>
+          )}
         </tr>
       </tbody>
     </table>
@@ -102,9 +104,11 @@ function SimpleTransactionDetail({ data }: { data: any }) {
           <td>
             <Badge color={status?.color}>{status?.text}</Badge>
           </td>
-          <td className="px-4 py-2">
-            {dateIntl.format(new Date(data.transactionReport.createdAt))}
-          </td>
+          {
+            <td className="px-4 py-2">
+              {dateIntl.format(new Date(data.transactionReport.createdAt))}
+            </td>
+          }
         </tr>
       </tbody>
     </table>

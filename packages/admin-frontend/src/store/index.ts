@@ -1,13 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
-import updateUserSlice from "./update-user.slice";
-import { userAuthSlice } from "./auth.slice";
+import { authSlice } from "./auth.slice";
+import adminZarApiInstance from "../api";
 
-const store = configureStore({
-  reducer: {
-    // Add the slice to the store
-    updateUser: updateUserSlice.reducer,
-    userAuth: userAuthSlice.reducer,
+export const store = configureStore({
+  devTools: true,
+  reducer: { auth: authSlice.reducer },
+  middleware(getDefaultMiddleware) {
+    return getDefaultMiddleware({
+      thunk: {
+        extraArgument: adminZarApiInstance,
+      },
+    });
   },
 });
 
-export default store;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = AppStore["dispatch"];
+export type AppStore = typeof store;

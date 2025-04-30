@@ -16,7 +16,6 @@ import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as InvoiceTransactionIdImport } from './routes/invoice.$transactionId'
 import { Route as LayoutAboutImport } from './routes/_layout/about'
 import { Route as AuthRegisterIndexImport } from './routes/auth/register.index'
-import { Route as AuthLogoutIndexImport } from './routes/auth/logout.index'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as AuthMethodVerifyImport } from './routes/auth/$method.verify'
 import { Route as LayoutReportTransactionIdIndexImport } from './routes/_layout/report/transaction.$id.index'
@@ -49,12 +48,6 @@ const LayoutAboutRoute = LayoutAboutImport.update({
 const AuthRegisterIndexRoute = AuthRegisterIndexImport.update({
   id: '/auth/register/',
   path: '/auth/register/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AuthLogoutIndexRoute = AuthLogoutIndexImport.update({
-  id: '/auth/logout/',
-  path: '/auth/logout/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -123,13 +116,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginIndexImport
       parentRoute: typeof rootRoute
     }
-    '/auth/logout/': {
-      id: '/auth/logout/'
-      path: '/auth/logout'
-      fullPath: '/auth/logout'
-      preLoaderRoute: typeof AuthLogoutIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/auth/register/': {
       id: '/auth/register/'
       path: '/auth/register'
@@ -171,7 +157,6 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
-  '/auth/logout': typeof AuthLogoutIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
   '/report/transaction/$id': typeof LayoutReportTransactionIdIndexRoute
 }
@@ -182,7 +167,6 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login': typeof AuthLoginIndexRoute
-  '/auth/logout': typeof AuthLogoutIndexRoute
   '/auth/register': typeof AuthRegisterIndexRoute
   '/report/transaction/$id': typeof LayoutReportTransactionIdIndexRoute
 }
@@ -195,7 +179,6 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/auth/$method/verify': typeof AuthMethodVerifyRoute
   '/auth/login/': typeof AuthLoginIndexRoute
-  '/auth/logout/': typeof AuthLogoutIndexRoute
   '/auth/register/': typeof AuthRegisterIndexRoute
   '/_layout/report/transaction/$id/': typeof LayoutReportTransactionIdIndexRoute
 }
@@ -209,7 +192,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/$method/verify'
     | '/auth/login'
-    | '/auth/logout'
     | '/auth/register'
     | '/report/transaction/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -219,7 +201,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/$method/verify'
     | '/auth/login'
-    | '/auth/logout'
     | '/auth/register'
     | '/report/transaction/$id'
   id:
@@ -230,7 +211,6 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/auth/$method/verify'
     | '/auth/login/'
-    | '/auth/logout/'
     | '/auth/register/'
     | '/_layout/report/transaction/$id/'
   fileRoutesById: FileRoutesById
@@ -241,7 +221,6 @@ export interface RootRouteChildren {
   InvoiceTransactionIdRoute: typeof InvoiceTransactionIdRoute
   AuthMethodVerifyRoute: typeof AuthMethodVerifyRoute
   AuthLoginIndexRoute: typeof AuthLoginIndexRoute
-  AuthLogoutIndexRoute: typeof AuthLogoutIndexRoute
   AuthRegisterIndexRoute: typeof AuthRegisterIndexRoute
 }
 
@@ -250,7 +229,6 @@ const rootRouteChildren: RootRouteChildren = {
   InvoiceTransactionIdRoute: InvoiceTransactionIdRoute,
   AuthMethodVerifyRoute: AuthMethodVerifyRoute,
   AuthLoginIndexRoute: AuthLoginIndexRoute,
-  AuthLogoutIndexRoute: AuthLogoutIndexRoute,
   AuthRegisterIndexRoute: AuthRegisterIndexRoute,
 }
 
@@ -268,7 +246,6 @@ export const routeTree = rootRoute
         "/invoice/$transactionId",
         "/auth/$method/verify",
         "/auth/login/",
-        "/auth/logout/",
         "/auth/register/"
       ]
     },
@@ -296,9 +273,6 @@ export const routeTree = rootRoute
     },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
-    },
-    "/auth/logout/": {
-      "filePath": "auth/logout.index.tsx"
     },
     "/auth/register/": {
       "filePath": "auth/register.index.tsx"

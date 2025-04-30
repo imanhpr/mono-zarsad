@@ -24,7 +24,7 @@ import userGuardHook from "./hooks/user-guard.hook.ts";
 import userPlugin from "./services/user/user.plugin.ts";
 import adminPlugin from "./services/admin/admin.plugin.ts";
 import AdminRepo from "./repository/Admin.repo.ts";
-import AdminSessionRepo from "./repository/Admin-Session.repo.ts";
+import AdminSessionRepoPlugin from "./repository/Admin-Session.repo.ts";
 import currencyPlugin from "./services/currency/currency.plugin.ts";
 import CurrencyPriceRepo from "./repository/Currency-Price.repo.ts";
 import CurrencyTypeRepo from "./repository/Currency-Type.repo.ts";
@@ -45,6 +45,7 @@ import paymentModulePlugin from "./services/payment/index.ts";
 import RefreshTokenRepoPlugin from "./repository/Refresh-Token.repo.ts";
 
 import { randomUUID } from "node:crypto";
+import passwordServicePlugin from "./plugins/password/index.ts";
 export default function appFactory() {
   const app = Fastify({
     logger: {
@@ -89,7 +90,7 @@ export default function appFactory() {
     .register(UserRepo)
     .register(AdminRepo)
     .register(UserSessionRepo)
-    .register(AdminSessionRepo)
+    .register(AdminSessionRepoPlugin)
     .register(CurrencyPriceRepo)
     .register(CurrencyTypeRepo)
     .register(WalletAudiRepo)
@@ -102,6 +103,7 @@ export default function appFactory() {
     .register(RefreshTokenRepoPlugin)
     // Business Logics
     .register(sharedServicePlugin)
+    .register(passwordServicePlugin)
     .register(authPlugin, { prefix: "auth" })
     .register(userPlugin, { prefix: "user" })
     .register(adminPlugin, { prefix: "admin" })

@@ -1,35 +1,41 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import type { UserAPI, AuthApi, TransactionAPI } from "../api";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { AdminZarApi } from "../api";
+import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { userAuthActions } from "../store/auth.slice";
+import { adminRefreshTokenThunk } from "../store/auth.slice";
 
-export const Route = createRootRouteWithContext<{
-  userAPI: UserAPI;
-  authAPI: AuthApi;
-  transactionAPI: TransactionAPI;
-}>()({
-  component: RouteComponent,
+type MyContext = {
+  adminApi: InstanceType<typeof AdminZarApi>;
+};
+export const Route = createRootRouteWithContext<MyContext>()({
+  component: RouteComponenet,
 });
 
-function RouteComponent() {
-  const dispatch = useDispatch();
-  const authAPI = Route.useRouteContext({ select: (t) => t.authAPI });
+function RouteComponenet() {
+  const authState = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const navigate = Route.useNavigate();
   useEffect(() => {
-    authAPI
-      .refreshToken()
-      .then((token) => {
-        dispatch(userAuthActions.setAccessToken(token));
-        return authAPI.me(token);
-      })
-      .then((me) => {
-        dispatch(userAuthActions.setUser(me));
-      });
-  }, []);
+    dispatch(adminRefreshTokenThunk());
+  }, [dispatch]);
+  // if (
+  //   !authState.accessToken &&
+  //    ["success" , "failed"].includes(authState.refreshTokenRequest.state)
+  // ) {
+  //   navigate({ to: "/auth/login" });
+  // }
+
   return (
     <>
       <Outlet />
+      {/* {authState.refreshTokenRequest.state === "loading" ? (
+        <div>
+          <p>loading ...</p>
+        </div>
+      ) : (
+        <Outlet />
+      )} */}
       <TanStackRouterDevtools />
     </>
   );
