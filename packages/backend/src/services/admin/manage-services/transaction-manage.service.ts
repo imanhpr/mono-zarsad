@@ -118,19 +118,33 @@ export class TransactionManageService {
   }
 }
 
-export default fp(function transactionManageServicePlugin(fastify, _, done) {
-  // TODO: Validate Deps
-  const transactionManageService = new TransactionManageService(
-    fastify.walletAudiRepo,
-    fastify.walletRepo,
-    fastify.profileRepo,
-    fastify.walletExchangeService,
-    fastify.walletTransactionRepo,
-    fastify.simpleWalletTransactionRepo
-  );
-  fastify.decorate("transactionManageService", transactionManageService);
-  done();
-});
+export default fp(
+  function transactionManageServicePlugin(fastify, _, done) {
+    const transactionManageService = new TransactionManageService(
+      fastify.walletAudiRepo,
+      fastify.walletRepo,
+      fastify.profileRepo,
+      fastify.walletExchangeService,
+      fastify.walletTransactionRepo,
+      fastify.simpleWalletTransactionRepo
+    );
+    fastify.decorate("transactionManageService", transactionManageService);
+    done();
+  },
+  {
+    name: "transactionManageServicePlugin",
+    decorators: {
+      fastify: [
+        "walletAudiRepo",
+        "walletRepo",
+        "profileRepo",
+        "walletExchangeService",
+        "walletTransactionRepo",
+        "simpleWalletTransactionRepo",
+      ],
+    },
+  }
+);
 
 declare module "fastify" {
   export interface FastifyInstance {

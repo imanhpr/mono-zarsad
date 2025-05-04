@@ -1,3 +1,4 @@
+import * as luxon from "luxon";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/postgresql";
 import type { EntityManager as CoreEM } from "@mikro-orm/postgresql";
 import fp from "fastify-plugin";
@@ -95,6 +96,19 @@ export class UserRepo {
     return this.#em.findOneOrFail(User, id, {
       populate: ["wallets", "wallets.currencyType"],
     });
+  }
+
+  async findUserCount(lastWeekEnd: Date) {
+    const lastWeekUserCountPromise = this.#em.count(User, {
+      createdAt: { $lte: lastWeekEnd },
+    });
+    const currentUserCountPromise = this.#em.count(User);
+
+    const [currentUserCount, lastWeekUserCount] = await Promise.all([
+      currentUserCountPromise,
+      lastWeekUserCountPromise,
+    ]);
+    return Object.freeze({ currentUserCount, lastWeekUserCount });
   }
 }
 

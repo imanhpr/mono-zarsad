@@ -8,11 +8,23 @@ import {
   IRefreshTokenResponseSchema,
   RefreshTokenResponseSchema,
 } from "../schema/RefreshToken.schema";
+import {
+  DashboardPageInfoSchema,
+  IDashboardPageInfoSchema,
+} from "../schema/Dashboard.schema";
 
 export class AdminZarApi {
   #ax: AxiosInstance;
   constructor(ax: AxiosInstance) {
     this.#ax = ax;
+  }
+
+  setAccessToken(token: string | null) {
+    if (token)
+      return (this.#ax.defaults.headers.common["Authorization"] =
+        `Bearer ${token}`);
+
+    this.#ax.defaults.headers.common["Authorization"] = "";
   }
   async login(payload: ILoginFormSchema): Promise<ILoginResponseSchema> {
     try {
@@ -46,6 +58,12 @@ export class AdminZarApi {
       }
       throw err;
     }
+  }
+
+  async dashBoardInfo(): Promise<IDashboardPageInfoSchema> {
+    const response = await this.#ax.get("/page/dashboard");
+    const parse = await DashboardPageInfoSchema.parseAsync(response.data);
+    return parse;
   }
 }
 

@@ -2,9 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BsFillPeopleFill } from "react-icons/bs";
 export const Route = createFileRoute("/_layout/_top-layout/")({
   component: Index,
+  async loader(ctx) {
+    const api = ctx.context.adminApi;
+    const result = await api.dashBoardInfo();
+    return result;
+  },
 });
 
 function Index() {
+  const pageInfo = Route.useLoaderData();
   const intlNormalNumber = new Intl.NumberFormat("fa-IR");
   return (
     <div dir="rtl" className="flex justify-start m-6">
@@ -20,10 +26,17 @@ function Index() {
           dir="rtl"
           className="flex flex-col items-start mx-8 font-bold text-3xl fa-numeric"
         >
-          <p>{intlNormalNumber.format(1234)}</p>
+          <p>
+            {intlNormalNumber.format(pageInfo.userCountInfo.currentUserCount)}
+          </p>
           <p className="flex items-center gap-x-1 text-muted-foreground text-sm">
-            <span dir="ltr" className="flex items-center mr-1 text-green-500">
-              +{intlNormalNumber.format(20.1)}%
+            <span
+              dir="ltr"
+              className="flex items-center mr-1 text-green-500 fa-numeric-mono"
+            >
+              +
+              {intlNormalNumber.format(pageInfo.userCountInfo.growthPercentage)}
+              %
             </span>
             <span className="font-medium text-gray-400">از ماه قبل</span>
           </p>

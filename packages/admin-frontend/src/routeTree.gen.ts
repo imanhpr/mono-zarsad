@@ -15,6 +15,7 @@ import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutTopLayoutImport } from './routes/_layout/_top-layout'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutTopLayoutIndexImport } from './routes/_layout/_top-layout/index'
+import { Route as LayoutTopLayoutUserIndexImport } from './routes/_layout/_top-layout/user/index'
 
 // Create/Update Routes
 
@@ -37,6 +38,12 @@ const AuthLoginIndexRoute = AuthLoginIndexImport.update({
 const LayoutTopLayoutIndexRoute = LayoutTopLayoutIndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => LayoutTopLayoutRoute,
+} as any)
+
+const LayoutTopLayoutUserIndexRoute = LayoutTopLayoutUserIndexImport.update({
+  id: '/user/',
+  path: '/user/',
   getParentRoute: () => LayoutTopLayoutRoute,
 } as any)
 
@@ -72,6 +79,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/_top-layout/user/': {
+      id: '/_layout/_top-layout/user/'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof LayoutTopLayoutUserIndexImport
+      parentRoute: typeof LayoutTopLayoutImport
+    }
   }
 }
 
@@ -79,10 +93,12 @@ declare module '@tanstack/react-router' {
 
 interface LayoutTopLayoutRouteChildren {
   LayoutTopLayoutIndexRoute: typeof LayoutTopLayoutIndexRoute
+  LayoutTopLayoutUserIndexRoute: typeof LayoutTopLayoutUserIndexRoute
 }
 
 const LayoutTopLayoutRouteChildren: LayoutTopLayoutRouteChildren = {
   LayoutTopLayoutIndexRoute: LayoutTopLayoutIndexRoute,
+  LayoutTopLayoutUserIndexRoute: LayoutTopLayoutUserIndexRoute,
 }
 
 const LayoutTopLayoutRouteWithChildren = LayoutTopLayoutRoute._addFileChildren(
@@ -104,12 +120,14 @@ export interface FileRoutesByFullPath {
   '': typeof LayoutTopLayoutRouteWithChildren
   '/': typeof LayoutTopLayoutIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/user': typeof LayoutTopLayoutUserIndexRoute
 }
 
 export interface FileRoutesByTo {
   '': typeof LayoutRouteWithChildren
   '/': typeof LayoutTopLayoutIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/user': typeof LayoutTopLayoutUserIndexRoute
 }
 
 export interface FileRoutesById {
@@ -118,19 +136,21 @@ export interface FileRoutesById {
   '/_layout/_top-layout': typeof LayoutTopLayoutRouteWithChildren
   '/_layout/_top-layout/': typeof LayoutTopLayoutIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
+  '/_layout/_top-layout/user/': typeof LayoutTopLayoutUserIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/' | '/auth/login'
+  fullPaths: '' | '/' | '/auth/login' | '/user'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/' | '/auth/login'
+  to: '' | '/' | '/auth/login' | '/user'
   id:
     | '__root__'
     | '/_layout'
     | '/_layout/_top-layout'
     | '/_layout/_top-layout/'
     | '/auth/login/'
+    | '/_layout/_top-layout/user/'
   fileRoutesById: FileRoutesById
 }
 
@@ -168,7 +188,8 @@ export const routeTree = rootRoute
       "filePath": "_layout/_top-layout.tsx",
       "parent": "/_layout",
       "children": [
-        "/_layout/_top-layout/"
+        "/_layout/_top-layout/",
+        "/_layout/_top-layout/user/"
       ]
     },
     "/_layout/_top-layout/": {
@@ -177,6 +198,10 @@ export const routeTree = rootRoute
     },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
+    },
+    "/_layout/_top-layout/user/": {
+      "filePath": "_layout/_top-layout/user/index.tsx",
+      "parent": "/_layout/_top-layout"
     }
   }
 }

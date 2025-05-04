@@ -34,6 +34,9 @@ export const adminLoginThunk = createAsyncThunk<
   Extra
 >("auth/login-request", async function loginRequest(payload, { extra: api }) {
   const result = await api.login(payload);
+  if (result.status === "success") {
+    api.setAccessToken(result.data.accessToken);
+  }
   return result;
 });
 
@@ -45,6 +48,9 @@ export const adminRefreshTokenThunk = createAsyncThunk<
   "auth/refreshToken-request",
   async function refreshTokenRequest(_, { extra: api }) {
     const result = await api.refreshToken();
+    if (result.status === "success") {
+      api.setAccessToken(result.data.accessToken);
+    }
     return result;
   }
 );
@@ -73,11 +79,13 @@ export const authSlice = createSlice({
 
     builder
       .addCase(adminRefreshTokenThunk.pending, (state) => {
+        console.log("1 set loading");
         state.refreshTokenRequest.state = "loading";
       })
       .addCase(adminRefreshTokenThunk.fulfilled, (state, action) => {
+        console.log("2 set sc");
+        state.refreshTokenRequest.state = "success";
         if (action.payload.status === "success") {
-          state.refreshTokenRequest.state = "success";
           state.accessToken = action.payload.data.accessToken;
           return;
         }

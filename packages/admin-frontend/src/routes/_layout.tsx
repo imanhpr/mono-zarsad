@@ -1,10 +1,22 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { BsHouseFill, BsPersonFill, BsPiggyBankFill } from "react-icons/bs";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+  BsHouseFill,
+  BsPersonFill,
+  BsPiggyBankFill,
+  BsGearFill,
+  BsFileEarmarkSpreadsheetFill,
+} from "react-icons/bs";
+import { useAppSelector } from "../hooks/redux-hooks";
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  const nav = Route.useNavigate();
+  if (!accessToken) {
+    return nav({ to: "/auth/login", replace: true });
+  }
   return (
     <div className="flex flex-row min-h-screen">
       <Outlet />
@@ -15,17 +27,51 @@ function RouteComponent() {
           </header>
           <nav className="flex-1">
             <ul className="space-y-2 my-2 px-4 *:transition-all *:cursor-pointer">
-              <li className="flex items-center gap-x-4 bg-amber-500 p-2 rounded-lg font-semibold text-xl">
-                <BsHouseFill className="fill-amber-100" />
-                <p className="text-white">داشبورد</p>
-              </li>
-              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-xl">
-                <BsPersonFill />
-                <p>مدیریت کاربران</p>
-              </li>
-              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-xl">
+              <Link
+                activeProps={{
+                  className:
+                    "block bg-amber-500 rounded-lg text-white fill-amber-100",
+                }}
+                inactiveProps={{
+                  className:
+                    "block hover:bg-amber-100 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg",
+                }}
+                from={Route.fullPath}
+                to="/"
+              >
+                <li className="flex items-center gap-x-4 p-2 rounded-lg font-semibold text-lg">
+                  <BsHouseFill />
+                  داشبورد
+                </li>
+              </Link>
+              <Link
+                activeProps={{
+                  className:
+                    "block bg-amber-500 rounded-lg text-white fill-amber-100",
+                }}
+                inactiveProps={{
+                  className:
+                    "block hover:bg-amber-100 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg",
+                }}
+                from={Route.fullPath}
+                to="/user"
+              >
+                <li className="flex items-center gap-x-4 p-2 rounded-lg font-semibold text-lg">
+                  <BsPersonFill />
+                  کاربران
+                </li>
+              </Link>
+              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
                 <BsPiggyBankFill />
                 <p>مدیریت مالی</p>
+              </li>
+              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
+                <BsFileEarmarkSpreadsheetFill />
+                <p>گزارش گیری</p>
+              </li>
+              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
+                <BsGearFill />
+                <p>تنظیمات سیستم</p>
               </li>
             </ul>
           </nav>

@@ -12,6 +12,7 @@ import getUserTransactionsPlugin from "./routes/transaction/get-user-transaction
 import finalizeTransactionPostPlugin from "./routes/transaction/finalize-transaction-post.plugin.ts";
 import adminAuthLoginPostPlugin from "./routes/auth/login-post.plugin.ts";
 import adminRefreshTokenGetPlugin from "./routes/auth/refresh-get.plugin.ts";
+import dashboardPageGetPlugin from "./routes/page/dashboard-get.plugin.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -33,6 +34,7 @@ export default function adminRoutesPlugin(
     .register(adminMeGetPlugin, authPrefix)
     .register(createTransactionPostPlugin)
     .register(getUserTransactionsPlugin)
-    .register(finalizeTransactionPostPlugin);
+    .register(finalizeTransactionPostPlugin)
+    .register(dashboardPageGetPlugin, { prefix: "page" });
   done();
 }

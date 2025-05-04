@@ -10,8 +10,10 @@ import { store } from "../../store";
 export const Route = createFileRoute("/auth/login/")({
   component: RouteComponent,
   beforeLoad() {
-    const authState = store.getState().auth;
-    if (authState.accessToken) throw redirect({ to: "/" });
+    const state = store.getState();
+    if (state.auth.accessToken) {
+      throw redirect({ from: Route.fullPath, to: "/" });
+    }
   },
 });
 
