@@ -1,12 +1,20 @@
 import { Outlet } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
+import { useContext } from "react";
 import { BsBell, BsList } from "react-icons/bs";
+import { sidebarCtx } from "../../context/ctx";
 
 export const Route = createFileRoute("/_layout/_top-layout")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const ctx = useContext(sidebarCtx);
+
+  function onSidebarToggle() {
+    ctx.toggleDisplay();
+  }
+
   return (
     <div className="w-full">
       <div className="">
@@ -14,7 +22,10 @@ function RouteComponent() {
           <div className="p-2">
             <BsBell size={22} />
           </div>
-          <div className="p-2">
+          <div
+            onClick={onSidebarToggle}
+            className="md:hidden p-2 cursor-pointer"
+          >
             <BsList size={22} />
           </div>
         </div>

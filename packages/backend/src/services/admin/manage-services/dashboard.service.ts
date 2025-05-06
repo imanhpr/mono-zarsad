@@ -1,11 +1,17 @@
 import fp from "fastify-plugin";
 import { type UserRepo } from "../../../repository/User.repo.ts";
 import * as luxon from "luxon";
+import { WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
 
 export class AdminDashboardService {
   #userRepo;
-  constructor(userRepo: UserRepo) {
+  #walletTransactionRepo: WalletTransactionRepo;
+  constructor(
+    userRepo: UserRepo,
+    walletTransactionRepo: WalletTransactionRepo
+  ) {
     this.#userRepo = userRepo;
+    this.#walletTransactionRepo = walletTransactionRepo;
   }
 
   async userCountAndGrowthInfo() {
@@ -21,22 +27,34 @@ export class AdminDashboardService {
 
     return Object.freeze({ growthPercentage, ...result });
   }
+
+  transactionCountInfo() {
+    return this.#walletTransactionRepo.countAllTransactions();
+  }
   async getData() {
     const userCountInfo = await this.userCountAndGrowthInfo();
+    const walletTransactionInfo = await this.transactionCountInfo();
     return Object.freeze({
       userCountInfo,
+      walletTransactionInfo,
     });
   }
 }
 
 export default fp(
   function adminDashboardServicePlugin(fastify, _, done) {
-    const adminDashboardService = new AdminDashboardService(fastify.userRepo);
+    const adminDashboardService = new AdminDashboardService(
+      fastify.userRepo,
+      fastify.walletTransactionRepo
+    );
     fastify.decorate("adminDashboardService", adminDashboardService);
     done();
   },
   {
     name: "adminDashboardServicePlugin",
+    decorators: {
+      fastify: ["walletTransactionRepo", "userRepo"],
+    },
   }
 );
 

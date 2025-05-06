@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BsFillPeopleFill } from "react-icons/bs";
+import { BsCurrencyExchange, BsFillPeopleFill } from "react-icons/bs";
+import DashboardCard from "../../../components/DashboardCard";
 export const Route = createFileRoute("/_layout/_top-layout/")({
   component: Index,
   async loader(ctx) {
@@ -11,37 +12,23 @@ export const Route = createFileRoute("/_layout/_top-layout/")({
 
 function Index() {
   const pageInfo = Route.useLoaderData();
-  const intlNormalNumber = new Intl.NumberFormat("fa-IR");
   return (
-    <div dir="rtl" className="flex justify-start m-6">
-      <div
-        className="flex flex-col gap-y-2 shadow-sm p-6 border border-gray-300 rounded lg:w-86"
-        dir="rtl"
-      >
-        <header className="flex justify-between mx-8">
-          <h2 className="font-semibold text-base">مشتریان</h2>
-          <BsFillPeopleFill className="fill-gray-500" size={20} />
-        </header>
-        <div
-          dir="rtl"
-          className="flex flex-col items-start mx-8 font-bold text-3xl fa-numeric"
-        >
-          <p>
-            {intlNormalNumber.format(pageInfo.userCountInfo.currentUserCount)}
-          </p>
-          <p className="flex items-center gap-x-1 text-muted-foreground text-sm">
-            <span
-              dir="ltr"
-              className="flex items-center mr-1 text-green-500 fa-numeric-mono"
-            >
-              +
-              {intlNormalNumber.format(pageInfo.userCountInfo.growthPercentage)}
-              %
-            </span>
-            <span className="font-medium text-gray-400">از ماه قبل</span>
-          </p>
-        </div>
-      </div>
+    <div dir="rtl" className="flex justify-start gap-x-4 m-6">
+      <DashboardCard
+        title="مشتریان"
+        Icon={BsFillPeopleFill}
+        currentNumber={pageInfo.userCountInfo.currentUserCount}
+        growthPercentage={pageInfo.userCountInfo.growthPercentage}
+      />
+      <DashboardCard
+        title="تراکنش ها"
+        Icon={BsCurrencyExchange}
+        currentNumber={parseInt(
+          pageInfo.walletTransactionInfo.filter(
+            (transaction) => transaction.type === "ALL"
+          )[0].count
+        )}
+      />
     </div>
   );
 }

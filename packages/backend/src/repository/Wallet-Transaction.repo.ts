@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { EntityManager } from "@mikro-orm/core";
+import { EntityManager, sql } from "@mikro-orm/postgresql";
 import { monotonicFactory } from "ulid";
 import WalletTransaction from "../models/Wallet-Transaction.entity.ts";
 
@@ -31,11 +31,34 @@ export class WalletTransactionRepo {
       id: transactionId,
     });
   }
+
+  async countAllTransactions() {
+    type TransactionType = WalletTransaction["type"] | "ALL";
+    type CountInfo = { type: TransactionType; count: string };
+
+    const transactionsPromise = this.#em
+      .createQueryBuilder(WalletTransaction, "w")
+      .select(["type", sql`count(w.type)`])
+      .groupBy("type")
+      .execute<CountInfo[]>();
+
+    const allTransactionsPromise = this.#em.count(WalletTransaction);
+    const [transactions, allTransactions] = await Promise.all([
+      transactionsPromise,
+      allTransactionsPromise,
+    ] as const);
+
+    const ALL: CountInfo = { type: "ALL", count: allTransactions.toString() };
+    transactions.push(ALL);
+    return transactions;
+  }
 }
 
 export default fp(
   function walletTransactionRepoPlugin(fastify, _, done) {
-    const walletTransactionRepo = new WalletTransactionRepo(fastify.orm.em);
+    const walletTransactionRepo = new WalletTransactionRepo(
+      fastify.orm.em as EntityManager
+    );
     fastify.decorate("walletTransactionRepo", walletTransactionRepo);
     done();
   },
