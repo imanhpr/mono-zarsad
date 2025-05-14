@@ -10,7 +10,7 @@ export class CurrencyTypeRepo {
     this.#em = em;
   }
 
-  async findOneById(id: number) {
+  async findOneById(id: number): Promise<CurrencyType> {
     const result = await this.#em.findOneOrFail(CurrencyType, { id });
     return result;
   }
@@ -20,6 +20,12 @@ export class CurrencyTypeRepo {
   }
   findAll() {
     return this.#em.findAll(CurrencyType);
+  }
+
+  findCurrencyPriceByEnumName(nameList: Readonly<CurrencyTypeEnum[]>) {
+    return this.#em.find(CurrencyType, {
+      name: { $in: nameList },
+    });
   }
 }
 

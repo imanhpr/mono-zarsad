@@ -1,0 +1,15 @@
+meta {
+  name: Current active spread
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3007/admin/spread/current
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoyLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NDcyMjA4NDgsImV4cCI6MTc0NzIyMjY0OH0.KQHEIOCoaZ51ZOZg67GHhuWgiiwGJ48yid_wGztWyOQ
+}

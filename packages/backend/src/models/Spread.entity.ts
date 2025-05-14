@@ -5,7 +5,6 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import type CurrencyPrice from "./Currency-Price.entity.ts";
 
 @Entity()
 export default class Spread {
@@ -20,7 +19,4 @@ export default class Spread {
 
   @Property()
   createdAt = new Date();
-
-  @OneToOne("CurrencyPrice", (c: CurrencyPrice) => c.spread)
-  currencyPrice!: CurrencyPrice;
 }

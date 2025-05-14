@@ -5,15 +5,24 @@ import { CurrencyTypeEnum } from "../types/currency-types.ts";
 
 export class CurrencyTypeSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
-    const gold = em.create(CurrencyType, {
-      name: CurrencyTypeEnum.GOLD_18,
-      name_farsi: "طلا",
+    em.create(CurrencyType, {
+      name: CurrencyTypeEnum.MELTED_GOLD_LOWER_18,
+      name_farsi: "طلا آب شده",
     });
-    const toman = em.create(CurrencyType, {
+
+    em.create(CurrencyType, {
+      name: CurrencyTypeEnum.MELTED_GOLD_NAGHDI_18,
+      name_farsi: "طلا آب شده",
+    });
+
+    em.create(CurrencyType, {
+      name: CurrencyTypeEnum.MELTED_GOLD_BONAK_18,
+      name_farsi: "طلا آب شده",
+    });
+
+    em.create(CurrencyType, {
       name: CurrencyTypeEnum.TOMAN,
       name_farsi: "تومان",
     });
-
-    em.persist([toman, gold]);
   }
 }

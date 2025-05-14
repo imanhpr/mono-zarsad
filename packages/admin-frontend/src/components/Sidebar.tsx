@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useContext } from "react";
 import {
   BsHouseFill,
@@ -6,10 +5,12 @@ import {
   BsPiggyBankFill,
   BsGearFill,
   BsFileEarmarkSpreadsheetFill,
+  BsCurrencyBitcoin,
 } from "react-icons/bs";
 import { sidebarCtx } from "../context/ctx";
 import { clsx } from "clsx";
 import { createPortal } from "react-dom";
+import SidebarLink from "./SidebarLink";
 
 export default function Sidebar() {
   const sidebarContext = useContext(sidebarCtx);
@@ -45,38 +46,14 @@ export default function Sidebar() {
           </header>
           <nav className="flex-1">
             <ul className="space-y-2 my-2 px-4 *:transition-all *:cursor-pointer">
-              <Link
-                activeProps={{
-                  className:
-                    "block bg-amber-500 rounded-lg text-white fill-amber-100",
-                }}
-                inactiveProps={{
-                  className:
-                    "block hover:bg-amber-100 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg",
-                }}
-                to="/"
-              >
-                <li className="flex items-center gap-x-4 p-2 rounded-lg font-semibold text-lg">
-                  <BsHouseFill />
-                  داشبورد
-                </li>
-              </Link>
-              <Link
-                activeProps={{
-                  className:
-                    "block bg-amber-500 rounded-lg text-white fill-amber-100",
-                }}
-                inactiveProps={{
-                  className:
-                    "block hover:bg-amber-100 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg",
-                }}
-                to="/user"
-              >
-                <li className="flex items-center gap-x-4 p-2 rounded-lg font-semibold text-lg">
-                  <BsPersonFill />
-                  کاربران
-                </li>
-              </Link>
+              <SidebarLink title="داشبورد" Icon={BsHouseFill} path="/" />
+              <SidebarLink title="کاربران" Icon={BsPersonFill} path="/user" />
+
+              <SidebarLink
+                title="ارز ها"
+                Icon={BsCurrencyBitcoin}
+                path="/currency"
+              />
               <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
                 <BsPiggyBankFill />
                 <p>مدیریت مالی</p>

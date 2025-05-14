@@ -43,9 +43,12 @@ import SystemInfoRepo from "./repository/System-Info.repo.ts";
 import invoiceModulePlugin from "./services/invoice/invoice.plugin.ts";
 import paymentModulePlugin from "./services/payment/index.ts";
 import RefreshTokenRepoPlugin from "./repository/Refresh-Token.repo.ts";
+import workerPlugin from "./services/workers/worker.plugin.ts";
 
 import { randomUUID } from "node:crypto";
 import passwordServicePlugin from "./plugins/password/index.ts";
+import persianapiServicePlugin from "./plugins/persian-api/persianapi.service.plugin.ts";
+import SpreadRepoPlugin from "./repository/Spread.repo.plugin.ts";
 export default function appFactory() {
   const app = Fastify({
     logger: {
@@ -86,6 +89,7 @@ export default function appFactory() {
     .register(cacheManager)
     .register(smsProvider)
     .register(root)
+    .register(persianapiServicePlugin)
     // Repo
     .register(UserRepo)
     .register(AdminRepo)
@@ -101,6 +105,7 @@ export default function appFactory() {
     .register(SimpleWalletTransactionRepo)
     .register(SystemInfoRepo)
     .register(RefreshTokenRepoPlugin)
+    .register(SpreadRepoPlugin)
     // Business Logics
     .register(sharedServicePlugin)
     .register(passwordServicePlugin)
@@ -110,7 +115,8 @@ export default function appFactory() {
     .register(currencyPlugin, { prefix: "currency" })
     .register(transactionModulePlugin)
     .register(invoiceModulePlugin)
-    .register(paymentModulePlugin);
+    .register(paymentModulePlugin)
+    .register(workerPlugin);
 
   app.addHook("onRequest", (req, _, done) => {
     console.log("-".repeat(10));

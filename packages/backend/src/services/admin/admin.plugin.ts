@@ -4,6 +4,7 @@ import userManageService from "./manage-services/user-manage.service.ts";
 import transactionManageServicePlugin from "./manage-services/transaction-manage.service.ts";
 import { AdminAuthService } from "./auth.service.ts";
 import AdminDashboardServicePlugin from "./manage-services/dashboard.service.ts";
+import currencyManageServicePlugin from "./manage-services/currency.manage.service.plugin.ts";
 
 export default fp<{ prefix: string }>(
   async function fastifyAdminPlugin(fastify, config) {
@@ -18,6 +19,7 @@ export default fp<{ prefix: string }>(
     fastify
       .register(userManageService)
       .register(transactionManageServicePlugin)
+      .register(currencyManageServicePlugin)
       .register(AdminDashboardServicePlugin)
       .register(adminRoutesPlugin, config);
   },

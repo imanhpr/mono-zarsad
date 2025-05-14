@@ -16,6 +16,7 @@ import { Route as LayoutTopLayoutImport } from './routes/_layout/_top-layout'
 import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutTopLayoutIndexImport } from './routes/_layout/_top-layout/index'
 import { Route as LayoutTopLayoutUserIndexImport } from './routes/_layout/_top-layout/user/index'
+import { Route as LayoutTopLayoutCurrencyIndexImport } from './routes/_layout/_top-layout/currency/index'
 
 // Create/Update Routes
 
@@ -46,6 +47,13 @@ const LayoutTopLayoutUserIndexRoute = LayoutTopLayoutUserIndexImport.update({
   path: '/user/',
   getParentRoute: () => LayoutTopLayoutRoute,
 } as any)
+
+const LayoutTopLayoutCurrencyIndexRoute =
+  LayoutTopLayoutCurrencyIndexImport.update({
+    id: '/currency/',
+    path: '/currency/',
+    getParentRoute: () => LayoutTopLayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -79,6 +87,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/_top-layout/currency/': {
+      id: '/_layout/_top-layout/currency/'
+      path: '/currency'
+      fullPath: '/currency'
+      preLoaderRoute: typeof LayoutTopLayoutCurrencyIndexImport
+      parentRoute: typeof LayoutTopLayoutImport
+    }
     '/_layout/_top-layout/user/': {
       id: '/_layout/_top-layout/user/'
       path: '/user'
@@ -93,11 +108,13 @@ declare module '@tanstack/react-router' {
 
 interface LayoutTopLayoutRouteChildren {
   LayoutTopLayoutIndexRoute: typeof LayoutTopLayoutIndexRoute
+  LayoutTopLayoutCurrencyIndexRoute: typeof LayoutTopLayoutCurrencyIndexRoute
   LayoutTopLayoutUserIndexRoute: typeof LayoutTopLayoutUserIndexRoute
 }
 
 const LayoutTopLayoutRouteChildren: LayoutTopLayoutRouteChildren = {
   LayoutTopLayoutIndexRoute: LayoutTopLayoutIndexRoute,
+  LayoutTopLayoutCurrencyIndexRoute: LayoutTopLayoutCurrencyIndexRoute,
   LayoutTopLayoutUserIndexRoute: LayoutTopLayoutUserIndexRoute,
 }
 
@@ -120,6 +137,7 @@ export interface FileRoutesByFullPath {
   '': typeof LayoutTopLayoutRouteWithChildren
   '/': typeof LayoutTopLayoutIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
 }
 
@@ -127,6 +145,7 @@ export interface FileRoutesByTo {
   '': typeof LayoutRouteWithChildren
   '/': typeof LayoutTopLayoutIndexRoute
   '/auth/login': typeof AuthLoginIndexRoute
+  '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
 }
 
@@ -136,20 +155,22 @@ export interface FileRoutesById {
   '/_layout/_top-layout': typeof LayoutTopLayoutRouteWithChildren
   '/_layout/_top-layout/': typeof LayoutTopLayoutIndexRoute
   '/auth/login/': typeof AuthLoginIndexRoute
+  '/_layout/_top-layout/currency/': typeof LayoutTopLayoutCurrencyIndexRoute
   '/_layout/_top-layout/user/': typeof LayoutTopLayoutUserIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/' | '/auth/login' | '/user'
+  fullPaths: '' | '/' | '/auth/login' | '/currency' | '/user'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/' | '/auth/login' | '/user'
+  to: '' | '/' | '/auth/login' | '/currency' | '/user'
   id:
     | '__root__'
     | '/_layout'
     | '/_layout/_top-layout'
     | '/_layout/_top-layout/'
     | '/auth/login/'
+    | '/_layout/_top-layout/currency/'
     | '/_layout/_top-layout/user/'
   fileRoutesById: FileRoutesById
 }
@@ -189,6 +210,7 @@ export const routeTree = rootRoute
       "parent": "/_layout",
       "children": [
         "/_layout/_top-layout/",
+        "/_layout/_top-layout/currency/",
         "/_layout/_top-layout/user/"
       ]
     },
@@ -198,6 +220,10 @@ export const routeTree = rootRoute
     },
     "/auth/login/": {
       "filePath": "auth/login.index.tsx"
+    },
+    "/_layout/_top-layout/currency/": {
+      "filePath": "_layout/_top-layout/currency/index.tsx",
+      "parent": "/_layout/_top-layout"
     },
     "/_layout/_top-layout/user/": {
       "filePath": "_layout/_top-layout/user/index.tsx",

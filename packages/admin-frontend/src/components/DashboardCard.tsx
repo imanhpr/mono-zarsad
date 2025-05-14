@@ -1,4 +1,5 @@
 import { type IconType } from "react-icons";
+import BaseCard from "./BaseContainer";
 
 const intlNormalNumber = new Intl.NumberFormat("fa-IR");
 
@@ -14,10 +15,7 @@ export default function DashboardCard({
   growthPercentage?: number;
 }) {
   return (
-    <div
-      className="flex flex-col gap-y-2 shadow-sm p-6 border border-gray-300 rounded lg:w-86"
-      dir="rtl"
-    >
+    <BaseCard>
       <header className="flex justify-between mx-8">
         <h2 className="font-semibold text-base">{title}</h2>
         <Icon className="fill-gray-500" size={20} />
@@ -39,6 +37,6 @@ export default function DashboardCard({
           </p>
         ) : null}
       </div>
-    </div>
+    </BaseCard>
   );
 }

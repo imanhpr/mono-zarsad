@@ -11,6 +11,7 @@ export default fp(
     await fastify.register(fastifyRedis, {
       host: REDIS_HOST,
       port: parseInt(REDIS_PORT),
+      maxRetriesPerRequest: null,
     });
     const keyVal = new KeyvValkey(fastify.redis as any);
     const keyv = new Keyv<typeof fastify.redis>(

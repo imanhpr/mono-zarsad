@@ -13,6 +13,8 @@ import finalizeTransactionPostPlugin from "./routes/transaction/finalize-transac
 import adminAuthLoginPostPlugin from "./routes/auth/login-post.plugin.ts";
 import adminRefreshTokenGetPlugin from "./routes/auth/refresh-get.plugin.ts";
 import dashboardPageGetPlugin from "./routes/page/dashboard-get.plugin.ts";
+import getLatestCurrencyByTypeIdPlugin from "./routes/currency/currency.get.route.ts";
+import getCurrentActiveSpreadPlugin from "./routes/spread/active-spread.get.route.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -35,6 +37,8 @@ export default function adminRoutesPlugin(
     .register(createTransactionPostPlugin)
     .register(getUserTransactionsPlugin)
     .register(finalizeTransactionPostPlugin)
-    .register(dashboardPageGetPlugin, { prefix: "page" });
+    .register(dashboardPageGetPlugin, { prefix: "page" })
+    .register(getLatestCurrencyByTypeIdPlugin, { prefix: "currency" })
+    .register(getCurrentActiveSpreadPlugin, { prefix: "spread" });
   done();
 }

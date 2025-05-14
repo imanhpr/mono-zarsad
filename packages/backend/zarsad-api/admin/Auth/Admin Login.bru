@@ -7,7 +7,11 @@ meta {
 post {
   url: http://localhost:3007/admin/auth/login
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoxLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NDY1MzQ2NDgsImV4cCI6MTc0NjUzNjQ0OH0.8A9il6xyto_qweG10_cBwJjNrAa3EClnJ3RppOI9p6A
 }
 
 body:json {

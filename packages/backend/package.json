@@ -49,6 +49,7 @@
     "@sinclair/typebox": "^0.34.16",
     "@vinejs/vine": "^3.0.0",
     "axios": "^1.7.9",
+    "bullmq": "^5.52.1",
     "cache-manager": "^6.4.0",
     "csv": "^6.3.11",
     "date-fns-jalali": "^4.1.0-0",

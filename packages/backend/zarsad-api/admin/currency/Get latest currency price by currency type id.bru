@@ -1,0 +1,21 @@
+meta {
+  name: Get latest currency price by currency type id
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3007/admin/currency/latest?limit=20&currencyTypeId=1&orderBy=DESC
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 20
+  currencyTypeId: 1
+  orderBy: DESC
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoyLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NDcyMTg0ODUsImV4cCI6MTc0NzIyMDI4NX0.WwugzNgzvzLf1hZABi-cJ4Ifrww1QLsdAIchVoQkmms
+}

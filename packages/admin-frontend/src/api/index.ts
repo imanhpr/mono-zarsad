@@ -12,6 +12,14 @@ import {
   DashboardPageInfoSchema,
   IDashboardPageInfoSchema,
 } from "../schema/Dashboard.schema";
+import {
+  GetLatestCurrencyPriceListSchema,
+  IGetLatestCurrencyPriceListSchema,
+} from "../schema/CurrencyLatest.schema";
+import {
+  CurrentActiveSpreadResponseSchema,
+  ICurrentActiveSpreadResponseSchema,
+} from "../schema/Spread.schema";
 
 export class AdminZarApi {
   #ax: AxiosInstance;
@@ -64,6 +72,31 @@ export class AdminZarApi {
     const response = await this.#ax.get("/page/dashboard");
     const parse = await DashboardPageInfoSchema.parseAsync(response.data);
     return parse;
+  }
+
+  async getLatestCurrency(
+    limit: number,
+    currencyTypeId: number,
+    orderBy: "ASC" | "DESC"
+  ): Promise<IGetLatestCurrencyPriceListSchema> {
+    const query = new URLSearchParams();
+    query.set("limit", limit.toString());
+    query.set("currencyTypeId", currencyTypeId.toString());
+    query.set("orderBy", orderBy);
+
+    const response = await this.#ax.get(`/currency/latest?${query.toString()}`);
+    const result = await GetLatestCurrencyPriceListSchema.parseAsync(
+      response.data
+    );
+    return result;
+  }
+
+  async getActiveSpread(): Promise<ICurrentActiveSpreadResponseSchema> {
+    const response = await this.#ax.get("/spread/current");
+    const result = await CurrentActiveSpreadResponseSchema.parseAsync(
+      response.data
+    );
+    return result;
   }
 }
 

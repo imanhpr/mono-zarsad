@@ -23,7 +23,7 @@ export class AdminDashboardService {
     const growthPercentage =
       ((result.currentUserCount - result.lastWeekUserCount) /
         result.lastWeekUserCount) *
-      100;
+        100 || 0;
 
     return Object.freeze({ growthPercentage, ...result });
   }
