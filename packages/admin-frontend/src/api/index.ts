@@ -20,6 +20,11 @@ import {
   CurrentActiveSpreadResponseSchema,
   ICurrentActiveSpreadResponseSchema,
 } from "../schema/Spread.schema";
+import {
+  CreateNewUserResponseSchema,
+  ICreateNewUserRequestPayloadSchema,
+  ICreateNewUserResponseSchema,
+} from "../schema/User.schema";
 
 export class AdminZarApi {
   #ax: AxiosInstance;
@@ -97,6 +102,29 @@ export class AdminZarApi {
       response.data
     );
     return result;
+  }
+
+  async createNewUser(
+    payload: ICreateNewUserRequestPayloadSchema
+  ): Promise<ICreateNewUserResponseSchema> {
+    try {
+      const response = await this.#ax.post("/user", payload);
+      if (response.status === 201) {
+        const result = await CreateNewUserResponseSchema.parseAsync(
+          response.data
+        );
+        return result;
+      }
+      throw new Error("Validation Has Just Failed - code 1023-EWSXEQ");
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const result = await CreateNewUserResponseSchema.parseAsync(
+          err.response?.data
+        );
+        return result;
+      }
+      throw err;
+    }
   }
 }
 

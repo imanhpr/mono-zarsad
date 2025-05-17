@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { useAppSelector } from "../hooks/redux-hooks";
 import PanelContainer from "../components/PanelContainer";
+import ModalContextProvider from "../context/Modal.provider";
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
 });
@@ -13,8 +14,10 @@ function RouteComponent() {
     return nav({ to: "/auth/login", replace: true });
   }
   return (
-    <PanelContainer>
-      <Outlet />
-    </PanelContainer>
+    <ModalContextProvider>
+      <PanelContainer>
+        <Outlet />
+      </PanelContainer>
+    </ModalContextProvider>
   );
 }

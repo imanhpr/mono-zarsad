@@ -27,11 +27,6 @@ export default class UserFactoryService {
       this.#walletRepo.createNew(currencyType, user)
     );
 
-    return Object.freeze({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      nationalCode: user.nationalCode,
-      phoneNumber: user.phoneNumber,
-    });
+    return user;
   }
 }

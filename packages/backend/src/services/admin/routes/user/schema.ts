@@ -1,11 +1,22 @@
 import { Static, Type } from "@sinclair/typebox";
 
-export const CreateUserPostRequestBodySchema = Type.Object({
-  firstName: Type.String(),
-  lastName: Type.String(),
-  nationalCode: Type.String(),
-  phoneNumber: Type.String(),
-});
+export const CreateUserPostRequestBodySchema = Type.Object(
+  {
+    firstName: Type.String({ readonly: true }),
+    lastName: Type.String({ readOnly: true }),
+    nationalCode: Type.RegExp(/^\d+$/, {
+      maxLength: 10,
+      minLength: 10,
+      readOnly: true,
+    }),
+    phoneNumber: Type.RegExp(/^\+98\d+$/, {
+      maxLength: 13,
+      minLength: 13,
+      readOnly: true,
+    }),
+  },
+  { readOnly: true }
+);
 export type ICreateUserPostRequestBodySchema = Static<
   typeof CreateUserPostRequestBodySchema
 >;

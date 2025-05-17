@@ -20,10 +20,15 @@ export class AdminDashboardService {
 
     const result = await this.#userRepo.findUserCount(lastWeekEnd.toJSDate());
 
-    const growthPercentage =
-      ((result.currentUserCount - result.lastWeekUserCount) /
-        result.lastWeekUserCount) *
-        100 || 0;
+    let growthPercentage = 0;
+    if (result.lastWeekUserCount > 0) {
+      growthPercentage =
+        ((result.currentUserCount - result.lastWeekUserCount) /
+          result.lastWeekUserCount) *
+        100;
+    } else {
+      growthPercentage = result.currentUserCount * 100;
+    }
 
     return Object.freeze({ growthPercentage, ...result });
   }

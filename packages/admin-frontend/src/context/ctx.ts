@@ -7,3 +7,13 @@ export const sidebarCtx = createContext<{
   toggleDisplay: () => {},
   display: false,
 });
+
+export const modalCtx = createContext<{
+  display: boolean;
+  toggleDisplay: () => void;
+  setDisplay: React.Dispatch<React.SetStateAction<boolean>>;
+}>({
+  toggleDisplay: () => {},
+  setDisplay: () => {},
+  display: false,
+});

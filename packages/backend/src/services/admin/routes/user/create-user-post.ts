@@ -3,6 +3,7 @@ import {
   CreateUserPostRequestBodySchema,
   ICreateUserPostRequestBodySchema,
 } from "./schema.ts";
+import { ICreateNewUser } from "../../../../types/user.ts";
 
 export default function createUserPostPlugin(
   fastify: FastifyInstance,
@@ -16,13 +17,11 @@ export default function createUserPostPlugin(
     return;
   }
   const service = fastify.userManageService;
-
-  fastify.post<{ Body: ICreateUserPostRequestBodySchema }>(
-    "/",
-    { schema: { body: CreateUserPostRequestBodySchema } },
-    function createUserPostHandler(req) {
-      return service.createUser(req.body);
-    }
-  );
+  fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
+    Body: ICreateUserPostRequestBodySchema;
+  }>("/", { schema: { body: CreateUserPostRequestBodySchema } }, async function createUserPostHandler(req, rep) {
+    const result = await service.createUser(req.body);
+    return rep.code(201).send(result);
+  });
   done();
 }

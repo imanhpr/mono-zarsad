@@ -2,12 +2,8 @@ import process from "node:process";
 import appFactory from "./app-factory.ts";
 import { BusinessOperationException } from "./exceptions/index.ts";
 import { BusinessOperationResult } from "./helpers/index.ts";
-import {
-  DriverException,
-  UniqueConstraintViolationException,
-} from "@mikro-orm/core";
+import { DriverException } from "@mikro-orm/core";
 const app = appFactory();
-UniqueConstraintViolationException;
 app.setErrorHandler(function exceptHandler(err, _, rep) {
   if (err instanceof BusinessOperationException) {
     console.log("err code: ", err.httpCode);

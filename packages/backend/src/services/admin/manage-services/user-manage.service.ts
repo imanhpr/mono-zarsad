@@ -1,8 +1,14 @@
 import fp from "fastify-plugin";
 import { type UserRepo } from "../../../repository/User.repo.ts";
 import { type ICreateNewUser } from "../../../types/user.ts";
-import { mapDateToJalali } from "../../../helpers/index.ts";
+import {
+  BusinessOperationResult,
+  mapDateToJalali,
+} from "../../../helpers/index.ts";
 import UserFactoryService from "../../shared/UserFactory.service.ts";
+import { BusinessOperationException } from "../../../exceptions/index.ts";
+import { UniqueConstraintViolationException } from "@mikro-orm/core";
+import i18next from "i18next";
 
 class UserManageService {
   #repo: UserRepo;
@@ -12,8 +18,37 @@ class UserManageService {
     this.#sharedUserFactoryService = userFactoryService;
   }
 
-  createUser(input: ICreateNewUser) {
-    return this.#sharedUserFactoryService.createNormalUser(input);
+  async createUser(input: ICreateNewUser) {
+    input.firstName = input.firstName.trim();
+    input.lastName = input.lastName.trim();
+    input.nationalCode = input.nationalCode.trim();
+    input.phoneNumber = input.phoneNumber.trim();
+    try {
+      const result =
+        await this.#sharedUserFactoryService.createNormalUser(input);
+
+      return new BusinessOperationResult(
+        "success",
+        i18next.t("USER_HAS_JUST_CREATED_SUCCESSFULLY"),
+        Object.freeze({
+          id: result.id,
+          firstName: result.firstName,
+          lastName: result.lastName,
+          nationalCode: result.nationalCode,
+          phoneNumber: result.phoneNumber,
+        })
+      );
+    } catch (err) {
+      if (err instanceof UniqueConstraintViolationException) {
+        throw new BusinessOperationException(
+          409,
+          i18next.t("USER_EXISTS_IN_DB"),
+          input
+        );
+      }
+      // TODO: LOG HERE
+      throw err;
+    }
   }
 
   async getLatestUsers() {

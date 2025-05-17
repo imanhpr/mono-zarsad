@@ -2,6 +2,9 @@ import { type IconType } from "react-icons";
 import BaseCard from "./BaseContainer";
 
 const intlNormalNumber = new Intl.NumberFormat("fa-IR");
+const intlNumberWithSign = new Intl.NumberFormat("fa-IR", {
+  signDisplay: "always",
+});
 
 export default function DashboardCard({
   currentNumber,
@@ -31,7 +34,7 @@ export default function DashboardCard({
               dir="ltr"
               className="flex items-center mr-1 text-green-500 fa-numeric-mono"
             >
-              +{intlNormalNumber.format(growthPercentage)}%
+              {intlNumberWithSign.format(growthPercentage)}%
             </span>
             <span className="font-medium text-gray-400">از ماه قبل</span>
           </p>

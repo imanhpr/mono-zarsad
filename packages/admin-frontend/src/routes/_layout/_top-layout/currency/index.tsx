@@ -192,7 +192,7 @@ function RouteComponent() {
                       <p>{intlDateLastPrice.format(data.rawCreatedAt)}</p>
                       <div className="space-y-4">
                         <div className="text-sm">
-                          <h6 className="text-red-600">قیمت خرید:</h6>
+                          <h6 className="text-green-600">قیمت خرید:</h6>
                           <span>
                             <p>
                               {intlNumber.format(data.buy)}
@@ -211,7 +211,7 @@ function RouteComponent() {
                         </div>
 
                         <div className="text-sm">
-                          <h6 className="text-green-600">قیمت فروش</h6>
+                          <h6 className="text-red-600">قیمت فروش</h6>
                           <span>
                             <p>
                               {intlNumber.format(data.sell)}
