@@ -1,7 +1,5 @@
 import { FastifyInstance } from "fastify";
-import passwordServicePlugin from "../../plugins/password/index.ts";
 import createUserPostPlugin from "./routes/user/create-user-post.ts";
-import getLatestUsersPlugin from "./routes/user/latest-users-get.ts";
 import deleteUserPlugin from "./routes/user/delete-user.ts";
 import updateUserPutPlugin from "./routes/user/update-user-put.ts";
 import getUserByFilterPlugin from "./routes/user/users-filter-get.ts";
@@ -15,6 +13,7 @@ import adminRefreshTokenGetPlugin from "./routes/auth/refresh-get.plugin.ts";
 import dashboardPageGetPlugin from "./routes/page/dashboard-get.plugin.ts";
 import getLatestCurrencyByTypeIdPlugin from "./routes/currency/currency.get.route.ts";
 import getCurrentActiveSpreadPlugin from "./routes/spread/active-spread.get.route.ts";
+import getUserListByFilterRoutePlugin from "./routes/user/get-user-list-by-filter.plugin.route.ts";
 
 export default function adminRoutesPlugin(
   fastify: FastifyInstance,
@@ -29,7 +28,7 @@ export default function adminRoutesPlugin(
     .register(adminAuthLoginPostPlugin, authPrefix)
     .register(adminRefreshTokenGetPlugin, authPrefix)
     .register(createUserPostPlugin, config)
-    .register(getLatestUsersPlugin, config)
+    .register(getUserListByFilterRoutePlugin, config)
     .register(deleteUserPlugin, config)
     .register(updateUserPutPlugin, config)
     .register(getUserByFilterPlugin, config)

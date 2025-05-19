@@ -1,0 +1,22 @@
+meta {
+  name: Get users by filter
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3007/admin/user?limit=2&orderBy=DESC&profile=true&offset=0
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 2
+  orderBy: DESC
+  profile: true
+  offset: 0
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoyLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NDc2NTEzMTcsImV4cCI6MTc0NzY1MzExN30.vK-tzBFV5la4387zLFfkBay7BQEahGzvlkBiA9rdkWs
+}

@@ -44,3 +44,14 @@ export const GetUserQueryParamSchema = Type.Object({
 });
 
 export type IGetUserQueryParamSchema = Static<typeof GetUserQueryParamSchema>;
+
+export const UserListQueryFilterSchema = Type.Object({
+  limit: Type.Number({ maximum: 50, minimum: 1 }),
+  orderBy: Type.Union([Type.Literal("DESC"), Type.Literal("ASC")]),
+  profile: Type.Boolean(),
+  offset: Type.Optional(Type.Number()),
+});
+
+export type IUserListQueryFilterSchema = Static<
+  typeof UserListQueryFilterSchema
+>;

@@ -9,6 +9,7 @@ import UserFactoryService from "../../shared/UserFactory.service.ts";
 import { BusinessOperationException } from "../../../exceptions/index.ts";
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import i18next from "i18next";
+import { IUserListQueryFilterSchema } from "../routes/user/schema.ts";
 
 class UserManageService {
   #repo: UserRepo;
@@ -51,9 +52,13 @@ class UserManageService {
     }
   }
 
-  async getLatestUsers() {
-    const result = await this.#repo.findLatestUserList();
-    return mapDateToJalali(result);
+  async getUserListByFilter(query: IUserListQueryFilterSchema) {
+    const result = await this.#repo.findUserByFilter(query);
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("GET_RESULT_SUCCESS"),
+      result
+    );
   }
 
   deleteUserById(id: number) {

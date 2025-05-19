@@ -24,6 +24,7 @@ import {
   CreateNewUserResponseSchema,
   ICreateNewUserRequestPayloadSchema,
   ICreateNewUserResponseSchema,
+  UserListResponse,
 } from "../schema/User.schema";
 
 export class AdminZarApi {
@@ -125,6 +126,25 @@ export class AdminZarApi {
       }
       throw err;
     }
+  }
+
+  async getUserList(query: {
+    orderBy: "DESC" | "ASC";
+    profile: boolean;
+    limit: number;
+    offset?: number;
+  }) {
+    const querystring = new URLSearchParams();
+    querystring.set("orderBy", query.orderBy);
+    querystring.set("profile", query.profile.toString());
+    querystring.set("limit", query.limit.toString());
+    if (query.offset) {
+      querystring.set("offset", query.offset.toString());
+    }
+    const path = `/user?${querystring.toString()}`;
+    const response = await this.#ax.get(path);
+    const userList = await UserListResponse.parseAsync(response.data);
+    return userList.data;
   }
 }
 

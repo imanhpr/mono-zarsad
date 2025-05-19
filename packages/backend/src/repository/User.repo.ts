@@ -1,4 +1,3 @@
-import * as luxon from "luxon";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/postgresql";
 import type { EntityManager as CoreEM } from "@mikro-orm/postgresql";
 import fp from "fastify-plugin";
@@ -31,15 +30,27 @@ export class UserRepo {
     return this.#repo.findOneOrFail({ id });
   }
 
-  findLatestUserList() {
-    return this.#repo.find(
-      {},
-      {
-        limit: 10,
-        orderBy: { createdAt: "DESC" },
-        populate: ["profile"],
-      }
-    );
+  async findUserByFilter({
+    limit,
+    offset,
+    orderBy = "DESC",
+    profile,
+  }: {
+    offset?: number;
+    limit: number;
+    orderBy: "DESC" | "ASC";
+    profile: boolean;
+  }) {
+    const qb = this.#em
+      .createQueryBuilder(User, "u")
+      .limit(limit)
+      .orderBy({ createdAt: orderBy });
+
+    if (offset) qb.offset(offset);
+    if (profile) qb.joinAndSelect("profile", "p");
+
+    const [users, count] = await qb.getResultAndCount();
+    return { count, limit, offset: offset ?? 0, users };
   }
 
   async deleteUserById(id: number) {
