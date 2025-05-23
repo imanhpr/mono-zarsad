@@ -17,6 +17,7 @@ import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutTopLayoutIndexImport } from './routes/_layout/_top-layout/index'
 import { Route as LayoutTopLayoutUserIndexImport } from './routes/_layout/_top-layout/user/index'
 import { Route as LayoutTopLayoutCurrencyIndexImport } from './routes/_layout/_top-layout/currency/index'
+import { Route as LayoutTopLayoutUserUserIdCreditImport } from './routes/_layout/_top-layout/user/$userId.credit'
 
 // Create/Update Routes
 
@@ -52,6 +53,13 @@ const LayoutTopLayoutCurrencyIndexRoute =
   LayoutTopLayoutCurrencyIndexImport.update({
     id: '/currency/',
     path: '/currency/',
+    getParentRoute: () => LayoutTopLayoutRoute,
+  } as any)
+
+const LayoutTopLayoutUserUserIdCreditRoute =
+  LayoutTopLayoutUserUserIdCreditImport.update({
+    id: '/user/$userId/credit',
+    path: '/user/$userId/credit',
     getParentRoute: () => LayoutTopLayoutRoute,
   } as any)
 
@@ -101,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutTopLayoutUserIndexImport
       parentRoute: typeof LayoutTopLayoutImport
     }
+    '/_layout/_top-layout/user/$userId/credit': {
+      id: '/_layout/_top-layout/user/$userId/credit'
+      path: '/user/$userId/credit'
+      fullPath: '/user/$userId/credit'
+      preLoaderRoute: typeof LayoutTopLayoutUserUserIdCreditImport
+      parentRoute: typeof LayoutTopLayoutImport
+    }
   }
 }
 
@@ -110,12 +125,14 @@ interface LayoutTopLayoutRouteChildren {
   LayoutTopLayoutIndexRoute: typeof LayoutTopLayoutIndexRoute
   LayoutTopLayoutCurrencyIndexRoute: typeof LayoutTopLayoutCurrencyIndexRoute
   LayoutTopLayoutUserIndexRoute: typeof LayoutTopLayoutUserIndexRoute
+  LayoutTopLayoutUserUserIdCreditRoute: typeof LayoutTopLayoutUserUserIdCreditRoute
 }
 
 const LayoutTopLayoutRouteChildren: LayoutTopLayoutRouteChildren = {
   LayoutTopLayoutIndexRoute: LayoutTopLayoutIndexRoute,
   LayoutTopLayoutCurrencyIndexRoute: LayoutTopLayoutCurrencyIndexRoute,
   LayoutTopLayoutUserIndexRoute: LayoutTopLayoutUserIndexRoute,
+  LayoutTopLayoutUserUserIdCreditRoute: LayoutTopLayoutUserUserIdCreditRoute,
 }
 
 const LayoutTopLayoutRouteWithChildren = LayoutTopLayoutRoute._addFileChildren(
@@ -139,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginIndexRoute
   '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
+  '/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
 }
 
 export interface FileRoutesByTo {
@@ -147,6 +165,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginIndexRoute
   '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
+  '/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
 }
 
 export interface FileRoutesById {
@@ -157,13 +176,20 @@ export interface FileRoutesById {
   '/auth/login/': typeof AuthLoginIndexRoute
   '/_layout/_top-layout/currency/': typeof LayoutTopLayoutCurrencyIndexRoute
   '/_layout/_top-layout/user/': typeof LayoutTopLayoutUserIndexRoute
+  '/_layout/_top-layout/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/' | '/auth/login' | '/currency' | '/user'
+  fullPaths:
+    | ''
+    | '/'
+    | '/auth/login'
+    | '/currency'
+    | '/user'
+    | '/user/$userId/credit'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/' | '/auth/login' | '/currency' | '/user'
+  to: '' | '/' | '/auth/login' | '/currency' | '/user' | '/user/$userId/credit'
   id:
     | '__root__'
     | '/_layout'
@@ -172,6 +198,7 @@ export interface FileRouteTypes {
     | '/auth/login/'
     | '/_layout/_top-layout/currency/'
     | '/_layout/_top-layout/user/'
+    | '/_layout/_top-layout/user/$userId/credit'
   fileRoutesById: FileRoutesById
 }
 
@@ -211,7 +238,8 @@ export const routeTree = rootRoute
       "children": [
         "/_layout/_top-layout/",
         "/_layout/_top-layout/currency/",
-        "/_layout/_top-layout/user/"
+        "/_layout/_top-layout/user/",
+        "/_layout/_top-layout/user/$userId/credit"
       ]
     },
     "/_layout/_top-layout/": {
@@ -227,6 +255,10 @@ export const routeTree = rootRoute
     },
     "/_layout/_top-layout/user/": {
       "filePath": "_layout/_top-layout/user/index.tsx",
+      "parent": "/_layout/_top-layout"
+    },
+    "/_layout/_top-layout/user/$userId/credit": {
+      "filePath": "_layout/_top-layout/user/$userId.credit.tsx",
       "parent": "/_layout/_top-layout"
     }
   }

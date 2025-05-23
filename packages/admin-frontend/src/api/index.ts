@@ -24,7 +24,11 @@ import {
   CreateNewUserResponseSchema,
   ICreateNewUserRequestPayloadSchema,
   ICreateNewUserResponseSchema,
+  IUserListResponse,
+  IUserWithWallet,
   UserListResponse,
+  UserListResponseWithPagination,
+  UserWithWallet,
 } from "../schema/User.schema";
 
 export class AdminZarApi {
@@ -143,8 +147,28 @@ export class AdminZarApi {
     }
     const path = `/user?${querystring.toString()}`;
     const response = await this.#ax.get(path);
-    const userList = await UserListResponse.parseAsync(response.data);
+    const userList = await UserListResponseWithPagination.parseAsync(
+      response.data
+    );
     return userList.data;
+  }
+
+  async getUserByUserId<T extends boolean>(
+    userId: number,
+    showWallet: T
+  ): Promise<T extends true ? IUserWithWallet : IUserListResponse> {
+    const query = new URLSearchParams();
+    query.set("userId", userId.toString());
+    query.set("wallet", showWallet ? "true" : "false");
+
+    const url = `/user/filter?${query.toString()}`;
+    const response = await this.#ax.get(url);
+
+    if (showWallet) {
+      return UserWithWallet.parse(response.data);
+    }
+    const result: IUserListResponse = UserListResponse.parse(response.data);
+    return result as T extends true ? IUserWithWallet : IUserListResponse;
   }
 }
 

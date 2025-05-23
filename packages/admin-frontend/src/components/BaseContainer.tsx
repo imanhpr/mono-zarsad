@@ -7,7 +7,7 @@ export default function BaseCard({
 }: PropsWithChildren<{ className?: string }>) {
   const clsName = clsx(
     className,
-    "flex flex-col shadow-sm border border-gray-300 rounded lg:w-86"
+    "flex flex-col shadow-sm border border-gray-300 rounded"
   );
   return (
     <div className={clsName} dir="rtl">

@@ -80,6 +80,7 @@ function MainUserList({ tableData }: props) {
     data: tableData,
     getCoreRowModel: getCoreRowModel(),
   });
+
   return (
     <table className="w-full table-auto">
       <thead className="border-b border-b-gray-300">

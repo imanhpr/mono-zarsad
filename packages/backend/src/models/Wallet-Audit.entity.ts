@@ -32,9 +32,6 @@ export default class WalletAudit {
   @Property()
   createdAt = new Date();
 
-  @Property()
-  source!: string;
-
   @ManyToOne("CurrencyType")
   currencyType!: CurrencyType;
 

@@ -44,15 +44,20 @@ export class TransactionManageService {
     this.#simpleWalletTransactionRepo = simpleWalletTransactionRepo;
   }
 
-  @Transactional({ isolationLevel: IsolationLevel.SERIALIZABLE })
+  @Transactional()
   async updateWalletUserAmount_P(
     walletId: number,
     amount: string,
     transactionType: "INCREMENT" | "DECREMENT"
   ) {
+    const now = new Date();
     const wallet = await this.#walletRepo.selectWalletForUpdate(walletId);
-    // @ts-expect-error
-    const walletTransaction = this.#walletTransactionRepo.create("SIMPLE");
+    const walletTransaction = this.#walletTransactionRepo.create(
+      "SIMPLE",
+      now,
+      false,
+      false
+    );
 
     let decimalAmount: Decimal | null = null;
     if (transactionType === "INCREMENT") {

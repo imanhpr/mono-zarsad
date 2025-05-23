@@ -15,7 +15,7 @@ export const MeltedGoldGetResponseSchema = vine.object({
         category: vine.string(),
         عنوان: vine.string(),
         قیمت: vine.string(),
-        تغییر: vine.string(),
+        تغییر: vine.any(),
         بیشترین: vine.string(),
         کمترین: vine.string(),
         "تاریخ بروزرسانی": vine.string(),

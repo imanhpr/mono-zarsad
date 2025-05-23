@@ -9,7 +9,10 @@ import UserFactoryService from "../../shared/UserFactory.service.ts";
 import { BusinessOperationException } from "../../../exceptions/index.ts";
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import i18next from "i18next";
-import { IUserListQueryFilterSchema } from "../routes/user/schema.ts";
+import {
+  IGetUserQueryParamSchema,
+  IUserListQueryFilterSchema,
+} from "../routes/user/schema.ts";
 
 class UserManageService {
   #repo: UserRepo;
@@ -69,20 +72,21 @@ class UserManageService {
     return this.#repo.updateUserAndProfileById(userId, payload);
   }
 
-  async userListByFilter(input: { userId?: number; nationalCode?: string }) {
+  async userListByFilter(input: IGetUserQueryParamSchema) {
     const result = await this.#repo.findUsersByFilter(input);
-    return {
-      users: mapDateToJalali(result.users),
-      count: result.count,
-    };
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("GET_RESULT_SUCCESS"),
+      {
+        count: result.count,
+        users: result.users,
+      }
+    );
   }
 }
 
 export default fp(
   function userManageService(fastify, _, done) {
-    const hasRepo = fastify.hasDecorator("userRepo");
-    if (!hasRepo) throw new Error("Please Init UserRepo");
-    // TODO: Add validation for walletRepo and currencyTypeRepo
     const userManageService = new UserManageService(
       fastify.userRepo,
       fastify.userFactoryService
@@ -90,7 +94,12 @@ export default fp(
     fastify.decorate("userManageService", userManageService);
     done();
   },
-  { name: "userManageService" }
+  {
+    name: "userManageService",
+    decorators: {
+      fastify: ["userRepo", "userFactoryService"],
+    },
+  }
 );
 
 declare module "fastify" {

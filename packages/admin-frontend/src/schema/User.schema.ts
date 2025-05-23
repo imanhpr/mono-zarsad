@@ -55,15 +55,60 @@ export type ICreateNewUserResponseSchema = z.infer<
 const UserProfile = z.object({ id: z.number(), debtPrem: z.boolean() });
 export type IUserProfile = z.infer<typeof UserProfile>;
 
+const PaginationSchema = z.object({
+  count: z.number(),
+  offset: z.number(),
+  limit: z.number(),
+});
+
 export const UserListResponse = z.object({
   status: z.literal("success"),
   message: z.string(),
   data: z.object({
-    count: z.number(),
-    offset: z.number(),
-    limit: z.number(),
     users: z.array(
       User.extend({ profile: UserProfile, createdAt: z.string().datetime() })
     ),
   }),
 });
+
+export type IUserListResponse = z.infer<typeof UserListResponse>;
+
+export const UserListResponseWithPagination = z.object({
+  status: z.literal("success"),
+  message: z.string(),
+  data: PaginationSchema.extend({
+    users: z.array(
+      User.extend({ profile: UserProfile, createdAt: z.string().datetime() })
+    ),
+  }),
+});
+
+const CurrencyTypeSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  name_farsi: z.string(),
+});
+
+const WalletSchema = z.object({
+  id: z.number(),
+  currencyType: CurrencyTypeSchema,
+  amount: z.string(),
+  lockAmount: z.string(),
+});
+
+export const UserWithWallet = z.object({
+  status: z.literal("success"),
+  message: z.string(),
+  data: z.object({
+    count: z.number(),
+    users: z.array(
+      User.extend({
+        wallets: z.array(WalletSchema),
+        profile: UserProfile,
+        createdAt: z.string().datetime(),
+      })
+    ),
+  }),
+});
+
+export type IUserWithWallet = z.infer<typeof UserWithWallet>;

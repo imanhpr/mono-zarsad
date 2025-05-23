@@ -43,7 +43,6 @@ export class CurrencyManageService {
         limit,
         orderBy
       );
-
     return new BusinessOperationResult(
       "success",
       i18next.t("PRICE_GET_SUCCESS"),

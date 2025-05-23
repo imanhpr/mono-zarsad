@@ -1,5 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { BsThreeDots } from "react-icons/bs";
+import { BsPiggyBankFill, BsThreeDots } from "react-icons/bs";
 
 type props = { fullName: string; userId: string };
 
@@ -63,14 +64,15 @@ const DropdownMenu = ({ fullName, userId }: props) => {
             </div>
           </header>
           <div className="py-1" role="none">
-            <a
-              href="#"
-              className="block px-4 py-2 text-gray-700 text-sm"
+            <Link
+              className="flex justify-center items-center space-x-2 px-4 py-2 text-gray-700 text-sm"
+              to={"/user/$userId/credit"}
+              params={{ userId: userId }}
               role="menuitem"
-              id="menu-item-0"
             >
-              ویرایش کاربر
-            </a>
+              <p>اعتبار</p>
+              <BsPiggyBankFill />
+            </Link>
           </div>
         </div>
       )}

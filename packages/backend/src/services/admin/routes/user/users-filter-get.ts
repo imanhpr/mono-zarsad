@@ -13,8 +13,6 @@ export default function getUserByFilterPlugin(
     { schema: { querystring: GetUserQueryParamSchema } },
     async function getUsersByFilterHandler(req) {
       const res = await service.userListByFilter(req.query);
-      console.log("ress : ", res);
-
       return res;
     }
   );

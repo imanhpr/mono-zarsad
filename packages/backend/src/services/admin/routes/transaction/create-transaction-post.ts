@@ -28,10 +28,11 @@ export default function createTransactionPostPlugin(
       return { transactionTypes };
     }
   );
-  fastify.post<{ Body: ICreateNewTransactionPostBodySchema }>(
-    "/transaction",
-    { schema: { body: CreateNewTransactionPostBodySchema } },
-    async function transactionPostHandler(req) {
+  fastify
+    .addHook("preHandler", fastify.adminJwtBearerAuth)
+    .post<{
+      Body: ICreateNewTransactionPostBodySchema;
+    }>("/transaction", { schema: { body: CreateNewTransactionPostBodySchema } }, async function transactionPostHandler(req) {
       const { amount, walletId, transactionType } = req.body;
       const result = await service.updateWalletUserAmount_P(
         walletId,
@@ -39,7 +40,6 @@ export default function createTransactionPostPlugin(
         transactionType
       );
       return result;
-    }
-  );
+    });
   done();
 }

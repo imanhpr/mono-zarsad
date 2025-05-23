@@ -2,7 +2,6 @@ import { Transactional } from "@mikro-orm/core";
 import { CurrencyTypeEnum } from "../../types/currency-types.ts";
 
 import { type WalletRepo } from "../../repository/Wallet.repo.ts";
-import { type CurrencyTypeRepo } from "../../repository/Currency-Type.repo.ts";
 import { type WalletAudiRepo } from "../../repository/Wallet-Audit.repo.ts";
 import { type SimpleWalletTransactionRepo } from "../../repository/Simple-Wallet-Transaction.repo.ts";
 import { type WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
