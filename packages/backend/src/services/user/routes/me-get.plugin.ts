@@ -7,7 +7,10 @@ export default function meGetPlugin(
 ) {
   fastify.get(
     "/me",
-    { preHandler: [fastify.jwtBearerAuth] },
+    {
+      preHandler: [fastify.jwtBearerAuth],
+      schema: { tags: ["user"], security: [{ userBearerAuth: [] }] },
+    },
     function meGetHandler({ user }) {
       return user;
     }

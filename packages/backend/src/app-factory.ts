@@ -9,6 +9,8 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyAuth from "@fastify/auth";
 import fastifyCors from "@fastify/cors";
 import fastifyReqContext from "@fastify/request-context";
+import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifySwagger from "@fastify/swagger";
 
 import mikroOrmPlugin from "./plugins/mikro-orm.plugin.ts";
 import root from "./services/root.ts";
@@ -49,6 +51,45 @@ import { randomUUID } from "node:crypto";
 import passwordServicePlugin from "./plugins/password/index.ts";
 import persianapiServicePlugin from "./plugins/persian-api/persianapi.service.plugin.ts";
 import SpreadRepoPlugin from "./repository/Spread.repo.plugin.ts";
+
+const swaggerOptions: fastifySwagger.SwaggerOptions = {
+  openapi: {
+    info: {
+      title: "@Zarsad/api",
+      version: "3.0.0",
+      summary: "All api related to the Zarsad backend",
+    },
+    servers: [
+      {
+        url: "http://localhost:3007",
+        description: "local server for development",
+        variables: {
+          baseUrl: {
+            default: "http://localhost:3007",
+            description: "default base url",
+          },
+        },
+      },
+    ],
+    components: {
+      securitySchemes: {
+        userBearerAuth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+          description: "Bearer token for authenticate as an user",
+        },
+
+        adminBearerAuth: {
+          type: "apiKey",
+          name: "Authorization",
+          in: "header",
+          description: "Bearer token for authenticate as an admin",
+        },
+      },
+    },
+  },
+};
 export default function appFactory() {
   const app = Fastify({
     logger: {
@@ -73,6 +114,31 @@ export default function appFactory() {
       prefix: "custom_ctx_",
     })
     .register(fastifyJwt, { secret: "verySecret" })
+    .register(fastifySwagger, swaggerOptions)
+    .register(fastifySwaggerUi, {
+      theme: {
+        title: "ZarSad-API",
+      },
+      routePrefix: "/documentation",
+      uiConfig: {
+        docExpansion: "list",
+        deepLinking: false,
+      },
+      uiHooks: {
+        onRequest: function (request, reply, next) {
+          next();
+        },
+        preHandler: function (request, reply, next) {
+          next();
+        },
+      },
+      staticCSP: true,
+      transformStaticCSP: (header) => header,
+      transformSpecification: (swaggerObject, request, reply) => {
+        return swaggerObject;
+      },
+      transformSpecificationClone: true,
+    })
     .register(fastifySensible)
     .register(fastifyCookie, { secret: "verySecretKey" })
     .register(fastifyAuth)

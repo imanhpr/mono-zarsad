@@ -11,25 +11,31 @@ export default async function adminRefreshTokenGetPlugin(
 
   fastify
     .register(responseSimpleCachePlugin)
-    .get("/refresh", async function adminRefreshTokenHandler(req, rep) {
-      const sid = req.cookies["session-id"];
-      if (!sid) return rep.unauthorized();
+    .get(
+      "/refresh",
+      { schema: { tags: ["auth/admin", "admin"] } },
+      async function adminRefreshTokenHandler(req, rep) {
+        const sid = req.cookies["session-id"];
+        if (!sid) return rep.unauthorized();
 
-      const unSignCookie = req.unsignCookie(sid);
-      if (!unSignCookie.valid) return rep.unauthorized();
-      let refreshToken: AdminSession;
-      let accessToken: BusinessOperationResult<unknown>;
-      try {
-        [refreshToken, accessToken] = await service.refresh(unSignCookie.value);
-      } catch (err) {
-        throw err;
+        const unSignCookie = req.unsignCookie(sid);
+        if (!unSignCookie.valid) return rep.unauthorized();
+        let refreshToken: AdminSession;
+        let accessToken: BusinessOperationResult<unknown>;
+        try {
+          [refreshToken, accessToken] = await service.refresh(
+            unSignCookie.value
+          );
+        } catch (err) {
+          throw err;
+        }
+
+        rep.cacheKey = refreshToken.id;
+        rep.setCookie("session-id", refreshToken.id, {
+          httpOnly: true,
+          signed: true,
+        });
+        return accessToken;
       }
-
-      rep.cacheKey = refreshToken.id;
-      rep.setCookie("session-id", refreshToken.id, {
-        httpOnly: true,
-        signed: true,
-      });
-      return accessToken;
-    });
+    );
 }

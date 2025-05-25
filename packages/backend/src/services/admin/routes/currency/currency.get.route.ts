@@ -13,7 +13,10 @@ export default async function getLatestCurrencyByTypeIdPlugin(
     "/latest",
     {
       preHandler: fastify.adminJwtBearerAuth,
-      schema: { querystring: GetLatestPriceListQuerySchema },
+      schema: {
+        querystring: GetLatestPriceListQuerySchema,
+        tags: ["admin/currency", "admin"],
+      },
     },
     async function getLatestCurrencyHandler(req) {
       const { currencyTypeId, limit, orderBy } = req.query;

@@ -8,7 +8,10 @@ export default function getMePlugin(
 ) {
   fastify.get(
     "/me",
-    { preHandler: [fastify.adminJwtBearerAuth] },
+    {
+      preHandler: [fastify.adminJwtBearerAuth],
+      schema: { tags: ["auth/admin", "admin"] },
+    },
     function getMeHandler(req) {
       return req.user;
     }

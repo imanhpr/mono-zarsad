@@ -10,7 +10,12 @@ export default function getUserByFilterPlugin(
   const service = fastify.userManageService;
   fastify.get<{ Querystring: IGetUserQueryParamSchema }>(
     "/filter",
-    { schema: { querystring: GetUserQueryParamSchema } },
+    {
+      schema: {
+        querystring: GetUserQueryParamSchema,
+        tags: ["admin", "admin/user"],
+      },
+    },
     async function getUsersByFilterHandler(req) {
       const res = await service.userListByFilter(req.query);
       return res;

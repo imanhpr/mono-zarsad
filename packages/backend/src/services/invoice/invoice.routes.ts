@@ -10,6 +10,7 @@ export default function invoiceRoutesPlugin(
   fastify.addHook("preHandler", fastify.jwtBearerAuth);
   fastify.get(
     "/invoice/:transactionId",
+    { schema: { tags: ["invoice"] } },
     async function getTransactionInvoiceByIdHandler(req) {
       // @ts-expect-error
       const { transactionId } = req.params;

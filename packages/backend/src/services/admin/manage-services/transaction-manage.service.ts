@@ -19,6 +19,7 @@ import {
   SimpleWalletTransactionStatus,
   SimpleWalletTransactionType,
 } from "../../../models/Wallet-Simple-Transaction.entity.ts";
+import { ISimpleTransaction } from "../routes/transaction/schema.ts";
 
 export class TransactionManageService {
   #walletAudioRepo: WalletAudiRepo;
@@ -45,13 +46,12 @@ export class TransactionManageService {
   }
 
   @Transactional()
-  async updateWalletUserAmount_P(
-    walletId: number,
-    amount: string,
-    transactionType: "INCREMENT" | "DECREMENT"
-  ) {
+  async updateWalletUserAmount_P(simpleTransactionPayload: ISimpleTransaction) {
     const now = new Date();
-    const wallet = await this.#walletRepo.selectWalletForUpdate(walletId);
+    const wallet = await this.#walletRepo.selectWalletForUpdateByIdAndUserId(
+      simpleTransactionPayload.walletId,
+      simpleTransactionPayload.userId
+    );
     const walletTransaction = this.#walletTransactionRepo.create(
       "SIMPLE",
       now,
@@ -60,10 +60,12 @@ export class TransactionManageService {
     );
 
     let decimalAmount: Decimal | null = null;
-    if (transactionType === "INCREMENT") {
-      decimalAmount = new Decimal(amount).abs();
+    if (simpleTransactionPayload.transactionType === "INCREMENT") {
+      decimalAmount = new Decimal(simpleTransactionPayload.amount).abs();
     } else {
-      decimalAmount = new Decimal(amount).abs().negated();
+      decimalAmount = new Decimal(simpleTransactionPayload.amount)
+        .abs()
+        .negated();
     }
 
     const currentAmount = new Decimal(wallet.amount);
@@ -79,8 +81,7 @@ export class TransactionManageService {
     this.#walletAudioRepo.create({
       amount: decimalAmount,
       wallet,
-      source: "CARD_TO_CARD",
-      type: transactionType,
+      type: simpleTransactionPayload.transactionType,
       walletAmount: finalAmount,
       walletTransactionId: walletTransaction.id,
     });
@@ -90,11 +91,14 @@ export class TransactionManageService {
       SimpleWalletTransactionType.CARD_TO_CARD,
       SimpleWalletTransactionStatus.SUCCESSFUL,
       finalAmount.toString(),
-      wallet
+      wallet,
+      simpleTransactionPayload.meta
     );
 
     this.#walletRepo.updateWalletAmount(wallet, finalAmount);
     const result = Object.freeze({
+      transactionId: walletTransaction.id,
+      userId: wallet.user.id,
       wallet: {
         id: wallet.id,
         amount: finalAmount.toString(),

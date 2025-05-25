@@ -9,17 +9,21 @@ export default function logOutGetPlugin(
   const service = fastify.authService;
   fastify
     .register(userGuardHook)
-    .get("/logout", async function logOutHandler(req, rep) {
-      // TODO: Type safety
-      const sid = req.cookies["session-id"];
-      if (sid) {
-        await service.logout(sid);
-        return rep
-          .clearCookie("session-id", { path: "/auth" })
-          .code(204)
-          .send();
+    .get(
+      "/logout",
+      { schema: { tags: ["auth/user"] } },
+      async function logOutHandler(req, rep) {
+        // TODO: Type safety
+        const sid = req.cookies["session-id"];
+        if (sid) {
+          await service.logout(sid);
+          return rep
+            .clearCookie("session-id", { path: "/auth" })
+            .code(204)
+            .send();
+        }
+        rep.unauthorized();
       }
-      rep.unauthorized();
-    });
+    );
   done();
 }

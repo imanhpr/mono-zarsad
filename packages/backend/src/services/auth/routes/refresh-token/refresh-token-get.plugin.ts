@@ -29,28 +29,32 @@ export default function refreshTokenGetPlugin(
         req.cookies["session-id"]
       );
     })
-    .get("/refresh", async function refreshTokenHandler(req, rep) {
-      const sid = req.cookies["session-id"];
-      if (sid) {
-        const [refreshToken, accessToken] = await service.refreshToken(sid);
-        if (refreshToken) {
-          const key = "REFRESH_IDP:" + refreshToken.id;
-          await fastify.redis.set(
-            key,
-            JSON.stringify(JSON.stringify(accessToken)),
-            "EX",
-            120
-          );
-        }
+    .get(
+      "/refresh",
+      { schema: { tags: ["auth/user"] } },
+      async function refreshTokenHandler(req, rep) {
+        const sid = req.cookies["session-id"];
+        if (sid) {
+          const [refreshToken, accessToken] = await service.refreshToken(sid);
+          if (refreshToken) {
+            const key = "REFRESH_IDP:" + refreshToken.id;
+            await fastify.redis.set(
+              key,
+              JSON.stringify(JSON.stringify(accessToken)),
+              "EX",
+              120
+            );
+          }
 
-        rep.setCookie("session-id", refreshToken.id, {
-          // path: "/auth",
-          httpOnly: true,
-          expires: luxon.DateTime.now().plus({ days: 4 }).toJSDate(),
-        });
-        return accessToken;
+          rep.setCookie("session-id", refreshToken.id, {
+            // path: "/auth",
+            httpOnly: true,
+            expires: luxon.DateTime.now().plus({ days: 4 }).toJSDate(),
+          });
+          return accessToken;
+        }
+        rep.unauthorized();
       }
-      rep.unauthorized();
-    });
+    );
   done();
 }

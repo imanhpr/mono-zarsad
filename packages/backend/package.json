@@ -40,6 +40,8 @@
     "@fastify/redis": "^7.0.2",
     "@fastify/request-context": "^6.1.0",
     "@fastify/sensible": "^6.0.3",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.2",
     "@fastify/type-provider-typebox": "^5.1.0",
     "@keyv/valkey": "^1.0.3",
     "@mikro-orm/core": "^6.4.5",

@@ -1,9 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { SyncDoneFn } from "../../../../types/fastify-done.ts";
-import {
-  CreateNewTransactionPostBodySchema,
-  ICreateNewTransactionPostBodySchema,
-} from "./schema.ts";
+import { ISimpleTransaction, SimpleTransaction } from "./schema.ts";
 
 const transactionTypes = Object.freeze([
   {
@@ -28,18 +25,12 @@ export default function createTransactionPostPlugin(
       return { transactionTypes };
     }
   );
-  fastify
-    .addHook("preHandler", fastify.adminJwtBearerAuth)
-    .post<{
-      Body: ICreateNewTransactionPostBodySchema;
-    }>("/transaction", { schema: { body: CreateNewTransactionPostBodySchema } }, async function transactionPostHandler(req) {
-      const { amount, walletId, transactionType } = req.body;
-      const result = await service.updateWalletUserAmount_P(
-        walletId,
-        amount,
-        transactionType
-      );
-      return result;
-    });
+  fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
+    Body: ISimpleTransaction;
+  }>("/transaction", { schema: { body: SimpleTransaction, tags: ["admin", "admin/transaction"] } }, async function transactionPostHandler(req) {
+    const simpleTransaction = req.body;
+    const result = await service.updateWalletUserAmount_P(simpleTransaction);
+    return result;
+  });
   done();
 }

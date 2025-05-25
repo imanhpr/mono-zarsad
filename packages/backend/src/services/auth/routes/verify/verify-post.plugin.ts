@@ -13,7 +13,7 @@ export default function verifyPostPlugin(
 
   fastify.register(phoneNumberValidationHook).post<{
     Body: IVerifyRequestBodySchema;
-  }>("/verify", { schema: { body: VerifyRequestBodySchema } }, async function verifyHandler(req, rep) {
+  }>("/verify", { schema: { body: VerifyRequestBodySchema, tags: ["auth/user"] } }, async function verifyHandler(req, rep) {
     const { code, phoneNumber } = req.body;
     const rawUserAgent = req.headers["user-agent"];
     const agent = UAParser(rawUserAgent);

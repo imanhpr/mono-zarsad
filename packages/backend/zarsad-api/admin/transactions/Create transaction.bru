@@ -5,14 +5,20 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/admin/transaction
+  url: http://localhost:3007/admin/transaction
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoyLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE3NDgwNzcwNTksImV4cCI6MTc0ODA3ODg1OX0.pei0FRnQa34lFhhn3wmkqiNyPA9EHMEdPWsnu2V-ObU
 }
 
 body:json {
   {
-    "walletId" : 2,
-    "amount" : "400000000"
+    "transactionType" :"INCREMENT",
+    "walletId" : 104,
+    "userId" : 105,
+    "amount" : "2000"
   }
 }

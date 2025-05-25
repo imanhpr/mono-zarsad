@@ -2,6 +2,7 @@ import {
   DecimalType,
   Entity,
   Enum,
+  JsonProperty,
   ManyToOne,
   Property,
 } from "@mikro-orm/core";
@@ -44,4 +45,7 @@ export default class WalletSimpleTransaction {
 
   @Property()
   createdAt = new Date();
+
+  @Property({ type: "jsonb", nullable: true })
+  meta?: Record<string, unknown>;
 }

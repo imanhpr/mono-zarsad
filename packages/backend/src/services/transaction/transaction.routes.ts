@@ -9,14 +9,20 @@ export default function transactionModuleRoutes(
 ) {
   const service = fastify.transactionService;
 
-  fastify.post("/", async function newTransactionPostHandler(req, rep) {
-    const transactionResult = await service.createNewExchange(req.body as any);
-    return transactionResult;
-  });
+  fastify.post(
+    "/",
+    { schema: { tags: ["transaction"] } },
+    async function newTransactionPostHandler(req, rep) {
+      const transactionResult = await service.createNewExchange(
+        req.body as any
+      );
+      return transactionResult;
+    }
+  );
   // TODO: Change name of this route to something else more meaningful
   fastify.get(
     "/report/latest-exchange",
-    { preHandler: fastify.jwtBearerAuth },
+    { preHandler: fastify.jwtBearerAuth, schema: { tags: ["transaction"] } },
     function latestExchangeUserReport(req) {
       return service.reportLast5Exchange(req.user.id);
     }
@@ -24,7 +30,7 @@ export default function transactionModuleRoutes(
 
   fastify.get<{ Params: { id: string } }>(
     "/:transactionId/report",
-    { preHandler: fastify.jwtBearerAuth },
+    { preHandler: fastify.jwtBearerAuth, schema: { tags: ["transaction"] } },
     async function transactionGetReportHandler(req) {
       // @ts-expect-error
       const transactionId = req.params.transactionId;
@@ -40,7 +46,7 @@ export default function transactionModuleRoutes(
 
   fastify.post(
     "/withdraw",
-    { preHandler: [fastify.jwtBearerAuth] },
+    { preHandler: [fastify.jwtBearerAuth], schema: { tags: ["transaction"] } },
     async function transactionWithdrawPostHandler(req) {
       // @ts-ignore
       const { currencyType, amount } = req.body;
@@ -61,7 +67,7 @@ export default function transactionModuleRoutes(
 
   fastify.post(
     "/withdraw/finalize",
-    { preHandler: fastify.jwtBearerAuth },
+    { preHandler: fastify.jwtBearerAuth, schema: { tags: ["transaction"] } },
     function transactionWithdrawFinalizePostHandler(req) {
       const service = fastify.withdrawService;
       // @ts-ignore

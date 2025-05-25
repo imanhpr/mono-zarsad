@@ -21,6 +21,7 @@ export default function updateUserPutPlugin(
       schema: {
         params: GenericIdParam,
         body: UpdateUserPutRequestBodySchema,
+        tags: ["admin", "admin/user"],
       },
     },
     function updateUserPutHandler(req, res) {

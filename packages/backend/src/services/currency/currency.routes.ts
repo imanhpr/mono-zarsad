@@ -19,6 +19,7 @@ export default function currencyRoutesPlugin(
   const service = fastify.currencyService;
   fastify.get<{ Querystring: GetCurrencyPriceListQuery }>(
     "/",
+    { schema: { tags: ["currency"] } },
     function getCurrencyList(req) {
       const { currency, isJalali } = req.query;
       return service.findCurrencyPriceByCurrencyTypeId(
@@ -29,6 +30,7 @@ export default function currencyRoutesPlugin(
   );
   fastify.post<{ Body: NewCurrencyPriceRequestBody }>(
     "/",
+    { schema: { tags: ["currency"] } },
     async function newCurrencyPrice(req) {
       const { currencyId, price } = req.body;
       const result = await service.insertNewCurrencyPrice({

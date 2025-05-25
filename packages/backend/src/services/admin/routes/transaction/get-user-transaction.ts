@@ -9,6 +9,7 @@ export default function getUserTransactionsPlugin(
   const service = fastify.transactionManageService;
   fastify.get(
     "/transaction/:userId",
+    { schema: { tags: ["admin", "admin/transaction"] } },
     function getTransactionsByUserId(req, rep) {
       // @ts-expect-error
       const { userId } = req.params;

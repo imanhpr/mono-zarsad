@@ -7,11 +7,16 @@ export default function dashboardPageGetPlugin(
   done: SyncDoneFn
 ) {
   const service = fastify.adminDashboardService;
-  console.log("Service ", { service });
-
-  fastify.get("/dashboard", { preHandler: fastify.adminJwtBearerAuth }, () => {
-    return service.getData();
-  });
+  fastify.get(
+    "/dashboard",
+    {
+      preHandler: fastify.adminJwtBearerAuth,
+      schema: { tags: ["admin", "admin/page"] },
+    },
+    () => {
+      return service.getData();
+    }
+  );
 
   done();
 }

@@ -30,6 +30,7 @@ import {
   UserListResponseWithPagination,
   UserWithWallet,
 } from "../schema/User.schema";
+import { ISimpleTransactionPayloadSchema } from "../schema/Credit.schema";
 
 export class AdminZarApi {
   #ax: AxiosInstance;
@@ -169,6 +170,14 @@ export class AdminZarApi {
     }
     const result: IUserListResponse = UserListResponse.parse(response.data);
     return result as T extends true ? IUserWithWallet : IUserListResponse;
+  }
+
+  async createTransaction(payload: ISimpleTransactionPayloadSchema) {
+    const url = "/transaction";
+    const p: Record<string, unknown> = payload;
+    p.walletId = payload.wallet.id;
+    const response = await this.#ax.post(url, p);
+    return response.data;
   }
 }
 

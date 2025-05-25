@@ -16,7 +16,7 @@ export default function loginPostPlugin(
       Body: ILoginRequestBodySchema;
     }>(
       "/login",
-      { schema: { body: LoginRequestBodySchema } },
+      { schema: { body: LoginRequestBodySchema, tags: ["auth/user"] } },
       function loginHandler(req) {
         return service.login(req.body.phoneNumber);
       }

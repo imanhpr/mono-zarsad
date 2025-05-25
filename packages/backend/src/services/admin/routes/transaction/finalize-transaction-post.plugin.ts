@@ -9,6 +9,7 @@ export default function finalizeTransactionPostPlugin(
   const service = fastify.transactionManageService;
   fastify.post(
     "/transaction/finalize/:transactionId",
+    { schema: { tags: ["admin", "admin/transaction"] } },
     async function finalizeTransactionPostHandler(req) {
       // @ts-expect-error
       const { transactionId } = req.params;

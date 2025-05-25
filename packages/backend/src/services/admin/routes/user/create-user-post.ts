@@ -10,16 +10,10 @@ export default function createUserPostPlugin(
   _: unknown,
   done: (err?: Error) => void
 ) {
-  const hasUserManageService = fastify.hasDecorator("userManageService");
-  if (!hasUserManageService) {
-    const err = new Error("Please Init userManageService");
-    done(err);
-    return;
-  }
   const service = fastify.userManageService;
   fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
     Body: ICreateUserPostRequestBodySchema;
-  }>("/", { schema: { body: CreateUserPostRequestBodySchema } }, async function createUserPostHandler(req, rep) {
+  }>("/", { schema: { body: CreateUserPostRequestBodySchema, tags: ["admin", "admin/user"] } }, async function createUserPostHandler(req, rep) {
     const result = await service.createUser(req.body);
     return rep.code(201).send(result);
   });

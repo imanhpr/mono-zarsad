@@ -11,7 +11,7 @@ export default function getUserListByFilterRoutePlugin(
 ) {
   fastify.addHook("preHandler", fastify.adminJwtBearerAuth).get<{
     Querystring: IUserListQueryFilterSchema;
-  }>("/", { schema: { querystring: UserListQueryFilterSchema } }, async function getUserListByFilterHandler(req) {
+  }>("/", { schema: { querystring: UserListQueryFilterSchema, tags: ["admin", "admin/user"] } }, async function getUserListByFilterHandler(req) {
     const result = await fastify.userManageService.getUserListByFilter(
       req.query
     );

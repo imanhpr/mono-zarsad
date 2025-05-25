@@ -10,8 +10,12 @@ export default function getCurrentActiveSpreadPlugin(
 
   fastify
     .addHook("preHandler", fastify.adminJwtBearerAuth)
-    .get("/current", async function getCurrentActiveSpread() {
-      return service.getActiveSpreadPair();
-    });
+    .get(
+      "/current",
+      { schema: { tags: ["admin", "admin/spread"] } },
+      async function getCurrentActiveSpread() {
+        return service.getActiveSpreadPair();
+      }
+    );
   done();
 }

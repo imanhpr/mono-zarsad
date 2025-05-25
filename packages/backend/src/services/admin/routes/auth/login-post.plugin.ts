@@ -10,7 +10,12 @@ export default async function adminAuthLoginPostPlugin(
 
   fastify.post<{ Body: IAdminAuthLoginRequestPayloadSchema }>(
     "/login",
-    { schema: { body: AdminAuthLoginRequestPayloadSchema } },
+    {
+      schema: {
+        body: AdminAuthLoginRequestPayloadSchema,
+        tags: ["auth/admin", "admin"],
+      },
+    },
     async function adminAuthLoginPostHandler(req, rep) {
       const [refreshToken, responseResult] = await service.login(
         req.body.username,

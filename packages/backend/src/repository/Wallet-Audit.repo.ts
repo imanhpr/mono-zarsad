@@ -13,7 +13,6 @@ export class WalletAudiRepo {
     type: "INCREMENT" | "DECREMENT";
     amount: Decimal;
     walletAmount: Decimal;
-    source: string;
     wallet: Wallet;
     walletTransactionId: string;
   }) {

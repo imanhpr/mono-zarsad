@@ -89,13 +89,14 @@ const CurrencyTypeSchema = z.object({
   name_farsi: z.string(),
 });
 
-const WalletSchema = z.object({
+export const WalletSchema = z.object({
   id: z.number(),
   currencyType: CurrencyTypeSchema,
   amount: z.string(),
   lockAmount: z.string(),
 });
 
+export type IWalletSchema = z.infer<typeof WalletSchema>;
 export const UserWithWallet = z.object({
   status: z.literal("success"),
   message: z.string(),

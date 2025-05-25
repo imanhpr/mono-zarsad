@@ -19,7 +19,7 @@ export default function Modal({
   const portal = createPortal(
     <div
       onClick={closeModalHandler}
-      className="z-30 absolute flex flex-col justify-center items-center bg-black/70 min-w-screen min-h-screen"
+      className="z-30 fixed flex flex-col justify-center items-center bg-black/70 min-w-screen min-h-screen"
     >
       <div className={style} dir="rtl" onClick={(e) => e.stopPropagation()}>
         {children}

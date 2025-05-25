@@ -9,7 +9,10 @@ export default function userInfoGetPlugin(
   const service = fastify.userService;
   fastify.get(
     "/info",
-    { preHandler: [fastify.jwtBearerAuth] },
+    {
+      preHandler: [fastify.jwtBearerAuth],
+      schema: { tags: ["user"], security: [{ userBearerAuth: [] }] },
+    },
     function userInfoGetPlugin({ user }) {
       return service.getUserInfoById(user.id);
     }

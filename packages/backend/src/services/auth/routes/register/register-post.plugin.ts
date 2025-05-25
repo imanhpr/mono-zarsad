@@ -18,7 +18,7 @@ export default function registerPostPlugin(
     .register(phoneNumberValidationHook)
     .post<IRequestBody>(
       "/register",
-      { schema: { body: RegisterRequestBodySchema } },
+      { schema: { body: RegisterRequestBodySchema, tags: ["auth/user"] } },
       async function registerHandler(req, rep) {
         const result = await service.register(req.body);
         rep.code(201).send(result);
