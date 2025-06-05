@@ -92,6 +92,7 @@ const swaggerOptions: fastifySwagger.SwaggerOptions = {
 };
 export default function appFactory() {
   const app = Fastify({
+    requestTimeout: 4000,
     logger: {
       transport: { target: "pino-pretty" },
     },

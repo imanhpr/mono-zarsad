@@ -4,7 +4,7 @@ import { BusinessOperationException } from "./exceptions/index.ts";
 import { BusinessOperationResult } from "./helpers/index.ts";
 import { DriverException } from "@mikro-orm/core";
 const app = appFactory();
-app.setErrorHandler(function exceptHandler(err, _, rep) {
+app.setErrorHandler(function exceptHandler(err, req, rep) {
   if (err instanceof BusinessOperationException) {
     console.log("err code: ", err.httpCode);
     rep
@@ -13,6 +13,7 @@ app.setErrorHandler(function exceptHandler(err, _, rep) {
     return;
   }
   if (err instanceof DriverException) {
+    req.log.error(err, "DbDriverError");
     rep
       .code(500)
       .send({ message: "Internal Server Error - Please Call Server Admin" });

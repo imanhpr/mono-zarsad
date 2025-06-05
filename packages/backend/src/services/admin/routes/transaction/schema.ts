@@ -1,7 +1,11 @@
 import { Static, Type } from "@sinclair/typebox";
+import {
+  SimpleTransactionOperationType,
+  SimpleTransactionType,
+} from "../../../../types/transaction.ts";
 
 export const SimpleCardToCardTransaction = Type.Object({
-  metaType: Type.Literal("CARD_TO_CARD"),
+  operationType: Type.Literal(SimpleTransactionOperationType.CARD_TO_CARD),
   userId: Type.Number(),
   amount: Type.String(),
   walletId: Type.Number(),
@@ -14,5 +18,25 @@ export const SimpleCardToCardTransaction = Type.Object({
   }),
 });
 
-export const SimpleTransaction = Type.Union([SimpleCardToCardTransaction]);
+export const SimpleTransactionGoldDeposit = Type.Object({
+  operationType: Type.Literal(SimpleTransactionOperationType.GOLD_DEPOSIT),
+  userId: Type.Number(),
+  amount: Type.String(),
+  walletId: Type.Number(),
+  transactionType: Type.Literal(SimpleTransactionType.INCREMENT),
+});
+
+export const SimpleTransactionGoldWithdraw = Type.Object({
+  operationType: Type.Literal(SimpleTransactionOperationType.GOLD_WITHDRAW),
+  userId: Type.Number(),
+  amount: Type.String(),
+  walletId: Type.Number(),
+  transactionType: Type.Literal(SimpleTransactionType.DECREMENT),
+});
+
+export const SimpleTransaction = Type.Union([
+  SimpleCardToCardTransaction,
+  SimpleTransactionGoldDeposit,
+  SimpleTransactionGoldWithdraw,
+]);
 export type ISimpleTransaction = Static<typeof SimpleTransaction>;

@@ -27,7 +27,7 @@ export default function createTransactionPostPlugin(
   );
   fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
     Body: ISimpleTransaction;
-  }>("/transaction", { schema: { body: SimpleTransaction, tags: ["admin", "admin/transaction"] } }, async function transactionPostHandler(req) {
+  }>("/transaction", { schema: { body: SimpleTransaction, tags: ["admin", "admin/transaction"], security: [{ adminBearerAuth: [] }] } }, async function transactionPostHandler(req) {
     const simpleTransaction = req.body;
     const result = await service.updateWalletUserAmount_P(simpleTransaction);
     return result;

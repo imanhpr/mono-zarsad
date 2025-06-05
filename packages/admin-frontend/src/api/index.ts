@@ -30,7 +30,7 @@ import {
   UserListResponseWithPagination,
   UserWithWallet,
 } from "../schema/User.schema";
-import { ISimpleTransactionPayloadSchema } from "../schema/Credit.schema";
+import { IFinalTransactionPayload } from "../schema/Credit.schema";
 
 export class AdminZarApi {
   #ax: AxiosInstance;
@@ -172,7 +172,7 @@ export class AdminZarApi {
     return result as T extends true ? IUserWithWallet : IUserListResponse;
   }
 
-  async createTransaction(payload: ISimpleTransactionPayloadSchema) {
+  async createTransaction(payload: IFinalTransactionPayload) {
     const url = "/transaction";
     const p: Record<string, unknown> = payload;
     p.walletId = payload.wallet.id;

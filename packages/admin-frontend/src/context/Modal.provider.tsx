@@ -3,7 +3,6 @@ import { modalCtx } from "./ctx";
 
 export default function ModalContextProvider({ children }: PropsWithChildren) {
   const [display, setDisplay] = useState<boolean>(false);
-  console.log({ display });
   const toggleDisplay = () => setDisplay((prev) => !prev);
 
   return (

@@ -20,7 +20,7 @@ export default class UserFactoryService {
 
   @Transactional()
   async createNormalUser(input: ICreateNewUser) {
-    const currencyTypes = await this.#currencyTypeRepo.findAll();
+    const currencyTypes = await this.#currencyTypeRepo.findAllThatHasWallet();
 
     const user = this.#userRepo.createNormal(input);
     currencyTypes.map((currencyType) =>

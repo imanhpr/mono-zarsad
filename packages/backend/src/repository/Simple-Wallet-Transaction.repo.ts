@@ -19,7 +19,7 @@ export class SimpleWalletTransactionRepo {
     status: SimpleWalletTransactionStatus,
     amount: string,
     wallet: Wallet,
-    meta: Record<string, unknown>
+    meta?: Record<string, unknown>
   ) {
     return this.#em.create(WalletSimpleTransaction, {
       id: walletTransactionId,

@@ -18,8 +18,8 @@ export class CurrencyTypeRepo {
   findOneByName(name: CurrencyTypeEnum) {
     return this.#em.findOneOrFail(CurrencyType, { name });
   }
-  findAll() {
-    return this.#em.findAll(CurrencyType);
+  findAllThatHasWallet() {
+    return this.#em.find(CurrencyType, { hasWallet: true });
   }
 
   findCurrencyPriceByEnumName(nameList: Readonly<CurrencyTypeEnum[]>) {

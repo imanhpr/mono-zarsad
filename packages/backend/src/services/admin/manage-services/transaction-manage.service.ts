@@ -13,13 +13,18 @@ import { type ProfileRepo } from "../../../repository/Profile.repo.ts";
 import { type WalletExchangeService } from "../../shared/WalletExchange.service.ts";
 import { type WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
 
-import { mapDateToJalali } from "../../../helpers/index.ts";
+import {
+  BusinessOperationResult,
+  mapDateToJalali,
+} from "../../../helpers/index.ts";
 import { SimpleWalletTransactionRepo } from "../../../repository/Simple-Wallet-Transaction.repo.ts";
 import {
   SimpleWalletTransactionStatus,
   SimpleWalletTransactionType,
 } from "../../../models/Wallet-Simple-Transaction.entity.ts";
 import { ISimpleTransaction } from "../routes/transaction/schema.ts";
+import i18next from "i18next";
+import { SimpleTransactionType } from "../../../types/transaction.ts";
 
 export class TransactionManageService {
   #walletAudioRepo: WalletAudiRepo;
@@ -48,6 +53,11 @@ export class TransactionManageService {
   @Transactional()
   async updateWalletUserAmount_P(simpleTransactionPayload: ISimpleTransaction) {
     const now = new Date();
+    let meta;
+    if ("meta" in simpleTransactionPayload) {
+      meta = simpleTransactionPayload.meta;
+    }
+
     const wallet = await this.#walletRepo.selectWalletForUpdateByIdAndUserId(
       simpleTransactionPayload.walletId,
       simpleTransactionPayload.userId
@@ -60,7 +70,10 @@ export class TransactionManageService {
     );
 
     let decimalAmount: Decimal | null = null;
-    if (simpleTransactionPayload.transactionType === "INCREMENT") {
+    if (
+      simpleTransactionPayload.transactionType ===
+      SimpleTransactionType.INCREMENT
+    ) {
       decimalAmount = new Decimal(simpleTransactionPayload.amount).abs();
     } else {
       decimalAmount = new Decimal(simpleTransactionPayload.amount)
@@ -92,7 +105,7 @@ export class TransactionManageService {
       SimpleWalletTransactionStatus.SUCCESSFUL,
       finalAmount.toString(),
       wallet,
-      simpleTransactionPayload.meta
+      meta
     );
 
     this.#walletRepo.updateWalletAmount(wallet, finalAmount);
@@ -105,7 +118,11 @@ export class TransactionManageService {
       },
     } as const);
 
-    return result;
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("SUCCESS_OPERATION"),
+      result
+    );
   }
 
   finalizeWalletExchange(exchangeId: string) {

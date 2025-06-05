@@ -5,6 +5,7 @@ import {
   JsonProperty,
   ManyToOne,
   Property,
+  Unique,
 } from "@mikro-orm/core";
 import WalletTransaction from "./Wallet-Transaction.entity.ts";
 import Wallet from "./Wallet.entity.ts";
@@ -20,6 +21,10 @@ export enum SimpleWalletTransactionType {
 }
 
 @Entity()
+@Unique({
+  name: "card_to_card_transaction_id_unique",
+  properties: "meta.transactionIdentifier",
+})
 export default class WalletSimpleTransaction {
   @ManyToOne(() => WalletTransaction, {
     primary: true,
