@@ -7,6 +7,9 @@ export abstract class Pair {
   protected readonly source: string;
   protected readonly currencyPricePerBase: string;
   protected readonly currencyPriceSpread: string;
+  abstract readonly sourceWalletTypeName: string;
+  abstract readonly targetWalletTypeName: string;
+
   constructor(
     sourceCurrency: string,
     targetCurrency: string,
@@ -39,6 +42,8 @@ export abstract class Pair {
 }
 
 class GoldToTomanPair extends Pair {
+  sourceWalletTypeName: string = "GOLD_18";
+  targetWalletTypeName: string = "TOMAN";
   #GOLD_CONST = GOLD_CONST;
   calculate() {
     const sourceDecimal = new Decimal(this.source).abs();
@@ -64,8 +69,8 @@ class GoldToTomanPair extends Pair {
   }
   reverse() {
     return new TomanToGoldPair(
-      "TOMAN",
-      "GOLD",
+      "TH",
+      "GOLD_18",
       this.calculate().mainResult.toString(),
       this.currencyPricePerBase.toString(),
       this.currencyPriceSpread.toString()
@@ -75,6 +80,8 @@ class GoldToTomanPair extends Pair {
 
 class TomanToGoldPair extends Pair {
   #GOLD_CONST = new Decimal("4.331802");
+  sourceWalletTypeName: string = "TOMAN";
+  targetWalletTypeName: string = "GOLD_18";
   calculate() {
     const scale = 1000;
     const sourceDecimal = new Decimal(this.source).abs();
@@ -103,8 +110,8 @@ class TomanToGoldPair extends Pair {
 
   reverse() {
     return new GoldToTomanPair(
-      "GOLD",
-      "TOMAN",
+      "GOLD_18",
+      "TH",
       this.calculate().mainResult.toString(),
       this.currencyPricePerBase,
       this.currencyPriceSpread
@@ -115,8 +122,8 @@ class TomanToGoldPair extends Pair {
 export class PairFactory {
   pairs = new Map(
     Object.entries({
-      "TOMAN:GOLD_18": TomanToGoldPair,
-      "GOLD_18:TOMAN": GoldToTomanPair,
+      "TH/GOLD_18": TomanToGoldPair,
+      "GOLD_18/TH": GoldToTomanPair,
     })
   );
 
@@ -127,7 +134,7 @@ export class PairFactory {
     currencyPriceAmount: string,
     spreadAmount: string
   ): Pair | null {
-    const key = `${sourceCurrency}:${targetCurrency}`;
+    const key = `${sourceCurrency}/${targetCurrency}`;
     const cls = this.pairs.get(key);
     if (cls)
       return new cls(

@@ -3,9 +3,10 @@ import fp from "fastify-plugin";
 import { EntityManager, LockMode } from "@mikro-orm/core";
 import Wallet from "../models/Wallet.entity.ts";
 import { Decimal } from "decimal.js";
+import { CurrencyTypeEnum } from "../types/currency-types.ts";
 import type CurrencyType from "../models/Currency-Type.entity.ts";
 import type User from "../models/User.entity.ts";
-import { CurrencyTypeEnum } from "../types/currency-types.ts";
+import type WalletExchangePairTransaction from "../models/WalletExchangePairTransaction.entity.ts";
 
 export class WalletRepo {
   #em: EntityManager;
@@ -53,14 +54,60 @@ export class WalletRepo {
     return wallet;
   }
 
-  selectWalletPairForExchange(sourceWalletId: number, targetWalletId: number) {
-    return this.#em.find(
+  async selectWalletPairForExchange(
+    userId: number,
+    sourceWalletCurrencyTypeId: number,
+    targetWalletCurrencyTypeId: number
+  ) {
+    const wallets = await this.#em.find(
       Wallet,
-      { id: { $in: [sourceWalletId, targetWalletId] } },
+      {
+        currencyType: {
+          id: {
+            $in: [sourceWalletCurrencyTypeId, targetWalletCurrencyTypeId],
+          },
+        },
+        user: { id: userId },
+      },
       {
         lockMode: LockMode.PESSIMISTIC_WRITE,
       }
     );
+
+    const sourceWallet = wallets.find(
+      (wallet) => wallet.currencyType.id == sourceWalletCurrencyTypeId
+    );
+    if (!sourceWallet) throw new Error("Source wallet not found");
+
+    const targetWallet = wallets.find(
+      (wallet) => wallet.currencyType.id == targetWalletCurrencyTypeId
+    );
+    if (!targetWallet) throw new Error("Target wallet not found");
+    return Object.freeze({ targetWallet, sourceWallet });
+  }
+
+  async selectWalletPairForUpdateByExchangeTransactionWithLock(
+    exchange: WalletExchangePairTransaction
+  ) {
+    const wallets = await this.#em.find(
+      Wallet,
+      {
+        id: { $in: [exchange.fromWallet.id, exchange.toWallet.id] },
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE }
+    );
+
+    const sourceWallet = wallets.find(
+      (wallet) => wallet.id === exchange.fromWallet.id
+    );
+    if (!sourceWallet) throw new Error("Source wallet not found");
+
+    const targetWallet = wallets.find(
+      (wallet) => wallet.id === exchange.toWallet.id
+    );
+    if (!targetWallet) throw new Error("Target wallet not found");
+
+    return { sourceWallet, targetWallet };
   }
 }
 

@@ -11,9 +11,8 @@ export default function getUserTransactionsPlugin(
     "/transaction/:userId",
     { schema: { tags: ["admin", "admin/transaction"] } },
     function getTransactionsByUserId(req, rep) {
-      // @ts-expect-error
-      const { userId } = req.params;
-      return service.userTransactionHistory(parseInt(userId));
+      // TODO: fixme
+      return "implement me";
     }
   );
   done();

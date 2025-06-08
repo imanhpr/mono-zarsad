@@ -17,6 +17,7 @@ import { Route as AuthLoginIndexImport } from './routes/auth/login.index'
 import { Route as LayoutTopLayoutIndexImport } from './routes/_layout/_top-layout/index'
 import { Route as LayoutTopLayoutUserIndexImport } from './routes/_layout/_top-layout/user/index'
 import { Route as LayoutTopLayoutCurrencyIndexImport } from './routes/_layout/_top-layout/currency/index'
+import { Route as LayoutTopLayoutTransactionReportIndexImport } from './routes/_layout/_top-layout/transaction/report.index'
 import { Route as LayoutTopLayoutUserUserIdCreditImport } from './routes/_layout/_top-layout/user/$userId.credit'
 
 // Create/Update Routes
@@ -53,6 +54,13 @@ const LayoutTopLayoutCurrencyIndexRoute =
   LayoutTopLayoutCurrencyIndexImport.update({
     id: '/currency/',
     path: '/currency/',
+    getParentRoute: () => LayoutTopLayoutRoute,
+  } as any)
+
+const LayoutTopLayoutTransactionReportIndexRoute =
+  LayoutTopLayoutTransactionReportIndexImport.update({
+    id: '/transaction/report/',
+    path: '/transaction/report/',
     getParentRoute: () => LayoutTopLayoutRoute,
   } as any)
 
@@ -116,6 +124,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutTopLayoutUserUserIdCreditImport
       parentRoute: typeof LayoutTopLayoutImport
     }
+    '/_layout/_top-layout/transaction/report/': {
+      id: '/_layout/_top-layout/transaction/report/'
+      path: '/transaction/report'
+      fullPath: '/transaction/report'
+      preLoaderRoute: typeof LayoutTopLayoutTransactionReportIndexImport
+      parentRoute: typeof LayoutTopLayoutImport
+    }
   }
 }
 
@@ -126,6 +141,7 @@ interface LayoutTopLayoutRouteChildren {
   LayoutTopLayoutCurrencyIndexRoute: typeof LayoutTopLayoutCurrencyIndexRoute
   LayoutTopLayoutUserIndexRoute: typeof LayoutTopLayoutUserIndexRoute
   LayoutTopLayoutUserUserIdCreditRoute: typeof LayoutTopLayoutUserUserIdCreditRoute
+  LayoutTopLayoutTransactionReportIndexRoute: typeof LayoutTopLayoutTransactionReportIndexRoute
 }
 
 const LayoutTopLayoutRouteChildren: LayoutTopLayoutRouteChildren = {
@@ -133,6 +149,8 @@ const LayoutTopLayoutRouteChildren: LayoutTopLayoutRouteChildren = {
   LayoutTopLayoutCurrencyIndexRoute: LayoutTopLayoutCurrencyIndexRoute,
   LayoutTopLayoutUserIndexRoute: LayoutTopLayoutUserIndexRoute,
   LayoutTopLayoutUserUserIdCreditRoute: LayoutTopLayoutUserUserIdCreditRoute,
+  LayoutTopLayoutTransactionReportIndexRoute:
+    LayoutTopLayoutTransactionReportIndexRoute,
 }
 
 const LayoutTopLayoutRouteWithChildren = LayoutTopLayoutRoute._addFileChildren(
@@ -157,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
   '/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
+  '/transaction/report': typeof LayoutTopLayoutTransactionReportIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -166,6 +185,7 @@ export interface FileRoutesByTo {
   '/currency': typeof LayoutTopLayoutCurrencyIndexRoute
   '/user': typeof LayoutTopLayoutUserIndexRoute
   '/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
+  '/transaction/report': typeof LayoutTopLayoutTransactionReportIndexRoute
 }
 
 export interface FileRoutesById {
@@ -177,6 +197,7 @@ export interface FileRoutesById {
   '/_layout/_top-layout/currency/': typeof LayoutTopLayoutCurrencyIndexRoute
   '/_layout/_top-layout/user/': typeof LayoutTopLayoutUserIndexRoute
   '/_layout/_top-layout/user/$userId/credit': typeof LayoutTopLayoutUserUserIdCreditRoute
+  '/_layout/_top-layout/transaction/report/': typeof LayoutTopLayoutTransactionReportIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -188,8 +209,16 @@ export interface FileRouteTypes {
     | '/currency'
     | '/user'
     | '/user/$userId/credit'
+    | '/transaction/report'
   fileRoutesByTo: FileRoutesByTo
-  to: '' | '/' | '/auth/login' | '/currency' | '/user' | '/user/$userId/credit'
+  to:
+    | ''
+    | '/'
+    | '/auth/login'
+    | '/currency'
+    | '/user'
+    | '/user/$userId/credit'
+    | '/transaction/report'
   id:
     | '__root__'
     | '/_layout'
@@ -199,6 +228,7 @@ export interface FileRouteTypes {
     | '/_layout/_top-layout/currency/'
     | '/_layout/_top-layout/user/'
     | '/_layout/_top-layout/user/$userId/credit'
+    | '/_layout/_top-layout/transaction/report/'
   fileRoutesById: FileRoutesById
 }
 
@@ -239,7 +269,8 @@ export const routeTree = rootRoute
         "/_layout/_top-layout/",
         "/_layout/_top-layout/currency/",
         "/_layout/_top-layout/user/",
-        "/_layout/_top-layout/user/$userId/credit"
+        "/_layout/_top-layout/user/$userId/credit",
+        "/_layout/_top-layout/transaction/report/"
       ]
     },
     "/_layout/_top-layout/": {
@@ -259,6 +290,10 @@ export const routeTree = rootRoute
     },
     "/_layout/_top-layout/user/$userId/credit": {
       "filePath": "_layout/_top-layout/user/$userId.credit.tsx",
+      "parent": "/_layout/_top-layout"
+    },
+    "/_layout/_top-layout/transaction/report/": {
+      "filePath": "_layout/_top-layout/transaction/report.index.tsx",
       "parent": "/_layout/_top-layout"
     }
   }

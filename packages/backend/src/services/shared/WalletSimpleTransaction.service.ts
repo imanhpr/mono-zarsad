@@ -5,10 +5,7 @@ import { type WalletRepo } from "../../repository/Wallet.repo.ts";
 import { type WalletAudiRepo } from "../../repository/Wallet-Audit.repo.ts";
 import { type SimpleWalletTransactionRepo } from "../../repository/Simple-Wallet-Transaction.repo.ts";
 import { type WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
-import {
-  SimpleWalletTransactionStatus,
-  SimpleWalletTransactionType,
-} from "../../models/Wallet-Simple-Transaction.entity.ts";
+import { SimpleWalletTransactionStatus } from "../../models/Wallet-Simple-Transaction.entity.ts";
 import { Decimal } from "decimal.js";
 
 export default class WithdrawService {
@@ -47,14 +44,14 @@ export default class WithdrawService {
     );
 
     let transactionType:
-      | SimpleWalletTransactionType.PHYSICAL_GOLD_WITHDRAW
-      | SimpleWalletTransactionType.TOMAN_WITHDRAW
+      | SimpleWalletOperationType.PHYSICAL_GOLD_WITHDRAW
+      | SimpleWalletOperationType.TOMAN_WITHDRAW
       | null = null;
 
     if (type === CurrencyTypeEnum.GOLD_18)
-      transactionType = SimpleWalletTransactionType.PHYSICAL_GOLD_WITHDRAW;
+      transactionType = SimpleWalletOperationType.PHYSICAL_GOLD_WITHDRAW;
     else if (type === CurrencyTypeEnum.TOMAN)
-      transactionType = SimpleWalletTransactionType.TOMAN_WITHDRAW;
+      transactionType = SimpleWalletOperationType.TOMAN_WITHDRAW;
     else throw new Error("Unknown withdraw transaction");
 
     const simpleWalletTransaction = this.#simpleTransactionRepo.create(

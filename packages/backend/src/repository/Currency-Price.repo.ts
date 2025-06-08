@@ -66,7 +66,10 @@ export class CurrencyPriceRepo {
   ) {
     const subquery = this.#em
       .createQueryBuilder(CurrencyPrice, "cp", "read")
-      .select(["*", sql`LAG(price) OVER (ORDER BY id DESC) AS previous_price`])
+      .select([
+        "*",
+        sql`LAG(price , -1) OVER (ORDER BY id DESC) AS previous_price`,
+      ])
       .where({ currency: { id: currencyTypeId } })
       .getKnexQuery();
 

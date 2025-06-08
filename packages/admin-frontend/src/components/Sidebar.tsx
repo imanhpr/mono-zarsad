@@ -54,10 +54,12 @@ export default function Sidebar() {
                 Icon={BsCurrencyBitcoin}
                 path="/currency"
               />
-              <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
-                <BsPiggyBankFill />
-                <p>مدیریت مالی</p>
-              </li>
+              <SidebarLink
+                title="تراکنش ها"
+                Icon={BsPiggyBankFill}
+                path="/transaction/report"
+              />
+
               <li className="flex items-center gap-x-4 hover:bg-amber-100 p-2 rounded-lg font-semibold text-gray-500 hover:text-amber-900 text-lg">
                 <BsFileEarmarkSpreadsheetFill />
                 <p>گزارش گیری</p>

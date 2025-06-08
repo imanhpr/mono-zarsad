@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { EntityManager, LockMode } from "@mikro-orm/core";
+import { EntityManager, Loaded, LockMode } from "@mikro-orm/core";
 
 import WalletExchangePairTransaction, {
   WalletExchangeTransactionStatus,
@@ -56,7 +56,9 @@ export class WalletExchangePairTransactionRepo {
     exchange.decrement = decrement;
   }
 
-  getExchangeTransactionForUpdateWithLock(id: string) {
+  getExchangeTransactionForUpdateWithLock(
+    id: string
+  ): Promise<Loaded<WalletExchangePairTransaction, never, "*", never>> {
     return this.#em.findOneOrFail(this.#model, id, {
       lockMode: LockMode.PESSIMISTIC_WRITE,
     });

@@ -1,10 +1,5 @@
 import fp from "fastify-plugin";
-import {
-  FlushMode,
-  IsolationLevel,
-  Transactional,
-  wrap,
-} from "@mikro-orm/core";
+import { Transactional } from "@mikro-orm/core";
 import { WalletRepo } from "../../../repository/Wallet.repo.ts";
 import { Decimal } from "decimal.js";
 
@@ -13,16 +8,13 @@ import { type ProfileRepo } from "../../../repository/Profile.repo.ts";
 import { type WalletExchangeService } from "../../shared/WalletExchange.service.ts";
 import { type WalletTransactionRepo } from "../../../repository/Wallet-Transaction.repo.ts";
 
-import {
-  BusinessOperationResult,
-  mapDateToJalali,
-} from "../../../helpers/index.ts";
+import { BusinessOperationResult } from "../../../helpers/index.ts";
 import { SimpleWalletTransactionRepo } from "../../../repository/Simple-Wallet-Transaction.repo.ts";
+import { SimpleWalletTransactionStatus } from "../../../models/Wallet-Simple-Transaction.entity.ts";
 import {
-  SimpleWalletTransactionStatus,
-  SimpleWalletTransactionType,
-} from "../../../models/Wallet-Simple-Transaction.entity.ts";
-import { ISimpleTransaction } from "../routes/transaction/schema.ts";
+  IExchangeTransactionInitSchema,
+  ISimpleTransaction,
+} from "../routes/transaction/schema.ts";
 import i18next from "i18next";
 import { SimpleTransactionType } from "../../../types/transaction.ts";
 
@@ -51,7 +43,9 @@ export class TransactionManageService {
   }
 
   @Transactional()
-  async updateWalletUserAmount_P(simpleTransactionPayload: ISimpleTransaction) {
+  async createSimpleTransactionByAdmin(
+    simpleTransactionPayload: ISimpleTransaction
+  ) {
     const now = new Date();
     let meta;
     if ("meta" in simpleTransactionPayload) {
@@ -101,7 +95,7 @@ export class TransactionManageService {
 
     this.#simpleWalletTransactionRepo.create(
       walletTransaction.id,
-      SimpleWalletTransactionType.CARD_TO_CARD,
+      simpleTransactionPayload.operationType,
       SimpleWalletTransactionStatus.SUCCESSFUL,
       finalAmount.toString(),
       wallet,
@@ -129,18 +123,41 @@ export class TransactionManageService {
     return this.#shardWalletExchangeService.finalizeWalletExchange(exchangeId);
   }
 
-  async userTransactionHistory(userId: number) {
+  async transactionHistoryByUserId(userId: number) {
     const result =
-      // @ts-expect-error
       await this.#walletTransactionRepo.findWalletTransactionByUserId(userId);
-    const mapResult = mapDateToJalali(result.transactions);
-    return Object.freeze({ count: result.count, transactions: mapResult });
+    return Object.freeze({ count: result.count, transactions: result });
+  }
+
+  async transactionHistory(
+    orderBt: "ASC" | "DESC",
+    offset: number,
+    limit: number
+  ) {
+    const result = await this.#walletTransactionRepo.transactionHistory(
+      orderBt,
+      offset,
+      limit
+    );
+
+    return new BusinessOperationResult(
+      "success",
+      i18next.t("GET_RESULT_SUCCESS"),
+      result
+    );
   }
 
   async #checkUserDebtPrem(userId: number, amount: Decimal) {
     const profile = await this.#profileRepo.findProfileByUserIdWithLock(userId);
     if (profile.debtPrem === false && amount.isNegative()) return false;
     return true;
+  }
+
+  @Transactional()
+  async createExchangeTransaction(payload: IExchangeTransactionInitSchema) {
+    return this.#shardWalletExchangeService.initNewWalletPairCurrencyExchange(
+      payload
+    );
   }
 }
 

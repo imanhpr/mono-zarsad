@@ -40,3 +40,19 @@ export const SimpleTransaction = Type.Union([
   SimpleTransactionGoldWithdraw,
 ]);
 export type ISimpleTransaction = Static<typeof SimpleTransaction>;
+
+export const ExchangeTransactionInitSchema = Type.Object({
+  pairSymbol: Type.String(),
+  sourceAmount: Type.String(),
+  userId: Type.Number(),
+});
+
+export type IExchangeTransactionInitSchema = Static<
+  typeof ExchangeTransactionInitSchema
+>;
+
+export const FinalizeExchangeSchema = Type.Object({
+  transactionId: Type.String(),
+});
+
+export type IFinalizeExchangeSchema = Static<typeof FinalizeExchangeSchema>;

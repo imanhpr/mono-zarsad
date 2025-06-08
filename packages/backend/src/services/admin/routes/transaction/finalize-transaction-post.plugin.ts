@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { SyncDoneFn } from "../../../../types/fastify-done.ts";
+import { FinalizeExchangeSchema, IFinalizeExchangeSchema } from "./schema.ts";
 
 export default function finalizeTransactionPostPlugin(
   fastify: FastifyInstance,
@@ -7,14 +8,11 @@ export default function finalizeTransactionPostPlugin(
   done: SyncDoneFn
 ) {
   const service = fastify.transactionManageService;
-  fastify.post(
-    "/transaction/finalize/:transactionId",
-    { schema: { tags: ["admin", "admin/transaction"] } },
-    async function finalizeTransactionPostHandler(req) {
-      // @ts-expect-error
-      const { transactionId } = req.params;
-      return service.finalizeWalletExchange(transactionId);
-    }
-  );
+  fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
+    Params: IFinalizeExchangeSchema;
+  }>("/transaction/finalize/:transactionId", { schema: { tags: ["admin", "admin/transaction"], params: FinalizeExchangeSchema } }, async function finalizeTransactionPostHandler(req) {
+    const { transactionId } = req.params;
+    return service.finalizeWalletExchange(transactionId);
+  });
   done();
 }

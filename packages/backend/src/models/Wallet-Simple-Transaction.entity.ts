@@ -2,22 +2,17 @@ import {
   DecimalType,
   Entity,
   Enum,
-  JsonProperty,
   ManyToOne,
   Property,
   Unique,
 } from "@mikro-orm/core";
 import WalletTransaction from "./Wallet-Transaction.entity.ts";
 import Wallet from "./Wallet.entity.ts";
+import { SimpleTransactionOperationType } from "../types/transaction.ts";
 
 export enum SimpleWalletTransactionStatus {
   SUCCESSFUL = "SUCCESSFUL",
   INIT = "INIT",
-}
-export enum SimpleWalletTransactionType {
-  CARD_TO_CARD = "CARD_TO_CARD",
-  PHYSICAL_GOLD_WITHDRAW = "PHYSICAL_GOLD_WITHDRAW",
-  TOMAN_WITHDRAW = "TOMAN_WITHDRAW",
 }
 
 @Entity()
@@ -33,14 +28,11 @@ export default class WalletSimpleTransaction {
   })
   id!: string;
 
-  @Enum({ items: () => SimpleWalletTransactionType })
-  type!: SimpleWalletTransactionType;
+  @Enum({ items: () => SimpleTransactionOperationType })
+  type!: SimpleTransactionOperationType;
 
   @ManyToOne(() => Wallet)
   wallet!: Wallet;
-
-  @Property({ unique: true })
-  bankTransactionId!: string;
 
   @Property({ type: DecimalType, scale: 3, precision: 21 })
   amount!: string;

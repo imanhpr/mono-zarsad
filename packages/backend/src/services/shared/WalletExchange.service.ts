@@ -1,12 +1,18 @@
 import { Transactional } from "@mikro-orm/core";
 import { Decimal } from "decimal.js";
-import { GOLD_CONST } from "../../helpers/index.ts";
+
 import { type WalletAudiRepo } from "../../repository/Wallet-Audit.repo.ts";
 import { type WalletRepo } from "../../repository/Wallet.repo.ts";
 import { type CurrencyPriceRepo } from "../../repository/Currency-Price.repo.ts";
 import { type WalletExchangePairTransactionRepo } from "../../repository/WalletExchangePairTransaction.repo.ts";
-import type Wallet from "../../models/Wallet.entity.ts";
+import { type PairRepo } from "../../repository/Pair.repo.ts";
+
 import { WalletTransactionRepo } from "../../repository/Wallet-Transaction.repo.ts";
+import { PairFactory } from "./CurrencyPair.ts";
+import { IExchangeTransactionInitSchema } from "../admin/routes/transaction/schema.ts";
+import WalletExchangePairTransaction, {
+  WalletExchangeTransactionStatus,
+} from "../../models/WalletExchangePairTransaction.entity.ts";
 
 export class WalletExchangeService {
   #walletAuditRepo: WalletAudiRepo;
@@ -14,233 +20,179 @@ export class WalletExchangeService {
   #currencyPriceRepo: CurrencyPriceRepo;
   #walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo;
   #walletTransactionRepo: WalletTransactionRepo;
+  #pairRepo: PairRepo;
+  #pairFactory = new PairFactory();
 
   constructor(
     walletAuditRepo: WalletAudiRepo,
     walletRepo: WalletRepo,
     currencyPriceRepo: CurrencyPriceRepo,
     walletExchangePairTransactionRepo: WalletExchangePairTransactionRepo,
-    walletTransactionRepo: WalletTransactionRepo
+    walletTransactionRepo: WalletTransactionRepo,
+    pairRepo: PairRepo
   ) {
     this.#walletAuditRepo = walletAuditRepo;
     this.#walletRepo = walletRepo;
     this.#currencyPriceRepo = currencyPriceRepo;
     this.#walletExchangePairTransactionRepo = walletExchangePairTransactionRepo;
     this.#walletTransactionRepo = walletTransactionRepo;
-  }
-  async #getAndLockPairOfWallets(rawWallets: {
-    sourceId: number;
-    targetId: number;
-  }) {
-    const wallets = await this.#walletRepo.selectWalletPairForExchange(
-      rawWallets.sourceId,
-      rawWallets.targetId
-    );
-
-    const sourceWallet = wallets.find(
-      (wallet) => wallet.id === rawWallets.sourceId
-    );
-    const targetWallet = wallets.find(
-      (wallet) => wallet.id === rawWallets.targetId
-    );
-
-    if (!sourceWallet || !targetWallet) {
-      throw new Error("Wallet not found");
-    }
-
-    return Object.freeze({ sourceWallet, targetWallet });
-  }
-
-  async #getCurrencyTypeBaseOfOrderType(
-    orderType: "sell" | "buy",
-    wallets: { sourceWallet: Wallet; targetWallet: Wallet }
-  ) {
-    // When it's buy source wallet is gold
-    if (orderType === "sell")
-      return this.#currencyPriceRepo.findLatestCurrencyPriceByCurrencyTypeId(
-        wallets.sourceWallet.currencyType.id
-      );
-
-    // When it's "sell" target wallet is gold
-    const res =
-      await this.#currencyPriceRepo.findLatestCurrencyPriceByCurrencyTypeId(
-        wallets.targetWallet.currencyType.id
-      );
-    return res;
-  }
-
-  #calcNewWalletAmountsBaseOfOrderType(
-    orderType: "sell" | "buy",
-    finalCalcTomanAmount: Decimal,
-    finalCalcGoldGram: Decimal,
-    sourceWalletAmount: Decimal,
-    targetWalletAmount: Decimal
-  ): Readonly<{
-    newSourceWalletAmount: Decimal;
-    newTargetWalletAmount: Decimal;
-  }> {
-    if (orderType === "sell") {
-      const newSourceWalletAmount = sourceWalletAmount.minus(finalCalcGoldGram);
-      const newTargetWalletAmount =
-        targetWalletAmount.plus(finalCalcTomanAmount);
-
-      return Object.freeze({ newSourceWalletAmount, newTargetWalletAmount });
-    }
-    const newSourceWalletAmount =
-      sourceWalletAmount.minus(finalCalcTomanAmount);
-    const newTargetWalletAmount = targetWalletAmount.plus(finalCalcGoldGram);
-
-    return Object.freeze({ newSourceWalletAmount, newTargetWalletAmount });
+    this.#pairRepo = pairRepo;
   }
 
   @Transactional()
-  async createNewWalletPairCurrencyExchange(payload: {
-    orderType: "sell" | "buy";
-    wallets: {
-      sourceId: number;
-      targetId: number;
-    };
-    tomanAmount: string;
-    goldAmount: string;
-  }) {
-    const transactionTime = new Date();
-    const { sourceWallet, targetWallet } = await this.#getAndLockPairOfWallets(
-      payload.wallets
+  async initNewWalletPairCurrencyExchange(
+    exchangePayload: IExchangeTransactionInitSchema
+  ) {
+    const payloadSourceAmount = new Decimal(exchangePayload.sourceAmount).abs();
+    if (payloadSourceAmount.equals(0))
+      throw new Error("Source amount must not be equal to zero");
+
+    const now = new Date();
+    const pair = await this.#pairRepo.findPairBySymbol(
+      exchangePayload.pairSymbol
     );
+    const { sourceWallet, targetWallet } =
+      await this.#walletRepo.selectWalletPairForExchange(
+        exchangePayload.userId,
+        pair.sourceType.id,
+        pair.targetType.id
+      );
+
+    if (sourceWallet.availableAmount().lt(payloadSourceAmount))
+      throw new Error(
+        "The current availableAmount balance of source wallet is not enough"
+      );
+    const [sourcePair, targetPair] = pair.symbol.split("/");
+    if (!sourcePair || !targetPair) throw new Error("Invalid pair");
+
+    const currencyPrice =
+      await this.#currencyPriceRepo.findLatestCurrencyPriceByCurrencyTypeId(
+        pair.basePriceType.id
+      );
+
+    const decimalSourceAmount = new Decimal(payloadSourceAmount).abs();
+    const pairCalculator = this.#pairFactory.getPair(
+      sourcePair,
+      targetPair,
+      decimalSourceAmount.toString(),
+      currencyPrice.price,
+      "100000"
+    );
+
+    if (!pairCalculator) throw new Error("Pair Logic not found");
+
+    const calcResult = pairCalculator.calculate();
+
     const walletTransaction = this.#walletTransactionRepo.create(
       "EXCHANGE",
-      transactionTime,
-      false,
-      false
+      now,
+      true,
+      true
     );
 
-    const exchangeCurrencyPrice = await this.#getCurrencyTypeBaseOfOrderType(
-      payload.orderType,
-      { sourceWallet, targetWallet }
+    const newSourceLockAmount = new Decimal(sourceWallet.lockAmount).plus(
+      decimalSourceAmount
+    );
+    sourceWallet.lockAmount = newSourceLockAmount
+      .toDecimalPlaces(3, 3)
+      .toString();
+
+    this.#walletAuditRepo.createLockAudit(
+      "LOCK",
+      decimalSourceAmount,
+      newSourceLockAmount,
+      sourceWallet,
+      walletTransaction.id,
+      now
     );
 
-    // Input from user
-    const rawTomanAmount = new Decimal(payload.tomanAmount).abs();
-    const rawGoldAmount = new Decimal(payload.goldAmount).abs();
-
-    const exchangeCurrencyPriceAmount = new Decimal(
-      exchangeCurrencyPrice.price
-    );
-
-    const calcTomanAmount =
-      WalletExchangeService.calcTomanAmountWithGoldGramInput(
-        exchangeCurrencyPriceAmount,
-        rawGoldAmount
-      );
-    const finalCalcTomanAmount = rawTomanAmount.gte(calcTomanAmount)
-      ? rawTomanAmount
-      : calcTomanAmount;
-
-    const finalCalcGoldGram =
-      WalletExchangeService.calcGoldGramWithTomanAmountInput(
-        exchangeCurrencyPriceAmount,
-        finalCalcTomanAmount
-      );
-
-    const exchangePairTransaction =
-      this.#walletExchangePairTransactionRepo.createInit({
-        id: walletTransaction.id,
-        fromWallet: sourceWallet,
-        toWallet: targetWallet,
-        currencyPrice: exchangeCurrencyPrice,
-        fromCurrency: sourceWallet.currencyType,
-        toCurrency: targetWallet.currencyType,
-        fromValue:
-          payload.orderType === "buy"
-            ? finalCalcTomanAmount.abs().negated()
-            : finalCalcGoldGram.abs().negated(),
-        toValue:
-          payload.orderType === "buy"
-            ? finalCalcGoldGram
-            : finalCalcTomanAmount,
-      });
-
-    return exchangePairTransaction;
+    const result = this.#walletExchangePairTransactionRepo.createInit({
+      id: walletTransaction.id,
+      currencyPrice: currencyPrice,
+      fromCurrency: pair.sourceType,
+      toCurrency: pair.targetType,
+      fromValue: decimalSourceAmount,
+      fromWallet: sourceWallet,
+      toWallet: targetWallet,
+      toValue: calcResult.roundedResult,
+    });
+    return result;
   }
 
   @Transactional()
   async finalizeWalletExchange(exchangeId: string) {
-    const exchangeTransaction =
-      await this.#walletExchangePairTransactionRepo.getExchangeTransactionForUpdateWithLock(
+    const now = new Date();
+    const [exchange, walletTransaction] = await Promise.all([
+      this.#walletExchangePairTransactionRepo.getExchangeTransactionForUpdateWithLock(
         exchangeId
+      ),
+      this.#walletTransactionRepo.selectTransactionByIdWithLockForUpdate(
+        exchangeId
+      ),
+    ]);
+
+    if (exchange.isFinal())
+      throw new Error("This transaction has finalized before");
+
+    const { sourceWallet, targetWallet } =
+      await this.#walletRepo.selectWalletPairForUpdateByExchangeTransactionWithLock(
+        exchange
       );
 
-    if (exchangeTransaction.isFinal()) throw new Error("Final Transaction");
+    const amountToFreeOnSourceWallet = new Decimal(exchange.fromValue);
 
-    const wallets = await this.#walletRepo.selectWalletPairForExchange(
-      exchangeTransaction.fromWallet.id,
-      exchangeTransaction.toWallet.id
+    const newSourceWalletAmount = new Decimal(sourceWallet.amount)
+      .minus(exchange.fromValue)
+      .toDecimalPlaces(3, 3);
+
+    const newTargetWalletAmount = new Decimal(targetWallet.amount)
+      .plus(exchange.toValue)
+      .toDecimalPlaces(3, 3);
+
+    const newSourceLockAmount = new Decimal(sourceWallet.lockAmount).minus(
+      amountToFreeOnSourceWallet
     );
 
-    const sourceWallet = wallets.find(
-      (wallet) => wallet.id === exchangeTransaction.fromWallet.id
-    );
-    const targetWallet = wallets.find(
-      (wallets) => wallets.id === exchangeTransaction.toWallet.id
-    );
-
-    if (!sourceWallet || !targetWallet) throw new Error("Wallet Not Founds");
-
-    const targetWalletAmount = new Decimal(targetWallet.amount);
-    const sourceWalletAmount = new Decimal(sourceWallet.amount);
-
-    const newSourceWalletAmount = sourceWalletAmount.minus(
-      exchangeTransaction.fromValue
-    );
-    const newTargetWalletAmount = targetWalletAmount.plus(
-      exchangeTransaction.toValue
+    sourceWallet.lockAmount = newSourceLockAmount
+      .toDecimalPlaces(3, 3)
+      .toString();
+    this.#walletAuditRepo.createLockAudit(
+      "LOCK_FREE",
+      amountToFreeOnSourceWallet,
+      newSourceLockAmount,
+      sourceWallet,
+      exchange.id,
+      now
     );
 
-    const incrementTransaction = this.#walletAuditRepo.create({
+    targetWallet.amount = newTargetWalletAmount
+      .toDecimalPlaces(3, 3)
+      .toString();
+    const incrementAudit = this.#walletAuditRepo.create({
       type: "INCREMENT",
-      source: "EXCHANGE",
-      amount: new Decimal(exchangeTransaction.toValue),
+      amount: new Decimal(exchange.toValue),
       wallet: targetWallet,
       walletAmount: newTargetWalletAmount,
-      walletTransactionId: exchangeTransaction.id,
+      walletTransactionId: exchange.id,
     });
 
-    const decrementTransaction = this.#walletAuditRepo.create({
+    sourceWallet.amount = newSourceWalletAmount
+      .toDecimalPlaces(3, 3)
+      .toString();
+    const decrementAudit = this.#walletAuditRepo.create({
       type: "DECREMENT",
-      source: "EXCHANGE",
-      amount: new Decimal(exchangeTransaction.fromValue).abs().neg(),
+      amount: new Decimal(exchange.fromValue),
       wallet: sourceWallet,
       walletAmount: newSourceWalletAmount,
-      walletTransactionId: exchangeTransaction.id,
+      walletTransactionId: exchange.id,
     });
 
-    sourceWallet.amount = newSourceWalletAmount.toString();
-    targetWallet.amount = newTargetWalletAmount.toString();
+    exchange.increment = incrementAudit;
+    exchange.decrement = decrementAudit;
+    exchange.status = WalletExchangeTransactionStatus.SUCCESSFUL;
+    exchange.finalizeAt = now;
+    walletTransaction.isLock = false;
 
-    this.#walletExchangePairTransactionRepo.setExchangeStatusToSuccessful(
-      exchangeTransaction,
-      incrementTransaction,
-      decrementTransaction
-    );
-  }
-
-  static calcTomanAmountWithGoldGramInput(
-    currencyPrice: Decimal,
-    goldAmountInput: Decimal
-  ) {
-    const pricePerGram = WalletExchangeService.calcPricePerGram(currencyPrice);
-    return goldAmountInput.mul(pricePerGram).ceil();
-  }
-
-  static calcPricePerGram(currencyPrice: Decimal): Decimal {
-    return currencyPrice.div(GOLD_CONST);
-  }
-
-  static calcGoldGramWithTomanAmountInput(
-    currencyPrice: Decimal,
-    tomanInput: Decimal
-  ) {
-    const pricePerGram = WalletExchangeService.calcPricePerGram(currencyPrice);
-    return tomanInput.div(pricePerGram);
+    return exchange as WalletExchangePairTransaction;
   }
 }

@@ -13,23 +13,19 @@ const transactionTypes = Object.freeze([
   } as const,
 ] as const);
 
-export default function createTransactionPostPlugin(
+export default function createSimpleTransactionPostPlugin(
   fastify: FastifyInstance,
   _: unknown,
   done: SyncDoneFn
 ) {
   const service = fastify.transactionManageService;
-  fastify.get(
-    "/transaction/setup",
-    function transactionPageSetupGetHandler(req, res) {
-      return { transactionTypes };
-    }
-  );
+
   fastify.addHook("preHandler", fastify.adminJwtBearerAuth).post<{
     Body: ISimpleTransaction;
   }>("/transaction", { schema: { body: SimpleTransaction, tags: ["admin", "admin/transaction"], security: [{ adminBearerAuth: [] }] } }, async function transactionPostHandler(req) {
     const simpleTransaction = req.body;
-    const result = await service.updateWalletUserAmount_P(simpleTransaction);
+    const result =
+      await service.createSimpleTransactionByAdmin(simpleTransaction);
     return result;
   });
   done();

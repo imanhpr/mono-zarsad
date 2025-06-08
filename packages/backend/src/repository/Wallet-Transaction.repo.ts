@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { EntityManager, sql } from "@mikro-orm/postgresql";
+import { EntityManager, LockMode, sql } from "@mikro-orm/postgresql";
 import { monotonicFactory } from "ulid";
 import WalletTransaction from "../models/Wallet-Transaction.entity.ts";
 
@@ -51,6 +51,34 @@ export class WalletTransactionRepo {
     const ALL: CountInfo = { type: "ALL", count: allTransactions.toString() };
     transactions.push(ALL);
     return transactions;
+  }
+
+  async selectTransactionByIdWithLockForUpdate(transactionId: string) {
+    return this.#em.findOneOrFail(
+      WalletTransaction,
+      {
+        id: transactionId,
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE }
+    );
+  }
+
+  async transactionHistory(
+    orderBy: "DESC" | "ASC",
+    offset: number,
+    limit: number
+  ) {
+    const [transactions, count] = await this.#em.findAndCount(
+      WalletTransaction,
+      {},
+      {
+        orderBy: { createdAt: orderBy },
+        offset,
+        limit,
+      }
+    );
+
+    return Object.freeze({ count, transactions });
   }
 }
 

@@ -51,6 +51,7 @@ import { randomUUID } from "node:crypto";
 import passwordServicePlugin from "./plugins/password/index.ts";
 import persianapiServicePlugin from "./plugins/persian-api/persianapi.service.plugin.ts";
 import SpreadRepoPlugin from "./repository/Spread.repo.plugin.ts";
+import PairRepo from "./repository/Pair.repo.ts";
 
 const swaggerOptions: fastifySwagger.SwaggerOptions = {
   openapi: {
@@ -173,6 +174,7 @@ export default function appFactory() {
     .register(SystemInfoRepo)
     .register(RefreshTokenRepoPlugin)
     .register(SpreadRepoPlugin)
+    .register(PairRepo)
     // Business Logics
     .register(sharedServicePlugin)
     .register(passwordServicePlugin)
